@@ -74,7 +74,7 @@ func TestBaselineCheckStaleByFinding(t *testing.T) {
 		t.Fatal(err)
 	}
 	code, _, stderr := runArgs(t, "baseline", root, "--check")
-	if code != 2 || !strings.Contains(stderr, "index 0 to 53  new 2  resolved 0\n") || !strings.Contains(stderr, "changed: findings 0 to 2 items\n") || !strings.Contains(stderr, "changed: coverage.production.files 2 to 3\n") {
+	if code != 2 || !strings.Contains(stderr, "index 0 to 31  new 1  resolved 0\n") || !strings.Contains(stderr, "changed: findings 0 to 1 items\n") || !strings.Contains(stderr, "changed: coverage.production.files 2 to 3\n") {
 		t.Errorf("exit %d, stderr %q", code, stderr)
 	}
 }

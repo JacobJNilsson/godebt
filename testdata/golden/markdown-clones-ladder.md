@@ -2,12 +2,12 @@
 
 example.com/clones/ladder, scree 0.0.0-test.
 
-The index is 53/100, lower is better, scoring 0.2.0.
-Contributions: complexity-erosion 32, duplication 21.
+The index is 31/100, lower is better, scoring 0.2.0.
+Contributions: complexity-erosion 31, duplication 0.
 
 | set | files | sloc | funcs | cc p50/p90/max | eroded | clones | dup lines |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| production | 1 | 32 | 2 | 1/13/13 | 1 (99%) | 1 | 24 (75%) |
+| production | 1 | 32 | 2 | 1/13/13 | 1 (99%) | 0 | 0 |
 | test | 0 | 0 | 0 | - | - | 0 | 0 |
 
 Other files: unsupported 1.
@@ -24,11 +24,7 @@ Other files: unsupported 1.
 
 ## Clones
 
-### production (1)
-
-| id | tokens | members |
-| --- | ---: | --- |
-| d73569ac7f6d0502 | 165 | ladder.go:6-27<br>ladder.go:8-29 |
+### production (0)
 
 ### test (0)
 

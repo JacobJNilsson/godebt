@@ -8,7 +8,6 @@ import (
 	"go/scanner"
 	"go/token"
 	"hash/fnv"
-	"math"
 	"slices"
 	"sort"
 	"strings"
@@ -88,13 +87,12 @@ func measureSet(inv *inventory.Inventory, set contract.SourceSet, maxTokens, max
 	if s.tokens > maxTokens {
 		return stopped("tokens", maxTokens, s.tokens)
 	}
-	// The suffix array costs one work unit per symbol at each level, and the LCP array costs one unit per symbol.
-	// Each LCP interval of at least DuplicationMinTokens symbols costs one unit, and each containment query costs one unit.
+	// Every scan over the suffix array, the LCP array, or the occurrences of a node spends work units.
 	work := &budget{max: maxWork}
 	sa := suffixArray(s.symbols, s.alphabet(), &work.used)
 	lcp := lcpArray(s.symbols, sa, &work.used)
 	nodes := intervalTree(sa, lcp, work)
-	groups := s.groups(nodes, sa, work)
+	groups := s.groups(nodes, sa, lcp, work)
 	if work.exceeded() {
 		return stopped("work", maxWork, work.used)
 	}
@@ -256,7 +254,10 @@ func (b *budget) exceeded() bool {
 	return b.used > b.max
 }
 
-// node is an LCP interval of at least DuplicationMinTokens symbols.
+// nodeMinLength is half of DuplicationMinTokens, because a run with a period of at most half its length repeats a prefix of that size.
+const nodeMinLength = formula.DuplicationMinTokens / 2
+
+// node is an LCP interval of at least nodeMinLength symbols.
 // The suffixes in the suffix array range [lb, rb] share exactly length symbols.
 type node struct {
 	lb, rb, length int32
@@ -264,7 +265,7 @@ type node struct {
 	parent int32
 }
 
-// intervalTree walks the LCP-interval tree bottom-up and returns every interval of at least DuplicationMinTokens symbols, each with its parent.
+// intervalTree walks the LCP-interval tree bottom-up and returns every interval of at least nodeMinLength symbols, each with its parent.
 // It returns nil once the budget runs out.
 func intervalTree(sa, lcp []int32, work *budget) []node {
 	if work.exceeded() {
@@ -278,7 +279,7 @@ func intervalTree(sa, lcp []int32, work *budget) []node {
 	var nodes []node
 	push := func(stack []frame, lcp, lb int32) []frame {
 		id := int32(-1)
-		if lcp >= formula.DuplicationMinTokens {
+		if lcp >= nodeMinLength {
 			id = int32(len(nodes))
 			nodes = append(nodes, node{lb: lb, length: lcp, parent: -1})
 		}
@@ -333,75 +334,347 @@ type cloneGroup struct {
 	members []member
 }
 
-// groups returns the intervals with at least two members, without a group whose every member lies inside a member of a longer group.
-// An interval that is not left-maximal needs no check of its own, because the longer run that extends it to the left subsumes it.
-// It visits the nodes longest first, so every child comes before its parent.
-// An occurrence inside a kept or subsumed child needs no query, so every position takes one query, plus one per dropped node.
+// groups applies the unit and line rules before subsumption, so a dropped group never hides the copies inside it.
 // It returns nil once the budget runs out.
-func (s *stream) groups(nodes []node, sa []int32, work *budget) []cloneGroup {
+func (s *stream) groups(nodes []node, sa, lcp []int32, work *budget) []cloneGroup {
 	if work.exceeded() {
 		return nil
 	}
-	minLen := s.minLengths()
-	children := childLists(nodes)
+	left := s.leftMaximal(nodes, sa, work)
+	units := s.units(nodes, sa, lcp, work)
+	if work.exceeded() {
+		return nil
+	}
+	candidates := s.candidates(nodes, sa, left, units, work)
+	if work.exceeded() {
+		return nil
+	}
+	return s.unsubsumed(candidates, work)
+}
+
+// leftMaximal reports whether a node's occurrences have two different symbols before them.
+func (s *stream) leftMaximal(nodes []node, sa []int32, work *budget) []bool {
+	before := func(p int32) int32 {
+		if p == 0 {
+			return -1
+		}
+		return s.symbols[p-1]
+	}
+	// changes[i] counts the suffix array indexes up to i whose preceding symbol differs from the one before.
+	changes := make([]int32, len(sa))
+	for i := 1; i < len(sa); i++ {
+		changes[i] = changes[i-1]
+		if before(sa[i]) != before(sa[i-1]) {
+			changes[i]++
+		}
+	}
+	work.spend(len(sa))
+	out := make([]bool, len(nodes))
+	for k, n := range nodes {
+		out[k] = changes[n.rb] > changes[n.lb]
+	}
+	return out
+}
+
+// longestFirst orders the nodes so that every child comes before its parent.
+func longestFirst(nodes []node) []int32 {
 	order := make([]int32, len(nodes))
 	for i := range order {
 		order[i] = int32(i)
 	}
-	// Two groups of equal length have no member inside each other, so their order does not matter.
 	slices.SortStableFunc(order, func(a, b int32) int { return cmp.Compare(nodes[b].length, nodes[a].length) })
-	// covered is the smallest minimum length of an occurrence below a node that lies inside a kept member.
-	covered := make([]int32, len(nodes))
-	// open holds the occurrences below a node that are not known to lie inside a kept member.
-	open := make([][]int32, len(nodes))
-	for i := range nodes {
-		covered[i] = math.MaxInt32
+	return order
+}
+
+// units returns the unit length of each node, which is its smallest period when that is at most half its length or two occurrences overlap, else 0.
+// It returns nil once the budget runs out.
+func (s *stream) units(nodes []node, sa, lcp []int32, work *budget) []int32 {
+	out := make([]int32, len(nodes))
+	children := childLists(nodes)
+	halves := s.halfPeriods(nodes, sa, lcp, work)
+	if work.exceeded() {
+		return nil
 	}
+	for _, k := range longestFirst(nodes) {
+		n := nodes[k]
+		if d := inheritedUnit(children[k], out, n.length); d > 0 {
+			out[k] = d
+			continue
+		}
+		if !work.spend(int(n.rb-n.lb) + 1) {
+			return nil
+		}
+		gap := closestPair(sa[n.lb:n.rb+1], n.length)
+		if gap == 0 {
+			out[k] = halves[k]
+			continue
+		}
+		// A run with two occurrences gap symbols apart has a period of at most gap, which its first 2*gap symbols show.
+		prefix := min(n.length, 2*gap)
+		if !work.spend(int(prefix)) {
+			return nil
+		}
+		out[k] = smallestPeriod(s.symbols[sa[n.lb] : sa[n.lb]+prefix])
+	}
+	return out
+}
+
+// halfFinder holds the state of the search for periods of at most half the run length.
+type halfFinder struct {
+	nodes []node
+	sa    []int32
+	rank  []int32
+	path  []int32
+	work  *budget
+}
+
+// halfPeriods returns each node's smallest period when it is at most half its length, else 0.
+func (s *stream) halfPeriods(nodes []node, sa, lcp []int32, work *budget) []int32 {
+	f := &halfFinder{nodes: nodes, sa: sa, rank: make([]int32, len(sa)), work: work}
+	for i, p := range sa {
+		f.rank[p] = int32(i)
+	}
+	work.spend(len(sa))
+	out := make([]int32, len(nodes))
+	children := childLists(nodes)
+	level := make([]int, len(nodes))
+	var stack []int32
+	for k, n := range nodes {
+		if n.parent < 0 {
+			stack = append(stack, int32(k))
+		}
+	}
+	for len(stack) > 0 && !work.exceeded() {
+		k := stack[len(stack)-1]
+		stack = append(stack[:len(stack)-1], children[k]...)
+		n := nodes[k]
+		if n.parent >= 0 {
+			level[k] = level[n.parent] + 1
+		}
+		f.path = append(f.path[:level[k]], k)
+		switch z := parentUnit(out, n); {
+		case z > 0 && f.holds(n, level[k], z):
+			out[k] = z
+		case n.length <= 2*parentDepth(n, lcp):
+			out[k] = f.search(n, level[k])
+		}
+	}
+	return out
+}
+
+// parentUnit returns the half period of a node's parent, or 0.
+func parentUnit(periods []int32, n node) int32 {
+	if n.parent < 0 {
+		return 0
+	}
+	return periods[n.parent]
+}
+
+// parentDepth returns the length of a node's parent, which its neighbours in the suffix array share.
+func parentDepth(n node, lcp []int32) int32 {
+	depth := lcp[n.lb]
+	if int(n.rb)+1 < len(lcp) {
+		depth = max(depth, lcp[n.rb+1])
+	}
+	return depth
+}
+
+// ancestor returns the shallowest node on the path with at least the given depth.
+func (f *halfFinder) ancestor(level int, depth int32) node {
+	i := sort.Search(level+1, func(i int) bool { return f.nodes[f.path[i]].length >= depth })
+	return f.nodes[f.path[i]]
+}
+
+// holds reports whether the run of n has period p, which puts its first L-p symbols at the first occurrence plus p.
+func (f *halfFinder) holds(n node, level int, p int32) bool {
+	f.work.spend(1)
+	a := f.ancestor(level, n.length-p)
+	r := f.rank[f.sa[n.lb]+p]
+	return a.lb <= r && r <= a.rb
+}
+
+// search returns the smallest period of at most half the run length, from the shorter of two lists of candidate offsets.
+func (f *halfFinder) search(n node, level int) int32 {
+	half := n.length / 2
+	start := f.sa[n.lb]
+	a := f.ancestor(level, (n.length+1)/2)
+	var offsets []int32
+	if size := int(a.rb-a.lb) + 1; size < int(half) {
+		f.work.spend(size)
+		for _, p := range f.sa[a.lb : a.rb+1] {
+			if p > start && p <= start+half {
+				offsets = append(offsets, p-start)
+			}
+		}
+		slices.Sort(offsets)
+	} else {
+		f.work.spend(int(half))
+		for p := int32(1); p <= half; p++ {
+			if r := f.rank[start+p]; a.lb <= r && r <= a.rb {
+				offsets = append(offsets, p)
+			}
+		}
+	}
+	for _, p := range offsets {
+		if f.holds(n, level, p) {
+			return p
+		}
+	}
+	return 0
+}
+
+// inheritedUnit returns the unit of a child that a run of at least two such units shares.
+func inheritedUnit(children, units []int32, length int32) int32 {
+	for _, c := range children {
+		if d := units[c]; d > 0 && length >= 2*d {
+			return d
+		}
+	}
+	return 0
+}
+
+// closestPair returns the smallest distance between two positions below length, or 0.
+func closestPair(positions []int32, length int32) int32 {
+	sorted := slices.Sorted(slices.Values(positions))
+	gap := int32(0)
+	for i := 1; i < len(sorted); i++ {
+		if d := sorted[i] - sorted[i-1]; d < length && (gap == 0 || d < gap) {
+			gap = d
+		}
+	}
+	return gap
+}
+
+// smallestPeriod returns the smallest p for which the symbols equal themselves shifted by p.
+func smallestPeriod(symbols []int32) int32 {
+	prefix := make([]int, len(symbols))
+	for i := 1; i < len(symbols); i++ {
+		k := prefix[i-1]
+		for k > 0 && symbols[i] != symbols[k] {
+			k = prefix[k-1]
+		}
+		if symbols[i] == symbols[k] {
+			k++
+		}
+		prefix[i] = k
+	}
+	return int32(len(symbols) - prefix[len(symbols)-1])
+}
+
+// target names one symbol sequence by a node and a length.
+type target struct{ node, length int32 }
+
+// unitNodes returns the node of each unit, which is the shallowest ancestor at least as long as the unit.
+func unitNodes(nodes []node, units []int32, work *budget) []int32 {
+	out := make([]int32, len(nodes))
+	order := longestFirst(nodes)
+	for i := len(order) - 1; i >= 0; i-- {
+		k, d := order[i], units[order[i]]
+		if d < formula.DuplicationMinTokens {
+			continue
+		}
+		parent := nodes[k].parent
+		switch {
+		case parent < 0 || nodes[parent].length < d:
+			out[k] = k
+		case units[parent] == d:
+			out[k] = out[parent]
+		default:
+			u := parent
+			for nodes[u].parent >= 0 && nodes[nodes[u].parent].length >= d {
+				u = nodes[u].parent
+				work.spend(1)
+			}
+			out[k] = u
+		}
+	}
+	return out
+}
+
+// candidates returns each maximal repeat's group after the unit and line rules.
+func (s *stream) candidates(nodes []node, sa []int32, left []bool, units []int32, work *budget) []cloneGroup {
+	tops := unitNodes(nodes, units, work)
+	tried, seen := map[target]bool{}, map[target]bool{}
+	var out []cloneGroup
+	for k, n := range nodes {
+		t := target{int32(k), n.length}
+		if units[k] > 0 {
+			t = target{tops[k], units[k]}
+		}
+		if !left[k] || t.length < formula.DuplicationMinTokens || tried[t] {
+			continue
+		}
+		tried[t] = true
+		g, at, ok := s.shorten(nodes, sa, t, work)
+		if ok && !seen[at] {
+			seen[at] = true
+			out = append(out, g)
+		}
+	}
+	return out
+}
+
+// shorten returns the group of the longest prefix whose members share no line, found by binary search because shorter prefixes share fewer lines.
+// When even the shortest prefix of the node shares a line, the search moves to the parent.
+func (s *stream) shorten(nodes []node, sa []int32, t target, work *budget) (cloneGroup, target, bool) {
+	for !work.exceeded() {
+		n := nodes[t.node]
+		floor := int32(0)
+		if n.parent >= 0 {
+			floor = nodes[n.parent].length
+		}
+		positions := sa[n.lb : n.rb+1]
+		disjoint := func(length int32) bool {
+			work.spend(len(positions))
+			members := s.members(positions, int(length))
+			return len(withoutOverlap(members)) == len(members)
+		}
+		low := max(floor+1, formula.DuplicationMinTokens)
+		if low > t.length {
+			return cloneGroup{}, t, false
+		}
+		if !disjoint(low) {
+			if floor < formula.DuplicationMinTokens {
+				return cloneGroup{}, t, false
+			}
+			t = target{n.parent, floor}
+			continue
+		}
+		lo, hi := low, t.length
+		for lo < hi {
+			if mid := (lo + hi + 1) / 2; disjoint(mid) {
+				lo = mid
+			} else {
+				hi = mid - 1
+			}
+		}
+		members := s.members(positions, int(lo))
+		return cloneGroup{length: int(lo), members: members}, target{t.node, lo}, len(members) >= 2
+	}
+	return cloneGroup{}, t, false
+}
+
+// unsubsumed returns the groups with a member outside every member of a longer group.
+// It returns nil once the budget runs out.
+func (s *stream) unsubsumed(candidates []cloneGroup, work *budget) []cloneGroup {
+	slices.SortStableFunc(candidates, func(a, b cloneGroup) int { return cmp.Compare(b.length, a.length) })
 	ends := make(maxEnds, len(s.symbols)+1)
 	var kept []cloneGroup
-	for _, k := range order {
-		n := nodes[k]
-		next := n.lb
-		for _, c := range append(children[k], -1) {
-			end := n.rb + 1
-			if c >= 0 {
-				end = nodes[c].lb
-			}
-			open[k] = append(open[k], sa[next:end]...)
-			if c >= 0 {
-				next = nodes[c].rb + 1
-			}
+	for _, g := range candidates {
+		if !work.spend(len(g.members)) {
+			return nil
 		}
-		length := n.length
-		var uncovered []int32
-		for _, p := range open[k] {
-			if minLen[p] > length {
-				continue
-			}
-			if !work.spend(1) {
-				return nil
-			}
-			if ends.upTo(int(p)) >= int(p+length) {
-				covered[k] = min(covered[k], minLen[p])
-				continue
-			}
-			uncovered = append(uncovered, p)
+		inside := true
+		for _, m := range g.members {
+			inside = inside && ends.upTo(m.start) >= m.start+g.length
 		}
-		open[k] = uncovered
-		if len(uncovered) >= 2 || (len(uncovered) == 1 && covered[k] <= length) {
-			members := s.members(sa[n.lb:n.rb+1], int(length))
-			for _, m := range members {
-				ends.add(m.start, m.start+int(length))
-				covered[k] = min(covered[k], minLen[m.start])
-			}
-			kept = append(kept, cloneGroup{length: int(length), members: members})
-			open[k] = nil
+		if inside {
+			continue
 		}
-		if parent := n.parent; parent >= 0 {
-			covered[parent] = min(covered[parent], covered[k])
-			open[parent] = append(open[parent], open[k]...)
+		for _, m := range g.members {
+			ends.add(m.start, m.start+g.length)
 		}
-		open[k] = nil
+		kept = append(kept, g)
 	}
 	return kept
 }
@@ -415,38 +688,6 @@ func childLists(nodes []node) [][]int32 {
 		}
 	}
 	return children
-}
-
-// minLengths returns, for each position, the fewest symbols that a run from it needs to span DuplicationMinLines lines, or MaxInt32.
-// A run spans lines from its first symbol that is not an inserted semicolon to its last symbol, as in members.
-func (s *stream) minLengths() []int32 {
-	out := make([]int32, len(s.symbols))
-	for i := range out {
-		out[i] = math.MaxInt32
-	}
-	for f, file := range s.files {
-		// The sentinel at end is never part of a run.
-		end := len(s.symbols) - 1
-		if f+1 < len(s.files) {
-			end = s.files[f+1].start - 1
-		}
-		first := end
-		for p := end - 1; p >= file.start; p-- {
-			if !s.inserted[p] {
-				first = p
-			}
-			if first == end {
-				continue
-			}
-			target := s.lines[first] + formula.DuplicationMinLines - 1
-			// The end lines rise within a file, and the first symbol that reaches the target line is never an inserted semicolon.
-			q := first + sort.Search(end-first, func(i int) bool { return s.endLines[first+i] >= target })
-			if q < end {
-				out[p] = int32(q - p + 1)
-			}
-		}
-	}
-	return out
 }
 
 // maxEnds is a Fenwick tree that returns the largest end of the kept member ranges that start at or before a position.
@@ -541,4 +782,25 @@ func (s *stream) duplicatedLines(members []member) int {
 
 func sortLimits(limits []contract.Limit) {
 	sort.Slice(limits, func(i, j int) bool { return limits[i].MetricID < limits[j].MetricID })
+}
+
+// withoutOverlap removes each member that shares a line with another member in the same file.
+func withoutOverlap(members []member) []member {
+	overlapping := make([]bool, len(members))
+	longest := 0
+	for i, m := range members {
+		if i > 0 && m.file == members[longest].file && m.startLine <= members[longest].endLine {
+			overlapping[i], overlapping[longest] = true, true
+		}
+		if m.file != members[longest].file || m.endLine > members[longest].endLine {
+			longest = i
+		}
+	}
+	var out []member
+	for i, m := range members {
+		if !overlapping[i] {
+			out = append(out, m)
+		}
+	}
+	return out
 }

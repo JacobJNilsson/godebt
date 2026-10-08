@@ -10,11 +10,11 @@
   "coverage": {
     "production": {
       "files": 42,
-      "sloc": 5342
+      "sloc": 5571
     },
     "test": {
       "files": 36,
-      "sloc": 7089
+      "sloc": 7415
     },
     "generated": {
       "files": 0
@@ -23,7 +23,7 @@
       "files": 0
     },
     "testdata": {
-      "files": 199
+      "files": 202
     },
     "excluded": {
       "files": 5
@@ -37,13 +37,13 @@
   "metrics": {
     "complexity.cc.max.production": {
       "state": "complete",
-      "value": 17,
+      "value": 15,
       "unit": "count",
       "detail": {}
     },
     "complexity.cc.max.test": {
       "state": "complete",
-      "value": 20,
+      "value": 19,
       "unit": "count",
       "detail": {}
     },
@@ -61,7 +61,7 @@
     },
     "complexity.cc.p90.production": {
       "state": "complete",
-      "value": 7,
+      "value": 8,
       "unit": "count",
       "detail": {}
     },
@@ -73,141 +73,141 @@
     },
     "complexity.functions.production": {
       "state": "complete",
-      "value": 380,
+      "value": 399,
       "unit": "count",
       "detail": {}
     },
     "complexity.functions.test": {
       "state": "complete",
-      "value": 561,
+      "value": 597,
       "unit": "count",
       "detail": {}
     },
     "duplication.density.production": {
       "state": "complete",
-      "value": 0.0041183077499064025,
+      "value": 0.0032310177705977385,
       "unit": "ratio",
-      "numerator": 22,
-      "denominator": 5342,
+      "numerator": 18,
+      "denominator": 5571,
       "detail": {}
     },
     "duplication.density.test": {
       "state": "complete",
-      "value": 0.07335308224009028,
+      "value": 0.05947403910991234,
       "unit": "ratio",
-      "numerator": 520,
-      "denominator": 7089,
+      "numerator": 441,
+      "denominator": 7415,
       "detail": {}
     },
     "duplication.duplicated-lines.production": {
       "state": "complete",
-      "value": 22,
+      "value": 18,
       "unit": "count",
       "detail": {}
     },
     "duplication.duplicated-lines.test": {
       "state": "complete",
-      "value": 520,
+      "value": 441,
       "unit": "count",
       "detail": {}
     },
     "duplication.groups.production": {
       "state": "complete",
-      "value": 2,
+      "value": 1,
       "unit": "count",
       "detail": {}
     },
     "duplication.groups.test": {
       "state": "complete",
-      "value": 29,
+      "value": 23,
       "unit": "count",
       "detail": {}
     },
     "erosion.eroded-count.production": {
       "state": "complete",
-      "value": 5,
+      "value": 4,
       "unit": "count",
       "detail": {}
     },
     "erosion.eroded-count.test": {
       "state": "complete",
-      "value": 9,
+      "value": 8,
       "unit": "count",
       "detail": {}
     },
     "erosion.eroded-share.production": {
       "state": "complete",
-      "value": 0.08693654158090174,
+      "value": 0.058694312025598334,
       "unit": "ratio",
-      "numerator": 468.78497462551877,
-      "denominator": 5392.266199009942,
+      "numerator": 332.78497462551877,
+      "denominator": 5669.799391811277,
       "detail": {}
     },
     "erosion.eroded-share.test": {
       "state": "complete",
-      "value": 0.09587051093084015,
+      "value": 0.07333302336003836,
       "unit": "ratio",
-      "numerator": 682.5247615867298,
-      "denominator": 7119.235674868731,
+      "numerator": 545.4116695787089,
+      "denominator": 7437.463295368812,
       "detail": {}
     },
     "erosion.mass.production": {
       "state": "complete",
-      "value": 5392.266199009942,
+      "value": 5669.799391811277,
       "unit": "mass",
       "detail": {}
     },
     "erosion.mass.test": {
       "state": "complete",
-      "value": 7119.235674868731,
+      "value": 7437.463295368812,
       "unit": "mass",
       "detail": {}
     }
   },
   "score": {
-    "index": 11,
+    "index": 8,
     "direction": "lower-is-better",
     "partial": false,
     "contributions": [
       {
         "dimension": "complexity-erosion",
-        "points": 9,
+        "points": 7,
         "weight": 0.6,
         "terms": [
           {
             "metricId": "erosion.eroded-share.production",
             "state": "complete",
-            "value": 0.08693654158090174,
+            "value": 0.058694312025598334,
             "saturatesAt": 0.8,
-            "score": 10.867067697612717
+            "score": 7.336789003199791
           },
           {
             "metricId": "erosion.eroded-count.production",
             "state": "complete",
-            "value": 5,
+            "value": 4,
             "countScale": 20,
-            "score": 18.243447473884206
+            "score": 15.420640497188202
           }
         ]
       },
       {
         "dimension": "duplication",
-        "points": 2,
+        "points": 1,
         "weight": 0.4,
         "terms": [
           {
             "metricId": "duplication.density.production",
             "state": "complete",
-            "value": 0.0041183077499064025,
+            "value": 0.0032310177705977385,
             "saturatesAt": 0.3,
-            "score": 1.372769249968801
+            "score": 1.0770059235325795
           },
           {
             "metricId": "duplication.groups.production",
             "state": "complete",
-            "value": 2,
+            "value": 1,
             "countScale": 15,
-            "score": 11.123999549558864
+            "score": 6.062582034946465
           }
         ]
       }
@@ -307,8 +307,8 @@
     {
       "kind": "complexity.hotspot",
       "path": "internal/duplication/duplication.go",
-      "startLine": 178,
-      "endLine": 233,
+      "startLine": 176,
+      "endLine": 231,
       "identity": "internal/duplication:stream.addFile",
       "ambiguous": false,
       "sourceSet": "production",
@@ -317,21 +317,6 @@
         "nesting": 2,
         "sloc": 54,
         "mass": 110.22703842524302
-      }
-    },
-    {
-      "kind": "complexity.hotspot",
-      "path": "internal/duplication/duplication.go",
-      "startLine": 341,
-      "endLine": 407,
-      "identity": "internal/duplication:stream.groups",
-      "ambiguous": false,
-      "sourceSet": "production",
-      "facts": {
-        "cc": 17,
-        "nesting": 3,
-        "sloc": 64,
-        "mass": 136
       }
     },
     {
@@ -347,21 +332,6 @@
         "nesting": 1,
         "sloc": 21,
         "mass": 50.40833264451424
-      }
-    },
-    {
-      "kind": "complexity.hotspot",
-      "path": "internal/duplication/groups_test.go",
-      "startLine": 19,
-      "endLine": 67,
-      "identity": "internal/duplication:naiveGroups",
-      "ambiguous": false,
-      "sourceSet": "test",
-      "facts": {
-        "cc": 20,
-        "nesting": 4,
-        "sloc": 47,
-        "mass": 137.11309200802089
       }
     },
     {
@@ -422,31 +392,6 @@
         "nesting": 1,
         "sloc": 32,
         "mass": 73.53910524340095
-      }
-    },
-    {
-      "kind": "duplication.clone-group",
-      "path": "internal/compare/compare_test.go",
-      "startLine": 126,
-      "endLine": 135,
-      "identity": "6a73623f66bdba13",
-      "ambiguous": false,
-      "sourceSet": "test",
-      "facts": {
-        "groupId": "6a73623f66bdba13",
-        "tokens": 128,
-        "members": [
-          {
-            "path": "internal/compare/compare_test.go",
-            "startLine": 126,
-            "endLine": 135
-          },
-          {
-            "path": "internal/compare/compare_test.go",
-            "startLine": 133,
-            "endLine": 142
-          }
-        ]
       }
     },
     {
@@ -518,8 +463,8 @@
           },
           {
             "path": "internal/duplication/duplication_test.go",
-            "startLine": 462,
-            "endLine": 476
+            "startLine": 478,
+            "endLine": 492
           }
         ]
       }
@@ -676,31 +621,6 @@
     },
     {
       "kind": "duplication.clone-group",
-      "path": "internal/discover/glob_test.go",
-      "startLine": 11,
-      "endLine": 37,
-      "identity": "6728ac849ad52053",
-      "ambiguous": false,
-      "sourceSet": "test",
-      "facts": {
-        "groupId": "6728ac849ad52053",
-        "tokens": 216,
-        "members": [
-          {
-            "path": "internal/discover/glob_test.go",
-            "startLine": 11,
-            "endLine": 37
-          },
-          {
-            "path": "internal/discover/glob_test.go",
-            "startLine": 12,
-            "endLine": 38
-          }
-        ]
-      }
-    },
-    {
-      "kind": "duplication.clone-group",
       "path": "internal/duplication/duplication_test.go",
       "startLine": 34,
       "endLine": 47,
@@ -750,31 +670,6 @@
             "path": "internal/safeguards/safeguards_test.go",
             "startLine": 46,
             "endLine": 58
-          }
-        ]
-      }
-    },
-    {
-      "kind": "duplication.clone-group",
-      "path": "internal/inventory/inventory_test.go",
-      "startLine": 47,
-      "endLine": 79,
-      "identity": "2b9aaaf75c9ff6f1",
-      "ambiguous": false,
-      "sourceSet": "test",
-      "facts": {
-        "groupId": "2b9aaaf75c9ff6f1",
-        "tokens": 475,
-        "members": [
-          {
-            "path": "internal/inventory/inventory_test.go",
-            "startLine": 47,
-            "endLine": 79
-          },
-          {
-            "path": "internal/inventory/inventory_test.go",
-            "startLine": 49,
-            "endLine": 80
           }
         ]
       }
@@ -833,48 +728,23 @@
       "kind": "duplication.clone-group",
       "path": "internal/policy/policy_test.go",
       "startLine": 121,
-      "endLine": 136,
-      "identity": "51d5cc5f63396ca1",
+      "endLine": 130,
+      "identity": "c99d7bb358d3a5d0",
       "ambiguous": false,
       "sourceSet": "test",
       "facts": {
-        "groupId": "51d5cc5f63396ca1",
-        "tokens": 159,
+        "groupId": "c99d7bb358d3a5d0",
+        "tokens": 108,
         "members": [
           {
             "path": "internal/policy/policy_test.go",
             "startLine": 121,
-            "endLine": 136
+            "endLine": 130
           },
           {
             "path": "internal/policy/policy_test.go",
             "startLine": 131,
-            "endLine": 146
-          }
-        ]
-      }
-    },
-    {
-      "kind": "duplication.clone-group",
-      "path": "internal/report/load_test.go",
-      "startLine": 80,
-      "endLine": 94,
-      "identity": "25d921f9f13e2a4f",
-      "ambiguous": false,
-      "sourceSet": "test",
-      "facts": {
-        "groupId": "25d921f9f13e2a4f",
-        "tokens": 150,
-        "members": [
-          {
-            "path": "internal/report/load_test.go",
-            "startLine": 80,
-            "endLine": 94
-          },
-          {
-            "path": "internal/report/load_test.go",
-            "startLine": 81,
-            "endLine": 95
+            "endLine": 140
           }
         ]
       }
@@ -1043,36 +913,6 @@
       "kind": "duplication.clone-group",
       "path": "internal/safeguards/command_test.go",
       "startLine": 36,
-      "endLine": 40,
-      "identity": "03a2192fd92288c6",
-      "ambiguous": false,
-      "sourceSet": "test",
-      "facts": {
-        "groupId": "03a2192fd92288c6",
-        "tokens": 104,
-        "members": [
-          {
-            "path": "internal/safeguards/command_test.go",
-            "startLine": 36,
-            "endLine": 40
-          },
-          {
-            "path": "internal/safeguards/command_test.go",
-            "startLine": 37,
-            "endLine": 41
-          },
-          {
-            "path": "internal/safeguards/command_test.go",
-            "startLine": 48,
-            "endLine": 52
-          }
-        ]
-      }
-    },
-    {
-      "kind": "duplication.clone-group",
-      "path": "internal/safeguards/command_test.go",
-      "startLine": 36,
       "endLine": 43,
       "identity": "da4c33c33a7f89f7",
       "ambiguous": false,
@@ -1115,31 +955,6 @@
             "path": "internal/safeguards/command_test.go",
             "startLine": 61,
             "endLine": 71
-          }
-        ]
-      }
-    },
-    {
-      "kind": "duplication.clone-group",
-      "path": "internal/safeguards/command_test.go",
-      "startLine": 51,
-      "endLine": 61,
-      "identity": "e37dbd6426b9e269",
-      "ambiguous": false,
-      "sourceSet": "test",
-      "facts": {
-        "groupId": "e37dbd6426b9e269",
-        "tokens": 230,
-        "members": [
-          {
-            "path": "internal/safeguards/command_test.go",
-            "startLine": 51,
-            "endLine": 61
-          },
-          {
-            "path": "internal/safeguards/command_test.go",
-            "startLine": 52,
-            "endLine": 62
           }
         ]
       }
@@ -1190,31 +1005,6 @@
             "path": "internal/safeguards/evaluate_test.go",
             "startLine": 148,
             "endLine": 152
-          }
-        ]
-      }
-    },
-    {
-      "kind": "duplication.clone-group",
-      "path": "internal/safeguards/safeguards.go",
-      "startLine": 115,
-      "endLine": 117,
-      "identity": "b2da81b9bf2fdd38",
-      "ambiguous": false,
-      "sourceSet": "production",
-      "facts": {
-        "groupId": "b2da81b9bf2fdd38",
-        "tokens": 114,
-        "members": [
-          {
-            "path": "internal/safeguards/safeguards.go",
-            "startLine": 115,
-            "endLine": 117
-          },
-          {
-            "path": "internal/safeguards/safeguards.go",
-            "startLine": 116,
-            "endLine": 118
           }
         ]
       }

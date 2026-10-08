@@ -82,9 +82,9 @@
     },
     "duplication.density.production": {
       "state": "complete",
-      "value": 0.75,
+      "value": 0,
       "unit": "ratio",
-      "numerator": 24,
+      "numerator": 0,
       "denominator": 32,
       "detail": {}
     },
@@ -95,7 +95,7 @@
     },
     "duplication.duplicated-lines.production": {
       "state": "complete",
-      "value": 24,
+      "value": 0,
       "unit": "count",
       "detail": {}
     },
@@ -107,7 +107,7 @@
     },
     "duplication.groups.production": {
       "state": "complete",
-      "value": 1,
+      "value": 0,
       "unit": "count",
       "detail": {}
     },
@@ -156,13 +156,13 @@
     }
   },
   "score": {
-    "index": 53,
+    "index": 31,
     "direction": "lower-is-better",
     "partial": false,
     "contributions": [
       {
         "dimension": "complexity-erosion",
-        "points": 32,
+        "points": 31,
         "weight": 0.6,
         "terms": [
           {
@@ -183,22 +183,22 @@
       },
       {
         "dimension": "duplication",
-        "points": 21,
+        "points": 0,
         "weight": 0.4,
         "terms": [
           {
             "metricId": "duplication.density.production",
             "state": "complete",
-            "value": 0.75,
+            "value": 0,
             "saturatesAt": 0.3,
-            "score": 100
+            "score": 0
           },
           {
             "metricId": "duplication.groups.production",
             "state": "complete",
-            "value": 1,
+            "value": 0,
             "countScale": 15,
-            "score": 6.062582034946465
+            "score": 0
           }
         ]
       }
@@ -218,31 +218,6 @@
         "nesting": 1,
         "sloc": 29,
         "mass": 70.00714249274854
-      }
-    },
-    {
-      "kind": "duplication.clone-group",
-      "path": "ladder.go",
-      "startLine": 6,
-      "endLine": 27,
-      "identity": "d73569ac7f6d0502",
-      "ambiguous": false,
-      "sourceSet": "production",
-      "facts": {
-        "groupId": "d73569ac7f6d0502",
-        "tokens": 165,
-        "members": [
-          {
-            "path": "ladder.go",
-            "startLine": 6,
-            "endLine": 27
-          },
-          {
-            "path": "ladder.go",
-            "startLine": 8,
-            "endLine": 29
-          }
-        ]
       }
     }
   ],

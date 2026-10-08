@@ -176,6 +176,22 @@ func TestWithin(t *testing.T) {
 	checkMetrics(t, metrics, setMetrics("production", 1, 66, 67))
 }
 
+// TestCrossPackageCopy keeps a function copied into another package as a group, and checks that no member of any group overlaps another.
+func TestCrossPackageCopy(t *testing.T) {
+	_, findings, _ := Measure(build(t, filepath.Join(fixtures, "clones", "selfmatch")))
+	for _, f := range findings {
+		members := f.Facts.Clone.Members
+		for i, a := range members {
+			for _, b := range members[i+1:] {
+				if a.Path == b.Path && a.StartLine <= b.EndLine && b.StartLine <= a.EndLine {
+					t.Errorf("group %s: %s:%d-%d overlaps %s:%d-%d", f.Identity, a.Path, a.StartLine, a.EndLine, b.Path, b.StartLine, b.EndLine)
+				}
+			}
+		}
+	}
+	checkGroups(t, findings, contract.Production, []group{{214, []string{"render/render.go:4-31", "summary/summary.go:4-31"}}})
+}
+
 func TestNested(t *testing.T) {
 	metrics, findings, _ := Measure(build(t, filepath.Join(fixtures, "clones", "nested")))
 	// The inner run starts at the semicolon that ends the line before the loop, and the loop holds 121 symbols.
@@ -188,12 +204,12 @@ func TestNested(t *testing.T) {
 	checkMetrics(t, metrics, setMetrics("production", 2, 59+59+23, 60+60+29))
 }
 
-// TestLadder keeps one group for a switch table, where every shorter run of rows lies inside the longest one.
+// TestLadder reports no group for a switch table, because the longest run of rows overlaps itself and every shorter run lies inside it.
 func TestLadder(t *testing.T) {
 	metrics, findings, _ := Measure(build(t, filepath.Join(fixtures, "clones", "ladder")))
-	// Twelve rows of 15 symbols repeat with a shift of one row, so the longest run holds eleven rows.
-	checkGroups(t, findings, contract.Production, []group{{165, []string{"ladder.go:6-27", "ladder.go:8-29"}}})
-	checkMetrics(t, metrics, setMetrics("production", 1, 24, 32))
+	// Twelve rows of 15 symbols repeat with a shift of one row, so the longest run holds eleven rows and overlaps itself.
+	checkGroups(t, findings, contract.Production, nil)
+	checkMetrics(t, metrics, setMetrics("production", 0, 0, 32))
 }
 
 // TestSubsumedGroup drops a block that repeats only inside two copies of a larger block.
@@ -438,7 +454,7 @@ func TestShortMember(t *testing.T) {
 
 // TestFindingsIgnoreFileOrder shuffles the files of a tree and asserts the same metrics and findings.
 func TestFindingsIgnoreFileOrder(t *testing.T) {
-	for _, name := range []string{"exact", "nested", "within", "fourway"} {
+	for _, name := range []string{"exact", "nested", "within", "fourway", "selfmatch", "ladder"} {
 		inv := build(t, filepath.Join(fixtures, "clones", name))
 		wantMetrics, wantFindings, _ := Measure(inv)
 		rng := rand.New(rand.NewSource(1))
