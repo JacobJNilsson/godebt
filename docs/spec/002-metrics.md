@@ -156,8 +156,23 @@ symbols and `DuplicationMinLines` (3) lines in every member.
 
 Grouping. A clone group is the set of every maximal run that shares one
 identical symbol sequence. A group needs at least two members. Repeats
-within one file count, and members of one group may overlap each other.
-Groups never merge through pairwise overlap.
+within one file count. A run repeats a shorter unit when its smallest period
+d is at most half its length, or when two of its occurrences overlap. Such a
+run is one block and not a clone of itself, so its group is replaced by the
+group of its first d symbols, which takes every occurrence of the unit. A
+group whose members share a line in one file is shortened to the longest
+prefix at which they share none. The shortening applies to every member of
+the group, in every file. When no allowed prefix frees the members of
+shared lines, a shorter prefix with more occurrences forms the group. A
+group below the thresholds or with fewer than two members is dropped. A run
+of a unit below the thresholds forms no group, whatever its total length. Two files that share only such a run form no group. A match
+that extends past the repeated rows, such as a shared switch header, still
+forms a group. These rules apply before subsumption. Groups never merge
+through pairwise overlap.
+
+Known limitation. A run that starts inside the tail of the unit before it is
+shifted by a few lines. One copy can then appear as several groups whose
+members are shifted by a few lines.
 
 A group is subsumed when every one of its members lies inside a member of
 a longer group. Subsumed groups are dropped. A block that repeats only as
@@ -184,7 +199,9 @@ Budgets. Before running, the detector checks the set against fixed caps:
 `DuplicationMaxWork` (100,000,000) work units for indexing and extraction.
 A set that exceeds a cap reports every duplication metric as `incomplete`
 with the cap named in the detail. No partial value is reported as a
-measurement.
+measurement. Input with many nested repeats, such as a long Fibonacci word
+or rows A B, A A B, A A A B, can reach the work cap and leave the metric
+incomplete.
 
 Engine. A suffix array built with SA-IS over the symbol sequence, an LCP
 array by Kasai's algorithm, and maximal repeat extraction over LCP
