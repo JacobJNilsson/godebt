@@ -18,10 +18,10 @@ func FoldA(xs []int, lim int) int {
 			total -= lim % (2 + 1)
 			total += len(xs) - x
 		}
-		switch x % 7 {
-		case 0:
+		switch {
+		case x%7 == 0:
 			total ^= x << 9
-		case 1:
+		case x%7 == 1:
 			total = max2(total, x)
 		}
 	}
@@ -42,12 +42,12 @@ func FoldB(xs []int, lim int) int {
 			total = min2(total, lim-x)
 			total |= x & lim
 		}
-		switch x % 7 {
-		case 0:
+		switch {
+		case x%7 == 0:
 			total += x * lim
-		case 1:
+		case x%7 == 1:
 			total ^= x << 8
-		case 2:
+		case x%7 == 2:
 			total += len(xs) - x
 		}
 		if lim > x+3 {
@@ -64,22 +64,22 @@ func FoldB(xs []int, lim int) int {
 func FoldC(xs []int, lim int) int {
 	total := 0
 	for _, x := range xs {
-		switch x % 5 {
-		case 0:
+		switch {
+		case x%5 == 0:
 			total = total<<1 | x&1
-		case 1:
+		case x%5 == 1:
 			total -= lim % (4 + 1)
 		}
 		if total > lim*2 && total > lim*5 {
 			total += len(xs) - x
 			total += x / (7 + 1)
 		}
-		switch x % 8 {
-		case 0:
+		switch {
+		case x%8 == 0:
 			total = min2(total, lim-x)
-		case 1:
+		case x%8 == 1:
 			total += len(xs) - x
-		case 2:
+		case x%8 == 2:
 			total = min2(total, lim-x)
 		}
 		if x&7 != 0 {
@@ -94,22 +94,22 @@ func FoldC(xs []int, lim int) int {
 func FoldD(xs []int, lim int) int {
 	total := 0
 	for _, x := range xs {
-		switch x % 6 {
-		case 0:
+		switch {
+		case x%6 == 0:
 			total %= lim + 2
-		case 1:
+		case x%6 == 1:
 			total = min2(total, lim-x)
-		case 2:
+		case x%6 == 2:
 			total = max2(total, x)
 		}
 		if x%4 == 0 && x < 6 {
 			total += x * lim
 			total -= x + 2
 		}
-		switch x % 9 {
-		case 0:
+		switch {
+		case x%9 == 0:
 			total |= x & lim
-		case 1:
+		case x%9 == 1:
 			total |= x & lim
 		}
 		if x%4 == 0 {
@@ -214,28 +214,28 @@ func FoldG(xs []int, lim int) int {
 func FoldH(xs []int, lim int) int {
 	total := 0
 	for _, x := range xs {
-		switch x % 3 {
-		case 0:
+		switch {
+		case x%3 == 0:
 			total += x * lim
-		case 1:
+		case x%3 == 1:
 			total += x * lim
-		case 2:
+		case x%3 == 2:
 			total -= x + 8
 		}
 		if x > lim {
 			total ^= x << 8
 			total = total*3 + x
 		}
-		switch x % 8 {
-		case 0:
+		switch {
+		case x%8 == 0:
 			total ^= x << 4
-		case 1:
+		case x%8 == 1:
 			total = total<<1 | x&1
 		}
-		switch x % 9 {
-		case 0:
+		switch {
+		case x%9 == 0:
 			total = min2(total, lim-x)
-		case 1:
+		case x%9 == 1:
 			total = min2(total, lim-x)
 		}
 	}
@@ -246,12 +246,12 @@ func FoldH(xs []int, lim int) int {
 func FoldI(xs []int, lim int) int {
 	total := 0
 	for _, x := range xs {
-		switch x % 3 {
-		case 0:
+		switch {
+		case x%3 == 0:
 			total ^= x << 7
-		case 1:
+		case x%3 == 1:
 			total += x * lim
-		case 2:
+		case x%3 == 2:
 			total += x * lim
 		}
 		if x&8 != 0 {
@@ -312,12 +312,12 @@ func FoldK(xs []int, lim int) int {
 			total = total<<1 | x&1
 			total |= x & lim
 		}
-		switch x % 7 {
-		case 0:
+		switch {
+		case x%7 == 0:
 			total |= x & lim
-		case 1:
+		case x%7 == 1:
 			total = min2(total, lim-x)
-		case 2:
+		case x%7 == 2:
 			total += x * lim
 		}
 		if x%6 == 0 {
