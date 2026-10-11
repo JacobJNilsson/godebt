@@ -60,6 +60,14 @@ Two dimensions weigh the index: complexity erosion at 0.6 and duplication at
 group holds at least 100 tokens over at least 3 lines. The match runs over
 normalized tokens. Renamed identifiers and changed literals still match.
 
+Each dimension scores two terms with equal weight. A count term turns the
+number of eroded functions or clone groups into a score that keeps rising with
+the count. The count is not divided by repository size, so at the same debt
+density a larger repository scores higher on it. A saturating term scores the
+eroded share or the duplication density, which divide debt by the size of the
+code. Compare a repository with its own baseline, not with a repository of
+another size.
+
 Test code is measured apart and never enters the index. Safeguards, such as a
 tracked pre-commit hook, are reported with their evidence and never scored. A
 default run writes nothing, and audits run offline.
