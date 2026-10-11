@@ -92,6 +92,26 @@ points in its body, excluding nested `FuncLit` bodies:
   excluding `default`
 - each `&&` and `||`
 
+A flat tagged switch is the exception to the `case` rule. It is an
+expression switch with a tag, or a type switch, that has at least one
+clause, where every clause, `default` included, has a trivial body. Such a
+switch adds 1 in total and its clauses add nothing. A flat switch with no
+clause other than `default` adds 0, as it does without this rule. Decision
+points in its init statement, its tag, and its `case` expressions still
+count. A trivial body is empty, or is one statement that holds no `&&`, no `||`, and no function literal, and that is
+one of:
+
+- a `return` statement
+- an assignment, including `:=` and `op=`
+- an expression statement that is a call
+
+Any other statement is not trivial. Examples are a block, a send, `go`,
+`defer`, `break`, and `++`.
+
+A `case` list with several values does not make a body non-trivial. A
+switch with a non-trivial body counts per clause. A tagless `switch`, which
+is an `if`/`else` chain, and `select` count per clause.
+
 Nothing else counts. Go has no ternary or null-coalescing operators.
 
 Maximum nesting depth per function is the deepest chain of nested `if`,
