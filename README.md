@@ -22,7 +22,7 @@ scree baseline --check .             # exit 2 when scree-baseline.json is stale
 ```
 
 Install the `baseline` command with
-`go install github.com/JacobJNilsson/scree/cmd/scree@v0.2.0`, or build the
+`go install github.com/JacobJNilsson/scree/cmd/scree@v0.3.0`, or build the
 command from a clone.
 
 An audit prints the index, the two contributions, both source sets with their
