@@ -10,7 +10,7 @@
   "coverage": {
     "production": {
       "files": 42,
-      "sloc": 5571
+      "sloc": 5573
     },
     "test": {
       "files": 36,
@@ -85,10 +85,10 @@
     },
     "duplication.density.production": {
       "state": "complete",
-      "value": 0.0032310177705977385,
+      "value": 0.0032298582451103534,
       "unit": "ratio",
       "numerator": 18,
-      "denominator": 5571,
+      "denominator": 5573,
       "detail": {}
     },
     "duplication.density.test": {
@@ -198,9 +198,9 @@
           {
             "metricId": "duplication.density.production",
             "state": "complete",
-            "value": 0.0032310177705977385,
+            "value": 0.0032298582451103534,
             "saturatesAt": 0.3,
-            "score": 1.0770059235325795
+            "score": 1.0766194150367845
           },
           {
             "metricId": "duplication.groups.production",
@@ -247,8 +247,8 @@
     {
       "kind": "complexity.hotspot",
       "path": "cmd/scree/run.go",
-      "startLine": 84,
-      "endLine": 107,
+      "startLine": 86,
+      "endLine": 109,
       "identity": "cmd/scree:run",
       "ambiguous": false,
       "sourceSet": "production",
