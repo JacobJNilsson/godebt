@@ -20,7 +20,7 @@ CI keeps `scree-baseline.json` current on `main`. `scree baseline --check .` onl
 
 ## Set up CI
 
-1. Run `go install github.com/JacobJNilsson/scree/cmd/scree@v0.2.0`. The `v0.1.0` tag lacks `baseline`, so use `v0.2.0` or a later tag.
+1. Run `go install github.com/JacobJNilsson/scree/cmd/scree@v0.3.0`. The `v0.1.0` tag lacks `baseline`, so use `v0.2.0` or a later tag.
 2. Run `scree baseline .` and commit `scree-baseline.json` on `main`.
 3. Add a CI step that runs `scree baseline --check .`.
 
@@ -29,7 +29,7 @@ Pin the version, because a different `scree` version writes different bytes. `sc
 ```yaml
       - name: Check the scree baseline
         run: |
-          go install github.com/JacobJNilsson/scree/cmd/scree@v0.2.0
+          go install github.com/JacobJNilsson/scree/cmd/scree@v0.3.0
           scree baseline --check .
 ```
 
