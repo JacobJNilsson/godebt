@@ -4,14 +4,14 @@ package before
 func Tangle(steps []string, limit int) int {
 	total := 0
 	for _, step := range steps {
-		switch step {
-		case "add":
+		switch {
+		case step == "add":
 			total += limit
-		case "sub":
+		case step == "sub":
 			total -= limit
-		case "mul":
+		case step == "mul":
 			total *= 2
-		case "div":
+		case step == "div":
 			total /= 2
 		}
 		if total > 100 {

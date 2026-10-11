@@ -4,14 +4,14 @@ package after
 func Curve(moves []string, bound int) int {
 	acc := 0
 	for _, move := range moves {
-		switch move {
-		case "plus":
+		switch {
+		case move == "plus":
 			acc += bound
-		case "minus":
+		case move == "minus":
 			acc -= bound
-		case "times":
+		case move == "times":
 			acc *= 2
-		case "over":
+		case move == "over":
 			acc /= 3
 		}
 		if acc > 100 {

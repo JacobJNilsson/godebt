@@ -1,15 +1,14 @@
 scree 0.0.0-test  example.com/clones/ladder
 
-index  31/100  lower is better  scoring 0.2.0
-       complexity-erosion 31  duplication 0
+index  0/100  lower is better  scoring 0.2.0
+       complexity-erosion 0  duplication 0
 
                    files    sloc   funcs   cc p50/p90/max     eroded  clones    dup lines
-production             1      32       2          1/13/13    1 (99%)       0            0
+production             1      32       2            1/2/2          0       0            0
 test                   0       0       0                -          -       0            0
 other: unsupported 1
 
-hotspots (production, 1)
-  70.0  cc 13  ladder.go:4-32  Code
+hotspots (production, 0)
 
 clones (production, 0)
 

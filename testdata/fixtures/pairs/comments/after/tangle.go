@@ -21,20 +21,20 @@ func Tangle(steps []string, limit int) int {
 	for _, step := range steps {
 
 		// The first switch applies the named operation.
-		switch step {
-		case "add":
+		switch {
+		case step == "add":
 			// An add step raises the total by the limit.
 			total += limit
 
-		case "sub":
+		case step == "sub":
 			// A sub step lowers the total by the limit.
 			total -= limit
 
-		case "mul":
+		case step == "mul":
 			// A mul step doubles the total.
 			total *= 2
 
-		case "div":
+		case step == "div":
 			// A div step halves the total.
 			total /= 2
 		}

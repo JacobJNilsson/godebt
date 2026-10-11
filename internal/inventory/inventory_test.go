@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"go/token"
 	"math/rand"
 	"os"
@@ -249,6 +250,63 @@ func F(x int, ch chan int) {
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("CC and nesting = %v, want %v", got, want)
+	}
+}
+
+func TestFlatSwitchComplexity(t *testing.T) {
+	cases := []struct {
+		name string
+		body string
+		want int
+	}{
+		{"tagged switch of trivial cases", "switch s {\n\tcase \"a\":\n\t\treturn\n\tcase \"b\":\n\t\tf()\n\t}", 2},
+		{"tagged switch with a default only", "switch s {\n\tdefault:\n\t\tf()\n\t}", 1},
+		{"tagged switch with multi-value cases", "switch s {\n\tcase \"a\", \"b\":\n\t\tf()\n\tcase \"c\":\n\t}", 2},
+		{"type switch of trivial cases", "switch v := any(s).(type) {\n\tcase int:\n\t\t_ = v\n\tcase string:\n\t\treturn\n\t}", 2},
+		{"tagless switch", "switch {\n\tcase s == \"a\":\n\t\tf()\n\tcase s == \"b\":\n\t\tf()\n\t}", 3},
+		{"tagged switch with one non-trivial case", "switch s {\n\tcase \"a\":\n\t\tf()\n\tcase \"b\":\n\t\tif s != \"\" {\n\t\t}\n\t}", 4},
+		{"tagged switch with a non-trivial default", "switch s {\n\tcase \"a\":\n\t\tf()\n\tdefault:\n\t\tfor {\n\t\t}\n\t}", 3},
+		{"tagged switch with fallthrough", "switch s {\n\tcase \"a\":\n\t\tfallthrough\n\tcase \"b\":\n\t\tf()\n\t}", 3},
+		{"tagged switch with a two-statement case", "switch s {\n\tcase \"a\":\n\t\tf()\n\t\tf()\n\tcase \"b\":\n\t}", 3},
+		{"trivial case with a decision in its call", "switch s {\n\tcase \"a\":\n\t\t_ = s != \"\" && s != \"b\"\n\tcase \"b\":\n\t}", 4},
+		{"trivial case whose call takes a function literal", "switch s {\n\tcase \"a\":\n\t\tg(func() {})\n\tcase \"b\":\n\t}", 3},
+		{"decisions in the init and the tag still count", "switch t := s; g2(s == \"a\" || s == \"b\") {\n\tcase true:\n\t\t_ = t\n\t}", 3},
+		{"decisions in a case expression still count", "switch s == \"a\" {\n\tcase s == \"b\" && s != \"c\":\n\t}", 3},
+		{"labeled break", "L:\n\tswitch s {\n\tcase \"a\":\n\t\tbreak L\n\tcase \"b\":\n\t}", 3},
+		{"increment", "n := 0\n\tswitch s {\n\tcase \"a\":\n\t\tn++\n\tcase \"b\":\n\t}", 3},
+		{"block body", "switch s {\n\tcase \"a\":\n\t\t{\n\t\t}\n\tcase \"b\":\n\t}", 3},
+		{"send statement", "switch s {\n\tcase \"a\":\n\t\tch <- 1\n\tcase \"b\":\n\t}", 3},
+		{"bare receive", "switch s {\n\tcase \"a\":\n\t\t<-ch\n\tcase \"b\":\n\t}", 3},
+		{"go statement", "switch s {\n\tcase \"a\":\n\t\tgo f()\n\tcase \"b\":\n\t}", 3},
+		{"flat switch nested in a non-flat switch", "switch s {\n\tcase \"a\":\n\t\tswitch s {\n\t\tcase \"b\":\n\t\t\tf()\n\t\t}\n\tcase \"c\":\n\t\tf()\n\t}", 4},
+		{"parenthesized call", "switch s {\n\tcase \"a\":\n\t\t(f())\n\tcase \"b\":\n\t\t(f())\n\t}", 2},
+		{"select", "select {\n\tcase ch <- 1:\n\t\tf()\n\tcase <-ch:\n\t\tf()\n\t}", 3},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			src := "package p\n\nfunc f() {}\nfunc g(func()) {}\nfunc g2(bool) bool { return true }\n\nfunc F(s string, ch chan int) {\n\t" + tc.body + "\n}\n"
+			inv := buildSource(t, map[string]string{"p.go": src})
+			for _, f := range inv.Functions {
+				if f.Identity == ".:F" && f.CC != tc.want {
+					t.Errorf("CC = %d, want %d", f.CC, tc.want)
+				}
+			}
+		})
+	}
+}
+
+func TestFlatSwitchWithManyCases(t *testing.T) {
+	var b strings.Builder
+	b.WriteString("package p\n\nfunc f() {}\n\nfunc F(s string) {\n\tswitch s {\n")
+	for i := range 28 {
+		fmt.Fprintf(&b, "\tcase %q:\n\t\tf()\n", fmt.Sprint("c", i))
+	}
+	b.WriteString("\t}\n}\n")
+	inv := buildSource(t, map[string]string{"p.go": b.String()})
+	for _, f := range inv.Functions {
+		if f.Identity == ".:F" && f.CC != 2 {
+			t.Errorf("CC = %d, want 2", f.CC)
+		}
 	}
 }
 
