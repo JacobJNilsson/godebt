@@ -4,3 +4,4 @@ coverage.scoped.out
 /godebt
 .godebt-self.json
 /.claude/
+/.serena/
