@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "analyzerVersion": "0.4.0-dev",
+  "analyzerVersion": "0.4.0",
   "scoringVersion": "0.2.0",
   "repo": {
     "root": ".",
