@@ -104,8 +104,9 @@ The spec is in [docs/spec](docs/spec). Implementation follows the steps in
 
 ## Agent skill
 
-The folder `skills/godebt` holds a skill for coding agents. It teaches the
-baseline workflow. Install it by copying or linking the folder into the skills
+The folder `skills/godebt` holds a skill for coding agents. It teaches an
+agent to save a report before a change and compare the finished code with it.
+The report stays outside the repository. Install it by copying or linking the folder into the skills
 folder that your agent reads.
 
 ## Influenced by

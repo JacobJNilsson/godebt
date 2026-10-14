@@ -1,37 +1,40 @@
 ---
 name: godebt
-description: Measures structural debt in a Go module with the godebt CLI and checks that a change does not raise it. Use when a Go repository has `godebt-baseline.json` or `godebt.yaml`, or when asked about structural debt, complexity, or duplication.
+description: Measures structural debt in a Go module with the godebt CLI and checks that a change does not raise it. Use before you start a change in a Go module, and when asked about structural debt, complexity, or duplication.
 ---
 
 # godebt
 
-`godebt` gives a Go module an index from 0 to 100. Lower is better. The repository commits `godebt-baseline.json` on `main`. CI runs `godebt baseline --check .` and fails a pull request that changes a measurement without updating the file. The committed file is the report that you compare your change against. Run `godebt audit --help` for the terms in the output.
+`godebt` gives a Go module an index from 0 to 100. Lower is better. It lists two kinds of findings, each with a file and lines: functions with too many branches, and blocks of repeated code. Run `godebt audit --help` for the terms in the output.
 
-If the repository has no baseline, run `godebt audit .` and answer the question. Set up CI only if the user asks for it.
+To check a change, save a report before you start and compare the finished code with it. The report lives outside the repository for the length of the task.
+
+If `godebt` is not installed, run `go install github.com/JacobJNilsson/godebt/cmd/godebt@latest`. If the user only asks about debt, run `godebt audit .` and answer the question.
 
 ## Check a change
 
-CI keeps `godebt-baseline.json` current on `main`. `godebt baseline --check .` only tells you whether that file is current. To learn whether your change made things worse, compare the code with the file.
+1. Before you change code, save a report outside the repository:
 
-1. After you change code, run `godebt audit . --baseline godebt-baseline.json --out "${TMPDIR:-/tmp}/godebt-current.json"`. Exit `2` means a policy failed or the comparison was refused, and stderr names the reason, for example `policy: maxIndex: index 33 is above 30`. Run `godebt compare godebt-baseline.json "${TMPDIR:-/tmp}/godebt-current.json"` to see each new finding with its file and lines, for example `production  complexity.hotspot  plan.go:4-34  .:Plan`.
-2. If the index rose, a new finding appeared, or a policy failed, fix it. Report a finding that comes from a problem outside your task to the user. If you cannot fix the rest inside the task, stop. Tell the user the index before and after and the findings that grew.
-3. If the comparison passes and shows nothing worse, run `godebt baseline .` and commit `godebt-baseline.json` with your change. Then `godebt baseline --check .` passes, and that is what CI runs. A change can update the file without moving the index, for example a new non-Go file.
-4. If a command refuses or exits `1`, stop and tell the user. The usual reason is a version refusal, which means your local `godebt` differs from the version CI pins.
+   ```sh
+   godebt audit . --quiet --out "${TMPDIR:-/tmp}/godebt-$(basename "$PWD")-before.json"
+   ```
 
-## Set up CI
+   If you changed code before you saved the report, audit the commit you started from. Run `git worktree add --detach <dir> <commit>`, run the same `godebt audit` command in `<dir>` with the same `--out` path, then run `git worktree remove <dir>`.
 
-1. Run `go install github.com/JacobJNilsson/godebt/cmd/godebt@v0.3.0`. The `v0.1.0` tag lacks `baseline`, so use `v0.2.0` or a later tag.
-2. Run `godebt baseline .` and commit `godebt-baseline.json` on `main`.
-3. Add a CI step that runs `godebt baseline --check .`.
+2. When the change is done, compare the code with the saved report:
 
-Pin the version, because a different `godebt` version writes different bytes. `godebt version` must match the version CI installs. Pin a tag, because every untagged commit prints the same string.
+   ```sh
+   godebt audit . --baseline "${TMPDIR:-/tmp}/godebt-$(basename "$PWD")-before.json" --quiet --out "${TMPDIR:-/tmp}/godebt-$(basename "$PWD")-after.json"
+   godebt compare "${TMPDIR:-/tmp}/godebt-$(basename "$PWD")-before.json" "${TMPDIR:-/tmp}/godebt-$(basename "$PWD")-after.json"
+   ```
 
-```yaml
-      - name: Check the godebt baseline
-        run: |
-          go install github.com/JacobJNilsson/godebt/cmd/godebt@v0.3.0
-          godebt baseline --check .
-```
+   `godebt compare` prints the index before and after, and each new or resolved finding with its file and lines, for example `production  complexity.hotspot  plan.go:4-34  .:Plan`. Exit `2` from `godebt audit` means a policy in `godebt.yaml` failed or the comparison was refused. Stderr names the reason, for example `policy: maxIndex: index 33 is above 30`.
+
+3. If the index rose, a new finding appeared, or a policy failed, fix it. Report a finding that comes from a problem outside your task to the user. If you cannot fix the rest inside the task, stop. Tell the user the index before and after and the findings that grew.
+
+4. Tell the user the index before and after the change.
+
+If a command refuses or exits `1`, stop and tell the user. `godebt` refuses to compare two reports from different `godebt` versions or from different configurations. A reinstall of `godebt` or an edit to `godebt.yaml` during the task causes that refusal.
 
 ## What not to do
 
@@ -39,4 +42,3 @@ Pin the version, because a different `godebt` version writes different bytes. `g
 - Do not move logic into test files, because test code never enters the index.
 - Do not add `exclude` entries to hide debt, because the debt stays and only the measurement hides it.
 - Do not raise `policy.maxIndex` or loosen any other policy check to pass. The policy is the limit the user chose. Only the user changes `godebt.yaml`.
-- Do not run `godebt baseline .` to silence a failed check before you read what changed, because that records a regression as the new normal.
