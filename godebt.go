@@ -22,7 +22,7 @@ import (
 )
 
 // Version is the godebt release that produced a report.
-const Version = "0.4.0"
+const Version = "0.5.0-dev"
 
 // Report is the result of one audit.
 type Report = report.Report

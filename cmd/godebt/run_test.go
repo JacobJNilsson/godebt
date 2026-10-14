@@ -23,7 +23,7 @@ func TestRun(t *testing.T) {
 		wantStderr string
 		wantCode   int
 	}{
-		{name: "version", args: []string{"version"}, wantStdout: "godebt 0.4.0\n"},
+		{name: "version", args: []string{"version"}, wantStdout: "godebt 0.5.0-dev\n"},
 		{name: "missing subcommand", wantStderr: usage + "\n", wantCode: 1},
 		{name: "unknown subcommand", args: []string{"inspect"}, wantStderr: usage + "\n", wantCode: 1},
 		{name: "audit without path", args: []string{"audit"}, wantStderr: usage + "\n", wantCode: 1},
