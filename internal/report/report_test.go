@@ -12,12 +12,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/JacobJNilsson/scree/internal/complexity"
-	"github.com/JacobJNilsson/scree/internal/contract"
-	"github.com/JacobJNilsson/scree/internal/discover"
-	"github.com/JacobJNilsson/scree/internal/duplication"
-	"github.com/JacobJNilsson/scree/internal/inventory"
-	"github.com/JacobJNilsson/scree/internal/safeguards"
+	"github.com/JacobJNilsson/godebt/internal/complexity"
+	"github.com/JacobJNilsson/godebt/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/discover"
+	"github.com/JacobJNilsson/godebt/internal/duplication"
+	"github.com/JacobJNilsson/godebt/internal/inventory"
+	"github.com/JacobJNilsson/godebt/internal/safeguards"
 )
 
 func newReport(t *testing.T, fixture string) *Report {
@@ -29,7 +29,7 @@ func newReport(t *testing.T, fixture string) *Report {
 	return measure(inventory.Build(tree))
 }
 
-// measure runs both measures over an inventory and merges their results the way scree.Audit does.
+// measure runs both measures over an inventory and merges their results the way godebt.Audit does.
 func measure(inv *inventory.Inventory) *Report {
 	metrics, findings := complexity.Measure(inv)
 	dupMetrics, clones, limits := duplication.Measure(inv)
@@ -69,7 +69,7 @@ func TestDeterministicJSON(t *testing.T) {
 	}
 }
 
-// testAnalyzer stands in for scree.Version, which this package cannot import.
+// testAnalyzer stands in for godebt.Version, which this package cannot import.
 const testAnalyzer = "0.0.0-test"
 
 // fixtures lists the fixture modules that have a golden report.

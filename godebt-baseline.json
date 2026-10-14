@@ -4,7 +4,7 @@
   "scoringVersion": "0.2.0",
   "repo": {
     "root": ".",
-    "module": "github.com/JacobJNilsson/scree"
+    "module": "github.com/JacobJNilsson/godebt"
   },
   "configDigest": "sha256:4c50bb6e6bc006a5b9243824f1685a5379c85d70169e618006d2edfe7d505d66",
   "coverage": {
@@ -231,10 +231,10 @@
     },
     {
       "kind": "complexity.hotspot",
-      "path": "cmd/scree/baseline_check_test.go",
+      "path": "cmd/godebt/baseline_check_test.go",
       "startLine": 121,
       "endLine": 145,
-      "identity": "cmd/scree:TestBaselineCheckUnusableFile",
+      "identity": "cmd/godebt:TestBaselineCheckUnusableFile",
       "ambiguous": false,
       "sourceSet": "test",
       "facts": {
@@ -246,10 +246,10 @@
     },
     {
       "kind": "complexity.hotspot",
-      "path": "cmd/scree/run.go",
+      "path": "cmd/godebt/run.go",
       "startLine": 86,
       "endLine": 109,
-      "identity": "cmd/scree:run",
+      "identity": "cmd/godebt:run",
       "ambiguous": false,
       "sourceSet": "production",
       "facts": {

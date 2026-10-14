@@ -5,9 +5,9 @@ import (
 	"math"
 	"sort"
 
-	"github.com/JacobJNilsson/scree/internal/contract"
-	"github.com/JacobJNilsson/scree/internal/formula"
-	"github.com/JacobJNilsson/scree/internal/inventory"
+	"github.com/JacobJNilsson/godebt/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/formula"
+	"github.com/JacobJNilsson/godebt/internal/inventory"
 )
 
 // KindHotspot is the finding kind of an eroded function.

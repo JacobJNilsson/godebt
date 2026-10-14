@@ -18,7 +18,7 @@ import (
 
 	gitignore "github.com/boyter/gocodewalker/go-gitignore"
 
-	"github.com/JacobJNilsson/scree/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/contract"
 )
 
 // SourceSet names the group a file belongs to.

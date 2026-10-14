@@ -1,6 +1,6 @@
-# scree report
+# godebt report
 
-example.com/broken, scree 0.0.0-test.
+example.com/broken, godebt 0.0.0-test.
 
 The index is 100/100, lower is better, scoring 0.2.0, partial.
 Contributions: complexity-erosion 60, duplication 40.

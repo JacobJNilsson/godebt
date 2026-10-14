@@ -1,8 +1,8 @@
-# scree
+# godebt
 
 Measure structural debt in a Go module.
 
-`scree` reads a Go module from disk, parses every file once, and reports two
+`godebt` reads a Go module from disk, parses every file once, and reports two
 things: functions that have grown too many branches, and blocks of code that
 repeat with renamed identifiers. It folds them into a 0 to 100 index. Lower is
 better. Every point traces back to a raw measurement and a list of findings
@@ -11,24 +11,25 @@ with file and line.
 ## Use
 
 ```
-go build ./cmd/scree
+go build ./cmd/godebt
 
-scree audit .                        # measure and print the report
-scree audit . --out report.json      # save a baseline
-scree audit . --baseline report.json # compare with the baseline
-scree compare before.json after.json # compare two saved reports
-scree baseline .                     # write scree-baseline.json
-scree baseline --check .             # exit 2 when scree-baseline.json is stale
+godebt audit .                        # measure and print the report
+godebt audit . --out report.json      # save a baseline
+godebt audit . --baseline report.json # compare with the baseline
+godebt compare before.json after.json # compare two saved reports
+godebt baseline .                     # write godebt-baseline.json
+godebt baseline --check .             # exit 2 when godebt-baseline.json is stale
 ```
 
-Install the `baseline` command with
-`go install github.com/JacobJNilsson/scree/cmd/scree@v0.3.0`, or build the
-command from a clone.
+Install the command with
+`go install github.com/JacobJNilsson/godebt/cmd/godebt@latest`, or build the
+command from a clone. Releases up to 0.3.0 use the name `scree` and the module
+path `github.com/JacobJNilsson/scree`.
 
 An audit prints the index, the two contributions, both source sets with their
 distributions, the findings, and the safeguards the repository declares. The
 flags `--json`, `--md`, `--out`, `--config`, `--baseline`, and `--quiet` shape
-the output and the run. `scree audit --help` names every flag and term.
+the output and the run. `godebt audit --help` names every flag and term.
 
 Exit code `2` means the policy failed, a baseline could not be compared, or
 `baseline --check` found a stale file. Exit code `1` means the command
@@ -36,7 +37,7 @@ could not run, and `0` means the run passed.
 
 ## Configuration
 
-`scree.yaml` at the audited root is optional. It sets the excluded paths, the
+`godebt.yaml` at the audited root is optional. It sets the excluded paths, the
 extra test patterns, and the policy that fails a run:
 
 ```yaml
@@ -84,7 +85,7 @@ alone. Doubling a module with clean code moves it by at most 3 points.
 
 `corpus/modules.txt` holds 15 public modules at pinned versions, from 142
 production lines to 75,973. Those line counts are the `coverage.production.sloc`
-field of `scree audit --json`. The production code lines column of the table
+field of `godebt audit --json`. The production code lines column of the table
 holds the same figure. `make corpus` audits each module and writes the
 spread to `corpus/results.md`. That table never changes a constant by itself.
 
@@ -93,7 +94,7 @@ spread to `corpus/results.md`. That table never changes a constant by itself.
 `make check` is the one definition of green. It runs the tidy check, vet, lint,
 the coverage gate, the tests, the build, and the anti-slop rules. It ends with
 a self-audit that fails when this repository breaks its own policy in
-`scree.yaml`.
+`godebt.yaml`.
 `make golden` regenerates the golden reports, and `make corpus` records the
 corpus table.
 
@@ -103,13 +104,13 @@ The spec is in [docs/spec](docs/spec). Implementation follows the steps in
 
 ## Agent skill
 
-The folder `skills/scree` holds a skill for coding agents. It teaches the
+The folder `skills/godebt` holds a skill for coding agents. It teaches the
 baseline workflow. Install it by copying or linking the folder into the skills
 folder that your agent reads.
 
 ## Influenced by
 
-`scree` is a Go re-imagining of [trellis](https://github.com/jayminwest/trellis)
+`godebt` is a Go re-imagining of [trellis](https://github.com/jayminwest/trellis)
 by Jaymin West, a deterministic sloppiness audit for TypeScript. The metric
 definitions, the traceable index, and the report contract come from that work.
 So does the rule that test code and safeguards never offset production debt.

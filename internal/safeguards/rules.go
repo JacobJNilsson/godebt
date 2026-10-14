@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/JacobJNilsson/scree/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/contract"
 )
 
 // hook applies the rule of pre-commit-hook and pre-push-hook to every hook file and hook tool that declares the hook.

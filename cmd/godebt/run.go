@@ -6,44 +6,44 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/JacobJNilsson/scree"
+	"github.com/JacobJNilsson/godebt"
 )
 
-const usage = "usage: scree audit <path> [--config <file>] [--baseline <report.json>] [--json|--md] [--out <file>] [--quiet]\n       scree compare <before.json> <after.json> [--json|--md]\n       scree baseline [path] [--config <file>] [--out <file>] [--check] [--quiet]\n       scree version"
+const usage = "usage: godebt audit <path> [--config <file>] [--baseline <report.json>] [--json|--md] [--out <file>] [--quiet]\n       godebt compare <before.json> <after.json> [--json|--md]\n       godebt baseline [path] [--config <file>] [--out <file>] [--check] [--quiet]\n       godebt version"
 
-const help = `usage: scree <command>
+const help = `usage: godebt <command>
 
 commands:
   audit <path>                        measure the Go module at path and print the report
   compare <before.json> <after.json>  compare two saved JSON reports and print the comparison
   baseline [path]                     write the reproducible baseline report of the module at path
-  version                             print the scree version
+  version                             print the godebt version
 
-Run scree audit --help for the audit flags and terms.
-Run scree baseline --help for the baseline flags.
+Run godebt audit --help for the audit flags and terms.
+Run godebt baseline --help for the baseline flags.
 `
 
-const baselineHelp = `usage: scree baseline [path] [--config <file>] [--out <file>] [--check] [--quiet]
+const baselineHelp = `usage: godebt baseline [path] [--config <file>] [--out <file>] [--check] [--quiet]
 
 The command audits the Go module at path, which defaults to the current directory, and writes
 the report as JSON with repo.root set to . and meta.durationMs set to 0. The same files,
 configuration, and versions then give the same bytes on any machine. The file is a valid
---baseline for scree audit and an argument for scree compare.
+--baseline for godebt audit and an argument for godebt compare.
 The audit leaves the output file out, so the file does not count as an unsupported file.
 With --check the command writes nothing and compares the bytes it would write with the file.
 Exit code 0 means the file is current, 2 means it is stale, and 1 means the file is missing or unreadable.
 
 flags:
-  --config <file>  read the configuration from the file, not from scree.yaml at the path
-  --out <file>     write the baseline to the file, default scree-baseline.json at the path
+  --config <file>  read the configuration from the file, not from godebt.yaml at the path
+  --out <file>     write the baseline to the file, default godebt-baseline.json at the path
   --check          compare with the committed file and write nothing, so CI fails when a change did not update it
   --quiet          do not print the line that names the file or the current baseline
   --help, -h       print this help
 `
 
-const compareHelp = `usage: scree compare <before.json> <after.json> [--json|--md]
+const compareHelp = `usage: godebt compare <before.json> <after.json> [--json|--md]
 
-The command compares two reports that scree audit --out saved. It runs no audit.
+The command compares two reports that godebt audit --out saved. It runs no audit.
 Exit code 2 means the reports are not comparable.
 
 flags:
@@ -52,11 +52,11 @@ flags:
   --help, -h  print this help
 `
 
-const auditHelp = `usage: scree audit <path> [--config <file>] [--baseline <report.json>] [--json|--md] [--out <file>] [--quiet]
+const auditHelp = `usage: godebt audit <path> [--config <file>] [--baseline <report.json>] [--json|--md] [--out <file>] [--quiet]
 
 flags:
-  --config <file>           read the configuration from the file, not from scree.yaml at the path
-  --baseline <report.json>  compare with a report that scree audit --out saved, and run the policy checks that need a baseline
+  --config <file>           read the configuration from the file, not from godebt.yaml at the path
+  --baseline <report.json>  compare with a report that godebt audit --out saved, and run the policy checks that need a baseline
   --json                    print the report as JSON
   --md                      print the report as Markdown
   --out <file>              write the report to the file, in the format of --json, --md, the .json or .md extension, else text
@@ -76,7 +76,7 @@ terms:
   dup lines        the source lines in clones, with their share of the set lines
   partial          a production input failed or hit a cap, so the index counts that part as full debt
   baseline         a saved report of an earlier audit, compared by index, metrics, and findings
-  policy           the config file checks that fail the run with exit code 2, like a baseline scree cannot compare
+  policy           the config file checks that fail the run with exit code 2, like a baseline godebt cannot compare
   safeguards       process checks the repo declares, reported but never scored
 `
 
@@ -84,7 +84,7 @@ terms:
 var errExclusive = errors.New("--json and --md are exclusive")
 
 func run(args []string, stdout, stderr io.Writer) int {
-	fs := flag.NewFlagSet("scree", flag.ContinueOnError)
+	fs := flag.NewFlagSet("godebt", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	// The program has no other place to report a failed write to stderr.
 	fs.Usage = func() { _, _ = fmt.Fprintln(stderr, usage) }
@@ -96,7 +96,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	case *wantHelp:
 		return writeText(stdout, help)
 	case fs.NArg() == 1 && fs.Arg(0) == "version":
-		return writeText(stdout, "scree "+scree.Version+"\n")
+		return writeText(stdout, "godebt "+godebt.Version+"\n")
 	case fs.NArg() > 0 && fs.Arg(0) == "audit":
 		return audit(fs.Args()[1:], stdout, stderr)
 	case fs.NArg() > 0 && fs.Arg(0) == "baseline":

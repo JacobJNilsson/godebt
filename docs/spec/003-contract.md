@@ -8,7 +8,7 @@ package. Everything here is versioned and tested with golden files.
 Three versions travel with every report:
 
 - `schemaVersion`: the shape of this document. Starts at `1.0.0`.
-- `analyzerVersion`: the `scree` release that produced the measurements.
+- `analyzerVersion`: the `godebt` release that produced the measurements.
   Equals the module version.
 - `scoringVersion`: the formula constants. It is `0.2.0`, the version the
   calibration in [004-implementation.md](004-implementation.md) checked. A
@@ -109,7 +109,7 @@ same rule: `value` appears only when the term's state is `complete`.
 
 ## Configuration
 
-`scree.yaml` at the audited root, or the file named by `--config`. Every key
+`godebt.yaml` at the audited root, or the file named by `--config`. Every key
 is optional. Unknown keys are an error. Scoring keys do not exist here: the
 policy gates a run and never changes how the index is computed.
 
@@ -168,10 +168,10 @@ not a policy failure. Integer knobs reject fractions.
 ## Command line
 
 ```
-scree audit <path> [--config <file>] [--baseline <report.json>] [--json|--md] [--out <file>] [--quiet]
-scree compare <before.json> <after.json> [--json|--md]
-scree baseline [path] [--config <file>] [--out <file>] [--check] [--quiet]
-scree version
+godebt audit <path> [--config <file>] [--baseline <report.json>] [--json|--md] [--out <file>] [--quiet]
+godebt compare <before.json> <after.json> [--json|--md]
+godebt baseline [path] [--config <file>] [--out <file>] [--check] [--quiet]
+godebt version
 ```
 
 - `audit` measures, scores, evaluates the policy, and prints the report. The
@@ -186,7 +186,7 @@ scree version
   no audit.
 - `baseline` audits like `audit` and writes the reproducible form of the
   report as JSON. The path defaults to `.`. `--out` defaults to
-  `scree-baseline.json` at the audited root, and `--quiet` suppresses the
+  `godebt-baseline.json` at the audited root, and `--quiet` suppresses the
   confirmation on stderr. The written file loads with `LoadReport`, so it is
   a valid `--baseline` for `audit` and an argument for `compare`. A
   repository commits the file on `main`, and its CI runs `baseline --check`.
@@ -225,7 +225,7 @@ The default run is stateless. Without `--out` it writes nothing.
 ## Public package
 
 ```go
-package scree // import "github.com/JacobJNilsson/scree"
+package godebt // import "github.com/JacobJNilsson/godebt"
 
 func Audit(ctx context.Context, root string, opts Options) (*Report, error)
 func LoadReport(path string) (*Report, error)
@@ -245,5 +245,5 @@ same inputs.
 operational error only for conditions that stop the audit. Incomplete
 analysis is not an error; it is a state inside the report.
 
-`cmd/scree` calls these functions and does nothing else. A deep-equal test
+`cmd/godebt` calls these functions and does nothing else. A deep-equal test
 proves that the CLI's JSON output is the marshalled `Report` from `Audit`.

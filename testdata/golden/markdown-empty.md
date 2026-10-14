@@ -1,6 +1,6 @@
-# scree report
+# godebt report
 
-example.com/empty, scree 0.0.0-test.
+example.com/empty, godebt 0.0.0-test.
 
 The index is 0/100, lower is better, scoring 0.2.0.
 Contributions: complexity-erosion 0, duplication 0.

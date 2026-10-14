@@ -1,4 +1,4 @@
-scree 0.0.0-test  example.com/clones/nested
+godebt 0.0.0-test  example.com/clones/nested
 
 index  55/100  lower is better  scoring 0.2.0
        complexity-erosion 33  duplication 22

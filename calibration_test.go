@@ -1,4 +1,4 @@
-package scree
+package godebt
 
 import (
 	"fmt"
@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/JacobJNilsson/scree/internal/contract"
-	"github.com/JacobJNilsson/scree/internal/report"
+	"github.com/JacobJNilsson/godebt/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/report"
 )
 
 // pairDirection is the index move that one paired refactor must produce.

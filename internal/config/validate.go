@@ -5,8 +5,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/JacobJNilsson/scree/internal/contract"
-	"github.com/JacobJNilsson/scree/internal/discover"
+	"github.com/JacobJNilsson/godebt/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/discover"
 )
 
 // newFindingKinds are the finding kinds that failOnNew accepts.

@@ -26,10 +26,10 @@ anti-slop-go v1.4.1 requires Go 1.26 or newer. With the default
 `make antislop`. With `GOTOOLCHAIN=local` on a host older than Go 1.26,
 `make antislop` fails.
 `make selfcheck` audits this repository with its own binary and is part of
-`make check` from step 1 on. It fails when the policy in `scree.yaml`
+`make check` from step 1 on. It fails when the policy in `godebt.yaml`
 fails, for example when the index rises above `maxIndex`. It also fails when
-`scree-baseline.json` is stale, so a change that alters a measurement needs
-`make baseline`, which runs `go run ./cmd/scree baseline .`.
+`godebt-baseline.json` is stale, so a change that alters a measurement needs
+`make baseline`, which runs `go run ./cmd/godebt baseline .`.
 
 The pre-commit tier, `make check-scoped`, runs vet, lint, anti-slop-go, and
 race tests on the packages a staged change touches, with the same coverage

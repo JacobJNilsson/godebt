@@ -47,7 +47,7 @@ func TestAuditMarkdown(t *testing.T) {
 	if code := run([]string{"audit", "--md", filepath.Join(fixtures, "functions")}, &stdout, &stderr); code != 0 {
 		t.Fatalf("exit code %d, stderr %q", code, stderr.String())
 	}
-	if !strings.HasPrefix(stdout.String(), "# scree report\n") {
+	if !strings.HasPrefix(stdout.String(), "# godebt report\n") {
 		t.Errorf("stdout is not the Markdown report:\n%s", stdout.String())
 	}
 }
@@ -62,9 +62,9 @@ func TestAuditOut(t *testing.T) {
 		prefix string
 	}{
 		{"json by extension", nil, "r.json", "{\n"},
-		{"markdown by extension", nil, "r.md", "# scree report\n"},
-		{"terminal by extension", nil, "r.txt", "scree 0.4.0-dev  "},
-		{"flag over extension", []string{"--md"}, "flag.json", "# scree report\n"},
+		{"markdown by extension", nil, "r.md", "# godebt report\n"},
+		{"terminal by extension", nil, "r.txt", "godebt 0.4.0-dev  "},
+		{"flag over extension", []string{"--md"}, "flag.json", "# godebt report\n"},
 		{"quiet", []string{"--quiet", "--json"}, "quiet.out", "{\n"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -101,7 +101,7 @@ func TestAuditOutFailure(t *testing.T) {
 	if code := run([]string{"audit", filepath.Join(fixtures, "functions"), "--out", path}, &stdout, &stderr); code != 1 {
 		t.Errorf("exit code = %d, want 1", code)
 	}
-	if !strings.HasPrefix(stderr.String(), "scree: open "+path) {
+	if !strings.HasPrefix(stderr.String(), "godebt: open "+path) {
 		t.Errorf("stderr = %q, want the open error", stderr.String())
 	}
 }

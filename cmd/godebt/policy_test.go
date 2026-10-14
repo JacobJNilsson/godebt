@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/JacobJNilsson/scree"
-	"github.com/JacobJNilsson/scree/internal/report"
+	"github.com/JacobJNilsson/godebt"
+	"github.com/JacobJNilsson/godebt/internal/report"
 )
 
 var update = flag.Bool("update", false, "rewrite the golden files")
@@ -76,7 +76,7 @@ func TestAuditWritesReportBeforeFailing(t *testing.T) {
 	if code != 2 || !strings.HasPrefix(stderr, "wrote "+out+"\npolicy: maxIndex: ") {
 		t.Errorf("exit %d, stderr %q", code, stderr)
 	}
-	if data, err := os.ReadFile(out); err != nil || !strings.HasPrefix(string(data), "# scree report\n") {
+	if data, err := os.ReadFile(out); err != nil || !strings.HasPrefix(string(data), "# godebt report\n") {
 		t.Errorf("report file: %v", err)
 	}
 }
@@ -87,12 +87,12 @@ func TestAuditRefusedBaseline(t *testing.T) {
 	if code != 2 {
 		t.Errorf("exit code %d, want 2", code)
 	}
-	want := "policy: baseline: analyzerVersion differs: before \"0.0.0-test\", after \"" + scree.Version + "\"\n"
+	want := "policy: baseline: analyzerVersion differs: before \"0.0.0-test\", after \"" + godebt.Version + "\"\n"
 	if stderr != want {
 		t.Errorf("stderr = %q, want %q", stderr, want)
 	}
 	var printed struct {
-		Comparison *scree.Comparison `json:"comparison"`
+		Comparison *godebt.Comparison `json:"comparison"`
 	}
 	if err := json.Unmarshal([]byte(stdout), &printed); err != nil || printed.Comparison == nil || printed.Comparison.Comparable {
 		t.Errorf("JSON comparison = %+v, %v, want a refused comparison", printed.Comparison, err)
@@ -104,7 +104,7 @@ func TestAuditRefusedBaselineWithBaselineChecks(t *testing.T) {
 	baseline := filepath.Join(goldens, "report-functions.json")
 	for _, format := range []string{"--md", "--quiet"} {
 		code, stdout, stderr := runArgs(t, "audit", filepath.Join(fixtures, "functions"), format, "--config", cfg, "--baseline", baseline)
-		want := "policy: baseline: analyzerVersion differs: before \"0.0.0-test\", after \"" + scree.Version + "\"\n" +
+		want := "policy: baseline: analyzerVersion differs: before \"0.0.0-test\", after \"" + godebt.Version + "\"\n" +
 			"policy: failOnNew: skipped, baseline not comparable\n" +
 			"policy: regression: skipped, baseline not comparable\n"
 		if code != 2 || stderr != want {
@@ -148,7 +148,7 @@ func TestAuditOperationalErrors(t *testing.T) {
 	for name, args := range cases {
 		t.Run(name, func(t *testing.T) {
 			code, stdout, stderr := runArgs(t, args...)
-			if code != 1 || stdout != "" || !strings.HasPrefix(stderr, "scree: ") {
+			if code != 1 || stdout != "" || !strings.HasPrefix(stderr, "godebt: ") {
 				t.Errorf("exit %d, stdout %q, stderr %q, want 1 and an error", code, stdout, stderr)
 			}
 		})
@@ -168,8 +168,8 @@ func TestAuditJSONWithBaseline(t *testing.T) {
 		t.Fatalf("exit %d, %s", code, stderr)
 	}
 	var printed struct {
-		SchemaVersion string            `json:"schemaVersion"`
-		Comparison    *scree.Comparison `json:"comparison"`
+		SchemaVersion string             `json:"schemaVersion"`
+		Comparison    *godebt.Comparison `json:"comparison"`
 	}
 	if err := json.Unmarshal([]byte(stdout), &printed); err != nil {
 		t.Fatal(err)
@@ -181,15 +181,15 @@ func TestAuditJSONWithBaseline(t *testing.T) {
 
 // TestBaselineGolden renders a comparison of two golden reports, which share their versions and digest.
 func TestBaselineGolden(t *testing.T) {
-	before, err := scree.LoadReport(filepath.Join(goldens, "report-sets.json"))
+	before, err := godebt.LoadReport(filepath.Join(goldens, "report-sets.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	after, err := scree.LoadReport(filepath.Join(goldens, "report-functions.json"))
+	after, err := godebt.LoadReport(filepath.Join(goldens, "report-functions.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	cmp := scree.Compare(before, after)
+	cmp := godebt.Compare(before, after)
 	for name, r := range map[string]renderer{"terminal-baseline.txt": renderTerminal, "markdown-baseline.md": renderMarkdown} {
 		var out bytes.Buffer
 		if err := r(&out, after, cmp); err != nil {

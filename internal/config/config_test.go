@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/JacobJNilsson/scree/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/contract"
 )
 
 // specExample is the configuration example of spec 003.
@@ -31,7 +31,7 @@ policy:
 
 func write(t *testing.T, content string) string {
 	t.Helper()
-	path := filepath.Join(t.TempDir(), "scree.yaml")
+	path := filepath.Join(t.TempDir(), "godebt.yaml")
 	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +94,7 @@ func TestLoadMissingNamedFile(t *testing.T) {
 
 func TestLoadDefault(t *testing.T) {
 	root := t.TempDir()
-	if got := Default(root); got != filepath.Join(root, "scree.yaml") {
+	if got := Default(root); got != filepath.Join(root, "godebt.yaml") {
 		t.Errorf("Default = %q", got)
 	}
 	f, err := LoadDefault(root)

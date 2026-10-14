@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/JacobJNilsson/scree/internal/contract"
-	"github.com/JacobJNilsson/scree/internal/duplication"
+	"github.com/JacobJNilsson/godebt/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/duplication"
 )
 
 func markdown(t *testing.T, r *Report) string {
@@ -31,9 +31,9 @@ func TestMarkdownGolden(t *testing.T) {
 func TestMarkdownSummary(t *testing.T) {
 	out := markdown(t, newReport(t, "functions"))
 	want := strings.Join([]string{
-		"# scree report",
+		"# godebt report",
 		"",
-		"example.com/functions, scree " + testAnalyzer + ".",
+		"example.com/functions, godebt " + testAnalyzer + ".",
 		"",
 		"The index is 23/100, lower is better, scoring 0.2.0.",
 		"Contributions: complexity-erosion 23, duplication 0.",
@@ -178,7 +178,7 @@ func TestMarkdownSafeguards(t *testing.T) {
 }
 
 func TestMarkdownWithoutModule(t *testing.T) {
-	if out := markdown(t, &Report{}); !strings.HasPrefix(out, "# scree report\n\n(no go.mod), scree .\n") {
+	if out := markdown(t, &Report{}); !strings.HasPrefix(out, "# godebt report\n\n(no go.mod), godebt .\n") {
 		t.Errorf("markdown:\n%s", out)
 	}
 }

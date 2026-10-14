@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/JacobJNilsson/scree"
-	"github.com/JacobJNilsson/scree/internal/report"
+	"github.com/JacobJNilsson/godebt"
+	"github.com/JacobJNilsson/godebt/internal/report"
 )
 
 const fixtures = "../../testdata/fixtures"
@@ -23,7 +23,7 @@ func TestRun(t *testing.T) {
 		wantStderr string
 		wantCode   int
 	}{
-		{name: "version", args: []string{"version"}, wantStdout: "scree 0.4.0-dev\n"},
+		{name: "version", args: []string{"version"}, wantStdout: "godebt 0.4.0-dev\n"},
 		{name: "missing subcommand", wantStderr: usage + "\n", wantCode: 1},
 		{name: "unknown subcommand", args: []string{"inspect"}, wantStderr: usage + "\n", wantCode: 1},
 		{name: "audit without path", args: []string{"audit"}, wantStderr: usage + "\n", wantCode: 1},
@@ -42,8 +42,8 @@ func TestRun(t *testing.T) {
 		},
 		{
 			name:       "audit missing path",
-			args:       []string{"audit", "/nonexistent-scree-path"},
-			wantStderr: "scree: stat /nonexistent-scree-path: no such file or directory\n",
+			args:       []string{"audit", "/nonexistent-godebt-path"},
+			wantStderr: "godebt: stat /nonexistent-godebt-path: no such file or directory\n",
 			wantCode:   1,
 		},
 		{name: "extra argument", args: []string{"version", "x"}, wantStderr: usage + "\n", wantCode: 1},
@@ -54,7 +54,7 @@ func TestRun(t *testing.T) {
 		{
 			name:       "json and md",
 			args:       []string{"audit", "--json", "--md", "."},
-			wantStderr: "scree: --json and --md are exclusive\n",
+			wantStderr: "godebt: --json and --md are exclusive\n",
 			wantCode:   1,
 		},
 		{
@@ -92,10 +92,10 @@ func TestRunVersionWriteFailure(t *testing.T) {
 	}
 }
 
-// TestAuditJSONParity proves that the CLI prints the marshalled report of scree.Audit.
+// TestAuditJSONParity proves that the CLI prints the marshalled report of godebt.Audit.
 func TestAuditJSONParity(t *testing.T) {
 	root := filepath.Join(fixtures, "functions")
-	r, err := scree.Audit(context.Background(), root, scree.Options{})
+	r, err := godebt.Audit(context.Background(), root, godebt.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -119,7 +119,7 @@ func TestAuditJSONParity(t *testing.T) {
 			t.Fatal(err)
 		}
 		if !bytes.Equal(got, want) {
-			t.Errorf("%v: stdout differs from json.MarshalIndent of scree.Audit:\n%s", args, stdout.String())
+			t.Errorf("%v: stdout differs from json.MarshalIndent of godebt.Audit:\n%s", args, stdout.String())
 		}
 	}
 }
@@ -140,7 +140,7 @@ func TestAuditWriteFailure(t *testing.T) {
 		if code := run(args, failingWriter{}, &stderr); code != 1 {
 			t.Errorf("%v: exit code = %d, want 1", args, code)
 		}
-		if want := "scree: write failed\n"; stderr.String() != want {
+		if want := "godebt: write failed\n"; stderr.String() != want {
 			t.Errorf("%v: stderr = %q, want %q", args, stderr.String(), want)
 		}
 	}

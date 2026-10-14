@@ -12,10 +12,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/JacobJNilsson/scree/internal/contract"
-	"github.com/JacobJNilsson/scree/internal/discover"
-	"github.com/JacobJNilsson/scree/internal/formula"
-	"github.com/JacobJNilsson/scree/internal/inventory"
+	"github.com/JacobJNilsson/godebt/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/discover"
+	"github.com/JacobJNilsson/godebt/internal/formula"
+	"github.com/JacobJNilsson/godebt/internal/inventory"
 )
 
 // KindCloneGroup is the finding kind of a clone group.

@@ -12,7 +12,7 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/JacobJNilsson/scree/internal/discover"
+	"github.com/JacobJNilsson/godebt/internal/discover"
 )
 
 // Function is one function of a measured file.

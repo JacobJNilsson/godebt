@@ -3,7 +3,7 @@ package safeguards
 import (
 	"strings"
 
-	"github.com/JacobJNilsson/scree/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/contract"
 )
 
 // located is a command with the path of the file that holds it, and the Makefile target whose recipe holds it.

@@ -1,6 +1,6 @@
-# scree report
+# godebt report
 
-example.com/clones/renamed, scree 0.0.0-test.
+example.com/clones/renamed, godebt 0.0.0-test.
 
 The index is 21/100, lower is better, scoring 0.2.0.
 Contributions: complexity-erosion 0, duplication 21.

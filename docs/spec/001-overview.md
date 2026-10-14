@@ -11,7 +11,7 @@ and tells you whether a change made it worse.
 
 ## Solution
 
-`scree` is one Go binary and one Go package. It reads a Go module from disk,
+`godebt` is one Go binary and one Go package. It reads a Go module from disk,
 parses every file once, and measures two things:
 
 - Complexity and erosion. Cyclomatic complexity per function, and how much of
@@ -24,16 +24,15 @@ It folds those into a 0–100 index where lower is better. Every point traces
 to a raw metric, a threshold, and a list of findings with file and line. A
 saved report is a baseline: a later audit compares against it and a
 declared policy decides whether the run passes. A repository can also commit
-a baseline on `main` with `scree baseline`, and CI runs `scree baseline
+a baseline on `main` with `godebt baseline`, and CI runs `godebt baseline
 --check` to fail a change that did not update it.
 
-Separately from the score, `scree` reports which safeguards the repository
+Separately from the score, `godebt` reports which safeguards the repository
 has configured: Git hooks, lint configuration, CI steps, coverage budgets.
 These are evidence about the project's process. They never change the index.
 
-The name is geological. Scree is the loose rock that collects at the foot of
-a cliff as the face weathers. The tool measures how large that pile has
-grown.
+The name says what the tool measures: structural debt in Go code. Releases
+up to 0.3.0 used the name `scree`.
 
 ## Goals
 
@@ -56,7 +55,7 @@ grown.
   normal Go.
 - Rule-level linting. `anti-slop-go`, `staticcheck`, and `golangci-lint`
   cover that.
-- Running the target's checks. `scree` inspects configuration and never
+- Running the target's checks. `godebt` inspects configuration and never
   claims a check passes.
 - History in a database and multi-repository fleet runs. Deferred to a later
   version. Baseline comparison over saved JSON covers the CI case.
@@ -65,7 +64,7 @@ grown.
 
 ## Influenced by
 
-`scree` is a Go re-imagining of [trellis](https://github.com/jayminwest/trellis)
+`godebt` is a Go re-imagining of [trellis](https://github.com/jayminwest/trellis)
 by Jaymin West, a deterministic sloppiness audit for TypeScript. The metric
 definitions, the traceable index, the rule that test code and safeguards
 never offset production debt, and the report contract come from that work.
@@ -75,11 +74,11 @@ Code ported directly from trellis carries its MIT notice in `NOTICE`.
 
 - [gocyclo](https://github.com/fzipp/gocyclo) and
   [gocognit](https://github.com/uudashr/gocognit) report per-function
-  complexity. `scree` uses the same cyclomatic definition and adds
+  complexity. `godebt` uses the same cyclomatic definition and adds
   aggregation, erosion, and comparison.
 - [dupl](https://github.com/mibk/dupl) finds Go clones over a syntax tree.
-  `scree` uses a normalized token stream so the same thresholds apply to
+  `godebt` uses a normalized token stream so the same thresholds apply to
   any construct.
 - [reporeport](https://github.com/JacobJNilsson/reporeport) shows many
-  repositories in a dashboard. It can run `scree` for its Go complexity
+  repositories in a dashboard. It can run `godebt` for its Go complexity
   numbers.

@@ -1,4 +1,4 @@
-scree 0.0.0-test  example.com/functions
+godebt 0.0.0-test  example.com/functions
 
 index  23/100  lower is better  scoring 0.2.0
        baseline 0  delta +23  new 4  resolved 0

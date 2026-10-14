@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/JacobJNilsson/scree/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/contract"
 )
 
 // The safeguard ids of spec 002.

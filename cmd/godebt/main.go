@@ -1,4 +1,4 @@
-// Command scree measures the structural debt of a Go module.
+// Command godebt measures the structural debt of a Go module.
 package main
 
 import "os"

@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/JacobJNilsson/scree/internal/complexity"
-	"github.com/JacobJNilsson/scree/internal/contract"
-	"github.com/JacobJNilsson/scree/internal/duplication"
+	"github.com/JacobJNilsson/godebt/internal/complexity"
+	"github.com/JacobJNilsson/godebt/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/duplication"
 )
 
 // maxListed bounds each list of the terminal summary.
@@ -35,7 +35,7 @@ func RenderCompared(w io.Writer, r *Report, base *Baseline) error {
 	if module == "" {
 		module = "(no go.mod)"
 	}
-	fmt.Fprintf(&b, "scree %s  %s\n\n", r.AnalyzerVersion, module)
+	fmt.Fprintf(&b, "godebt %s  %s\n\n", r.AnalyzerVersion, module)
 	renderIndex(&b, r, base)
 	b.WriteString("\n")
 	fmt.Fprintf(&b, tableRow, "", "files", "sloc", "funcs", "cc p50/p90/max", "eroded", "clones", "dup lines")

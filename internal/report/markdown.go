@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/JacobJNilsson/scree/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/contract"
 )
 
 // RenderMarkdown prints the report as a bounded Markdown summary.
@@ -21,7 +21,7 @@ func RenderMarkdownCompared(w io.Writer, r *Report, base *Baseline) error {
 	if module == "" {
 		module = "(no go.mod)"
 	}
-	fmt.Fprintf(&b, "# scree report\n\n%s, scree %s.\n\n", module, r.AnalyzerVersion)
+	fmt.Fprintf(&b, "# godebt report\n\n%s, godebt %s.\n\n", module, r.AnalyzerVersion)
 	fmt.Fprintf(&b, "The index is %d/100, lower is better, scoring %s", r.Score.Index, r.ScoringVersion)
 	if r.Score.Partial {
 		b.WriteString(", partial")

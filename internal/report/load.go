@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/JacobJNilsson/scree/internal/complexity"
-	"github.com/JacobJNilsson/scree/internal/contract"
-	"github.com/JacobJNilsson/scree/internal/duplication"
-	"github.com/JacobJNilsson/scree/internal/formula"
-	"github.com/JacobJNilsson/scree/internal/safeguards"
+	"github.com/JacobJNilsson/godebt/internal/complexity"
+	"github.com/JacobJNilsson/godebt/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/duplication"
+	"github.com/JacobJNilsson/godebt/internal/formula"
+	"github.com/JacobJNilsson/godebt/internal/safeguards"
 )
 
 // maxIndex is the highest index that the score of spec 002 can take.

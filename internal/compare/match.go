@@ -3,7 +3,7 @@ package compare
 import (
 	"encoding/json"
 
-	"github.com/JacobJNilsson/scree/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/contract"
 )
 
 // matchFindings splits the findings of two reports into new, resolved, and persistent, each sorted.

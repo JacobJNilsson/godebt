@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/JacobJNilsson/scree/internal/contract"
-	"github.com/JacobJNilsson/scree/internal/report"
+	"github.com/JacobJNilsson/godebt/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/report"
 )
 
 // Comparison is the result of Compare.
