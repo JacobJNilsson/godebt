@@ -63,7 +63,7 @@ func TestAuditOut(t *testing.T) {
 	}{
 		{"json by extension", nil, "r.json", "{\n"},
 		{"markdown by extension", nil, "r.md", "# godebt report\n"},
-		{"terminal by extension", nil, "r.txt", "godebt 0.4.0  "},
+		{"terminal by extension", nil, "r.txt", "godebt 0.5.0-dev  "},
 		{"flag over extension", []string{"--md"}, "flag.json", "# godebt report\n"},
 		{"quiet", []string{"--quiet", "--json"}, "quiet.out", "{\n"},
 	} {
