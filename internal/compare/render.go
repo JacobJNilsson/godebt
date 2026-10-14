@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/JacobJNilsson/scree/internal/contract"
-	"github.com/JacobJNilsson/scree/internal/report"
+	"github.com/JacobJNilsson/godebt/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/report"
 )
 
 // maxListed bounds the new and the resolved list of both renderers.
@@ -19,7 +19,7 @@ const unmeasured = "-"
 // Render prints the comparison as a fixed-width terminal summary.
 func Render(w io.Writer, c *Comparison) error {
 	var b strings.Builder
-	b.WriteString("scree compare\n\n")
+	b.WriteString("godebt compare\n\n")
 	fmt.Fprintf(&b, "before  %s\nafter   %s\n", summaryText(c.Before), summaryText(c.After))
 	if !c.Comparable {
 		fmt.Fprintf(&b, "\nrefused: %s\n", c.Refusal)
@@ -42,7 +42,7 @@ func Render(w io.Writer, c *Comparison) error {
 // RenderMarkdown prints the comparison as a bounded Markdown summary.
 func RenderMarkdown(w io.Writer, c *Comparison) error {
 	var b strings.Builder
-	b.WriteString("# scree comparison\n\n")
+	b.WriteString("# godebt comparison\n\n")
 	fmt.Fprintf(&b, "Before: %s.\nAfter: %s.\n", summaryText(c.Before), summaryText(c.After))
 	if !c.Comparable {
 		fmt.Fprintf(&b, "\nRefused: %s.\n", c.Refusal)

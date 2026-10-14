@@ -11,9 +11,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/JacobJNilsson/scree/internal/complexity"
-	"github.com/JacobJNilsson/scree/internal/contract"
-	"github.com/JacobJNilsson/scree/internal/duplication"
+	"github.com/JacobJNilsson/godebt/internal/complexity"
+	"github.com/JacobJNilsson/godebt/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/duplication"
 )
 
 func render(t *testing.T, r *Report) string {
@@ -50,7 +50,7 @@ func TestTerminalGolden(t *testing.T) {
 func TestTerminalHeaderAndIndex(t *testing.T) {
 	r := newReport(t, "functions")
 	got := lines(render(t, r))
-	if got[0] != "scree "+testAnalyzer+"  example.com/functions" || got[1] != "" {
+	if got[0] != "godebt "+testAnalyzer+"  example.com/functions" || got[1] != "" {
 		t.Errorf("header = %q, %q", got[0], got[1])
 	}
 	want := fmt.Sprintf("index  %d/100  lower is better  scoring %s", r.Score.Index, r.ScoringVersion)
@@ -61,7 +61,7 @@ func TestTerminalHeaderAndIndex(t *testing.T) {
 	if got[3] != contributions {
 		t.Errorf("contributions line = %q, want %q", got[3], contributions)
 	}
-	if out := render(t, &Report{}); !strings.HasPrefix(out, "scree   (no go.mod)\n\nindex  0/100  lower is better  scoring \n\n") {
+	if out := render(t, &Report{}); !strings.HasPrefix(out, "godebt   (no go.mod)\n\nindex  0/100  lower is better  scoring \n\n") {
 		t.Errorf("empty report:\n%s", out)
 	}
 }

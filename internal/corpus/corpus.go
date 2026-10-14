@@ -14,8 +14,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/JacobJNilsson/scree"
-	"github.com/JacobJNilsson/scree/internal/contract"
+	"github.com/JacobJNilsson/godebt"
+	"github.com/JacobJNilsson/godebt/internal/contract"
 )
 
 // The reasons one download can fail, so a caller and a test name one without reading a message.
@@ -114,9 +114,9 @@ type downloadJSON struct {
 	Error string
 }
 
-// audit measures one module directory with no configuration, so a scree.yaml in the module has no effect.
-func audit(ctx context.Context, dir string) (*scree.Report, error) {
-	return scree.Audit(ctx, dir, scree.Options{Config: &scree.Config{}})
+// audit measures one module directory with no configuration, so a godebt.yaml in the module has no effect.
+func audit(ctx context.Context, dir string) (*godebt.Report, error) {
+	return godebt.Audit(ctx, dir, godebt.Options{Config: &godebt.Config{}})
 }
 
 // parseListFile reads the corpus list from the file at path.
@@ -214,10 +214,10 @@ func measure(ctx context.Context, entries []entry, fetch downloadFunc, audit aud
 type downloadFunc func(ctx context.Context, e entry) (string, error)
 
 // auditFunc measures one module directory.
-type auditFunc func(ctx context.Context, dir string) (*scree.Report, error)
+type auditFunc func(ctx context.Context, dir string) (*godebt.Report, error)
 
 // row reads one report into a table row.
-func row(e entry, r *scree.Report) tableRow {
+func row(e entry, r *godebt.Report) tableRow {
 	out := tableRow{entry: e, index: r.Score.Index, completeness: string(r.Completeness)}
 	for _, c := range r.Score.Contributions {
 		switch c.Dimension {
@@ -235,7 +235,7 @@ func row(e entry, r *scree.Report) tableRow {
 }
 
 // metric returns the value of one counted metric, or 0 when the metric is not measured.
-func metric(r *scree.Report, id string) int {
+func metric(r *godebt.Report, id string) int {
 	m, ok := r.Metrics[id]
 	if !ok || m.State != contract.Complete {
 		return 0

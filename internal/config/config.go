@@ -1,4 +1,4 @@
-// Package config reads and validates scree.yaml, the configuration of spec 003.
+// Package config reads and validates godebt.yaml, the configuration of spec 003.
 package config
 
 import (
@@ -12,10 +12,10 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/JacobJNilsson/scree/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/contract"
 )
 
-// File is the content of one scree.yaml.
+// File is the content of one godebt.yaml.
 type File struct {
 	Exclude  []string `yaml:"exclude"`
 	Classify Classify `yaml:"classify"`
@@ -48,7 +48,7 @@ type Budget struct {
 
 // Default returns the path of the configuration file that an audit of root reads when the user names none.
 func Default(root string) string {
-	return filepath.Join(root, "scree.yaml")
+	return filepath.Join(root, "godebt.yaml")
 }
 
 // Load reads and validates the configuration file at path.

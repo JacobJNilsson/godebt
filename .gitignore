@@ -1,6 +1,6 @@
 .DS_Store
 coverage.out
 coverage.scoped.out
-/scree
-.scree-self.json
+/godebt
+.godebt-self.json
 /.claude/

@@ -11,14 +11,14 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/JacobJNilsson/scree"
-	"github.com/JacobJNilsson/scree/internal/report"
+	"github.com/JacobJNilsson/godebt"
+	"github.com/JacobJNilsson/godebt/internal/report"
 )
 
-// baselineFile is the default output of scree baseline, at the audited root.
-const baselineFile = "scree-baseline.json"
+// baselineFile is the default output of godebt baseline, at the audited root.
+const baselineFile = "godebt-baseline.json"
 
-// baselineFlags holds the parsed command line of scree baseline.
+// baselineFlags holds the parsed command line of godebt baseline.
 type baselineFlags struct {
 	root, out, config string
 	quiet, help       bool
@@ -37,7 +37,7 @@ func baselineCommand(args []string, stdout, stderr io.Writer) int {
 		return checkBaseline(f, stderr)
 	}
 	if err := writeBaseline(f); err != nil {
-		_, _ = fmt.Fprintf(stderr, "scree: %v\n", err)
+		_, _ = fmt.Fprintf(stderr, "godebt: %v\n", err)
 		return 1
 	}
 	if !f.quiet {
@@ -48,7 +48,7 @@ func baselineCommand(args []string, stdout, stderr io.Writer) int {
 
 func parseBaseline(args []string, stderr io.Writer) (baselineFlags, bool) {
 	f := baselineFlags{root: "."}
-	fs := flag.NewFlagSet("scree baseline", flag.ContinueOnError)
+	fs := flag.NewFlagSet("godebt baseline", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	fs.Usage = func() { _, _ = fmt.Fprintln(stderr, usage) }
 	wantHelp := helpFlags(fs)
@@ -80,7 +80,7 @@ func buildBaseline(f baselineFlags) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return scree.Baseline(context.Background(), f.root, scree.Options{Config: cfg, Omit: f.out})
+	return godebt.Baseline(context.Background(), f.root, godebt.Options{Config: cfg, Omit: f.out})
 }
 
 func writeBaseline(f baselineFlags) error {
@@ -95,7 +95,7 @@ func checkBaseline(f baselineFlags, stderr io.Writer) int {
 	committed, err := os.ReadFile(f.out)
 	if err == nil {
 		if _, loadErr := report.Load(bytes.NewReader(committed)); loadErr != nil {
-			_, _ = fmt.Fprintf(stderr, "scree: %s: %v\nregenerate it with: %s\n", f.out, loadErr, regenerateCommand(f))
+			_, _ = fmt.Fprintf(stderr, "godebt: %s: %v\nregenerate it with: %s\n", f.out, loadErr, regenerateCommand(f))
 			return 1
 		}
 	}
@@ -104,7 +104,7 @@ func checkBaseline(f baselineFlags, stderr io.Writer) int {
 		fresh, err = buildBaseline(f)
 	}
 	if err != nil {
-		_, _ = fmt.Fprintf(stderr, "scree: %v\n", err)
+		_, _ = fmt.Fprintf(stderr, "godebt: %v\n", err)
 		return 1
 	}
 	if bytes.Equal(committed, fresh) {
@@ -122,7 +122,7 @@ func explainStale(stderr io.Writer, committed, fresh []byte) {
 	before, errBefore := report.Load(bytes.NewReader(committed))
 	after, errAfter := report.Load(bytes.NewReader(fresh))
 	if errBefore == nil && errAfter == nil {
-		cmp := scree.Compare(before, after)
+		cmp := godebt.Compare(before, after)
 		if cmp.Comparable {
 			_, _ = fmt.Fprintf(stderr, "index %d to %d  new %d  resolved %d\n", cmp.Before.Index, cmp.After.Index, len(cmp.New), len(cmp.Resolved))
 		} else {
@@ -135,7 +135,7 @@ func explainStale(stderr io.Writer, committed, fresh []byte) {
 }
 
 func regenerateCommand(f baselineFlags) string {
-	cmd := "scree baseline " + shellQuote(f.root)
+	cmd := "godebt baseline " + shellQuote(f.root)
 	if f.config != "" {
 		cmd += " --config " + shellQuote(f.config)
 	}

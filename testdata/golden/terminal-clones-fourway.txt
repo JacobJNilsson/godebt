@@ -1,4 +1,4 @@
-scree 0.0.0-test  example.com/clones/fourway
+godebt 0.0.0-test  example.com/clones/fourway
 
 index  21/100  lower is better  scoring 0.2.0
        complexity-erosion 0  duplication 21

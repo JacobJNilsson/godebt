@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/JacobJNilsson/scree"
+	"github.com/JacobJNilsson/godebt"
 )
 
 // copyFixture copies a fixture module into a temporary directory, so a command can write beside its files.
@@ -43,14 +43,14 @@ func TestBaselineDefaultOut(t *testing.T) {
 	if code != 0 || stderr != "" {
 		t.Fatalf("exit %d, stderr %q", code, stderr)
 	}
-	file := filepath.Join(root, "scree-baseline.json")
-	if _, err := scree.LoadReport(file); err != nil {
+	file := filepath.Join(root, "godebt-baseline.json")
+	if _, err := godebt.LoadReport(file); err != nil {
 		t.Fatalf("default file: %v", err)
 	}
 	if code, _, stderr := runArgs(t, "audit", root, "--baseline", file, "--quiet"); code != 0 || strings.Contains(stderr, "baseline:") {
 		t.Errorf("audit: exit %d, stderr %q", code, stderr)
 	}
-	if code, stdout, stderr := runArgs(t, "compare", file, file); code != 0 || stderr != "" || !strings.Contains(stdout, "scree") {
+	if code, stdout, stderr := runArgs(t, "compare", file, file); code != 0 || stderr != "" || !strings.Contains(stdout, "godebt") {
 		t.Errorf("compare: exit %d, stdout %q, stderr %q", code, stdout, stderr)
 	}
 }
@@ -66,10 +66,10 @@ func TestBaselineDefaultPath(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = os.Chdir(previous) })
-	if code, _, stderr := runArgs(t, "baseline"); code != 0 || stderr != "wrote scree-baseline.json\n" {
+	if code, _, stderr := runArgs(t, "baseline"); code != 0 || stderr != "wrote godebt-baseline.json\n" {
 		t.Fatalf("exit %d, stderr %q", code, stderr)
 	}
-	if _, err := scree.LoadReport("scree-baseline.json"); err != nil {
+	if _, err := godebt.LoadReport("godebt-baseline.json"); err != nil {
 		t.Error(err)
 	}
 }
@@ -81,8 +81,8 @@ func TestBaselineUsageErrors(t *testing.T) {
 	}{
 		"two paths":    {[]string{"baseline", "a", "b"}, usage + "\n"},
 		"unknown flag": {[]string{"baseline", "-x"}, "flag provided but not defined: -x\n" + usage + "\n"},
-		"missing root": {[]string{"baseline", "/nonexistent-scree-path"}, "scree: stat /nonexistent-scree-path: no such file or directory\n"},
-		"bad config":   {[]string{"baseline", fixtures + "/empty", "--config", "/nonexistent-scree.yaml"}, ""},
+		"missing root": {[]string{"baseline", "/nonexistent-godebt-path"}, "godebt: stat /nonexistent-godebt-path: no such file or directory\n"},
+		"bad config":   {[]string{"baseline", fixtures + "/empty", "--config", "/nonexistent-godebt.yaml"}, ""},
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
@@ -96,7 +96,7 @@ func TestBaselineUsageErrors(t *testing.T) {
 
 func TestBaselineWriteError(t *testing.T) {
 	code, _, stderr := runArgs(t, "baseline", filepath.Join(fixtures, "empty"), "--out", filepath.Join(t.TempDir(), "no", "b.json"))
-	if code != 1 || !strings.HasPrefix(stderr, "scree: ") {
+	if code != 1 || !strings.HasPrefix(stderr, "godebt: ") {
 		t.Errorf("exit %d, stderr %q", code, stderr)
 	}
 }

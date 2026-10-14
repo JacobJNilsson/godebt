@@ -1,4 +1,4 @@
-module github.com/JacobJNilsson/scree
+module github.com/JacobJNilsson/godebt
 
 go 1.23.0
 

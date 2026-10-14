@@ -9,14 +9,14 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/JacobJNilsson/scree"
-	"github.com/JacobJNilsson/scree/internal/report"
+	"github.com/JacobJNilsson/godebt"
+	"github.com/JacobJNilsson/godebt/internal/report"
 )
 
 // exitPolicy is the exit code of a run whose policy failed or whose baseline comparison was refused.
 const exitPolicy = 2
 
-// auditFlags holds the parsed command line of scree audit.
+// auditFlags holds the parsed command line of godebt audit.
 type auditFlags struct {
 	root, out, config, baseline string
 	asJSON, asMarkdown, quiet   bool
@@ -25,12 +25,12 @@ type auditFlags struct {
 
 // auditResult is what gate needs after the command writes the report.
 type auditResult struct {
-	cmp    *scree.Comparison
-	policy scree.PolicyResult
+	cmp    *godebt.Comparison
+	policy godebt.PolicyResult
 }
 
 // renderer writes a report in one format, with the comparison against a baseline when there is one.
-type renderer func(io.Writer, *scree.Report, *scree.Comparison) error
+type renderer func(io.Writer, *godebt.Report, *godebt.Comparison) error
 
 func audit(args []string, stdout, stderr io.Writer) int {
 	f, ok := parseAudit(args, stderr)
@@ -42,7 +42,7 @@ func audit(args []string, stdout, stderr io.Writer) int {
 	}
 	result, err := auditTo(f, stdout)
 	if err != nil {
-		_, _ = fmt.Fprintf(stderr, "scree: %v\n", err)
+		_, _ = fmt.Fprintf(stderr, "godebt: %v\n", err)
 		return 1
 	}
 	if f.out != "" && !f.quiet {
@@ -53,7 +53,7 @@ func audit(args []string, stdout, stderr io.Writer) int {
 
 func parseAudit(args []string, stderr io.Writer) (auditFlags, bool) {
 	var f auditFlags
-	fs := flag.NewFlagSet("scree audit", flag.ContinueOnError)
+	fs := flag.NewFlagSet("godebt audit", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	fs.Usage = func() { _, _ = fmt.Fprintln(stderr, usage) }
 	wantHelp := helpFlags(fs)
@@ -88,41 +88,41 @@ func auditTo(f auditFlags, stdout io.Writer) (auditResult, error) {
 	if err != nil {
 		return auditResult{}, err
 	}
-	var baseline *scree.Report
+	var baseline *godebt.Report
 	if f.baseline != "" {
-		if baseline, err = scree.LoadReport(f.baseline); err != nil {
+		if baseline, err = godebt.LoadReport(f.baseline); err != nil {
 			return auditResult{}, err
 		}
 	}
-	r, err := scree.Audit(context.Background(), f.root, scree.Options{Config: cfg})
+	r, err := godebt.Audit(context.Background(), f.root, godebt.Options{Config: cfg})
 	if err != nil {
 		return auditResult{}, err
 	}
 	var result auditResult
 	if baseline != nil {
-		result.cmp = scree.Compare(baseline, r)
+		result.cmp = godebt.Compare(baseline, r)
 	}
 	if err := writeReport(f.out, stdout, render, r, result.cmp); err != nil {
 		return auditResult{}, err
 	}
-	var p scree.Policy
+	var p godebt.Policy
 	if cfg != nil {
 		p = cfg.Policy
 	}
-	result.policy = scree.EvaluateWithComparison(p, r, result.cmp)
+	result.policy = godebt.EvaluateWithComparison(p, r, result.cmp)
 	return result, nil
 }
 
-// loadConfig reads the named configuration, or scree.yaml at root when the user names none, and nil means no configuration.
-func loadConfig(named, root string) (*scree.Config, error) {
+// loadConfig reads the named configuration, or godebt.yaml at root when the user names none, and nil means no configuration.
+func loadConfig(named, root string) (*godebt.Config, error) {
 	if named != "" {
-		return scree.LoadConfig(named)
+		return godebt.LoadConfig(named)
 	}
-	return scree.LoadDefaultConfig(root)
+	return godebt.LoadDefaultConfig(root)
 }
 
 // writeReport writes the report to the file out, or to stdout when out is empty.
-func writeReport(out string, stdout io.Writer, render renderer, r *scree.Report, cmp *scree.Comparison) error {
+func writeReport(out string, stdout io.Writer, render renderer, r *godebt.Report, cmp *godebt.Comparison) error {
 	if out == "" {
 		return render(stdout, r, cmp)
 	}
@@ -173,16 +173,16 @@ func format(asJSON, asMarkdown bool, out string) (renderer, error) {
 	return renderTerminal, nil
 }
 
-func renderTerminal(w io.Writer, r *scree.Report, cmp *scree.Comparison) error {
+func renderTerminal(w io.Writer, r *godebt.Report, cmp *godebt.Comparison) error {
 	return report.RenderCompared(w, r, baselineOf(cmp))
 }
 
-func renderMarkdown(w io.Writer, r *scree.Report, cmp *scree.Comparison) error {
+func renderMarkdown(w io.Writer, r *godebt.Report, cmp *godebt.Comparison) error {
 	return report.RenderMarkdownCompared(w, r, baselineOf(cmp))
 }
 
 // baselineOf returns what the renderers print about a comparable baseline, and nil for no baseline or a refused one.
-func baselineOf(cmp *scree.Comparison) *report.Baseline {
+func baselineOf(cmp *godebt.Comparison) *report.Baseline {
 	if cmp == nil || !cmp.Comparable {
 		return nil
 	}
@@ -194,20 +194,20 @@ func jsonFor(out string) renderer {
 	if out == "" {
 		return writeJSON
 	}
-	return func(w io.Writer, r *scree.Report, _ *scree.Comparison) error {
+	return func(w io.Writer, r *godebt.Report, _ *godebt.Comparison) error {
 		return writeJSON(w, r, nil)
 	}
 }
 
 // writeJSON prints the same bytes as json.MarshalIndent with two spaces, plus a newline, and adds the comparison only with a baseline.
-func writeJSON(w io.Writer, r *scree.Report, cmp *scree.Comparison) error {
+func writeJSON(w io.Writer, r *godebt.Report, cmp *godebt.Comparison) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 	if cmp == nil {
 		return enc.Encode(r)
 	}
 	return enc.Encode(struct {
-		*scree.Report
-		Comparison *scree.Comparison `json:"comparison"`
+		*godebt.Report
+		Comparison *godebt.Comparison `json:"comparison"`
 	}{r, cmp})
 }

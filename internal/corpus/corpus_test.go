@@ -10,14 +10,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/JacobJNilsson/scree"
-	"github.com/JacobJNilsson/scree/internal/contract"
-	"github.com/JacobJNilsson/scree/internal/report"
+	"github.com/JacobJNilsson/godebt"
+	"github.com/JacobJNilsson/godebt/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/report"
 )
 
 // stubAudit returns a report with the metric values that a row needs.
-func stubAudit(index int) *scree.Report {
-	return &scree.Report{
+func stubAudit(index int) *godebt.Report {
+	return &godebt.Report{
 		Completeness: report.Complete,
 		Coverage:     report.Coverage{Production: report.Measured{SLOC: 900}},
 		Metrics: map[string]contract.Metric{
@@ -55,7 +55,7 @@ func TestMeasureRows(t *testing.T) {
 	dirs := map[string]string{"example.com/a@v1.0.0": "/cache/a"}
 	rows, err := measure(context.Background(), entries,
 		func(_ context.Context, e entry) (string, error) { return dirs[e.path+"@"+e.version], nil },
-		func(_ context.Context, _ string) (*scree.Report, error) { return stubAudit(17), nil })
+		func(_ context.Context, _ string) (*godebt.Report, error) { return stubAudit(17), nil })
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,7 +71,7 @@ func TestMeasureReportsAFailedModule(t *testing.T) {
 	if _, err := measure(context.Background(), entries, failing, nil); err == nil {
 		t.Error("a failed download gave no error")
 	}
-	measuring := func(context.Context, string) (*scree.Report, error) { return nil, context.Canceled }
+	measuring := func(context.Context, string) (*godebt.Report, error) { return nil, context.Canceled }
 	if _, err := measure(context.Background(), entries, func(context.Context, entry) (string, error) { return "/cache/a", nil }, measuring); err == nil {
 		t.Error("a failed audit gave no error")
 	}
@@ -110,7 +110,7 @@ func TestRunWritesTheTable(t *testing.T) {
 	}
 	outPath := filepath.Join(dir, "results.md")
 	fetch := func(context.Context, entry) (string, error) { return filepath.Join(dir, "cache"), nil }
-	measuring := func(context.Context, string) (*scree.Report, error) { return stubAudit(17), nil }
+	measuring := func(context.Context, string) (*godebt.Report, error) { return stubAudit(17), nil }
 	if err := run(context.Background(), listPath, outPath, fetch, measuring); err != nil {
 		t.Fatal(err)
 	}
@@ -141,7 +141,7 @@ func writeModule(t *testing.T, dir string) {
 func TestAuditReadsNoConfiguration(t *testing.T) {
 	dir := t.TempDir()
 	writeModule(t, dir)
-	if err := os.WriteFile(filepath.Join(dir, "scree.yaml"), []byte("exclude: [\"**\"]\n"), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "godebt.yaml"), []byte("exclude: [\"**\"]\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	r, err := audit(context.Background(), dir)
@@ -149,7 +149,7 @@ func TestAuditReadsNoConfiguration(t *testing.T) {
 		t.Fatal(err)
 	}
 	if r.Coverage.Production.Files != 1 {
-		t.Errorf("production files = %d, want 1, so the scree.yaml of the module was ignored", r.Coverage.Production.Files)
+		t.Errorf("production files = %d, want 1, so the godebt.yaml of the module was ignored", r.Coverage.Production.Files)
 	}
 }
 
@@ -172,7 +172,7 @@ func TestRunRejectsUnreadablePaths(t *testing.T) {
 		t.Fatal(err)
 	}
 	fetch := func(context.Context, entry) (string, error) { return dir, nil }
-	measuring := func(context.Context, string) (*scree.Report, error) { return stubAudit(17), nil }
+	measuring := func(context.Context, string) (*godebt.Report, error) { return stubAudit(17), nil }
 	if err := run(context.Background(), dir, filepath.Join(dir, "results.md"), fetch, measuring); err == nil {
 		t.Error("a directory as the list gave no error")
 	}
@@ -197,7 +197,7 @@ func TestRunReportsAFailedFetch(t *testing.T) {
 		t.Fatal(err)
 	}
 	fetch := func(context.Context, entry) (string, error) { return "", errors.New("no proxy") }
-	measuring := func(context.Context, string) (*scree.Report, error) { return stubAudit(17), nil }
+	measuring := func(context.Context, string) (*godebt.Report, error) { return stubAudit(17), nil }
 	if err := run(context.Background(), listPath, filepath.Join(dir, "results.md"), fetch, measuring); err == nil {
 		t.Error("a failed download gave no error")
 	}

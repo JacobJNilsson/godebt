@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/JacobJNilsson/scree/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/contract"
 )
 
 const (

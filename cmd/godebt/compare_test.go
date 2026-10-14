@@ -67,9 +67,9 @@ func TestCompareErrors(t *testing.T) {
 		"one report":     {[]string{"compare", good}, usage + "\n"},
 		"three reports":  {[]string{"compare", good, good, good}, usage + "\n"},
 		"unknown flag":   {[]string{"compare", good, good, "-x"}, "flag provided but not defined: -x\n" + usage + "\n"},
-		"missing before": {[]string{"compare", missing, good}, "scree: open " + missing + ": no such file or directory\n"},
-		"missing after":  {[]string{"compare", good, missing}, "scree: open " + missing + ": no such file or directory\n"},
-		"json and md":    {[]string{"compare", good, good, "--json", "--md"}, "scree: --json and --md are exclusive\n"},
+		"missing before": {[]string{"compare", missing, good}, "godebt: open " + missing + ": no such file or directory\n"},
+		"missing after":  {[]string{"compare", good, missing}, "godebt: open " + missing + ": no such file or directory\n"},
+		"json and md":    {[]string{"compare", good, good, "--json", "--md"}, "godebt: --json and --md are exclusive\n"},
 		"not a report":   {[]string{"compare", good, "compare_test.go"}, ""},
 	}
 	for name, tc := range cases {
@@ -98,7 +98,7 @@ func TestCompareHelp(t *testing.T) {
 func TestCompareWriteFailure(t *testing.T) {
 	good := filepath.Join(goldens, "report-functions.json")
 	var stderr bytes.Buffer
-	if code := run([]string{"compare", good, good}, failingWriter{}, &stderr); code != 1 || stderr.String() != "scree: write failed\n" {
+	if code := run([]string{"compare", good, good}, failingWriter{}, &stderr); code != 1 || stderr.String() != "godebt: write failed\n" {
 		t.Errorf("exit %d, stderr %q", code, stderr.String())
 	}
 }

@@ -1,4 +1,4 @@
-scree compare
+godebt compare
 
 before  index 0/100, scoring 0.2.0
 after   index 23/100, scoring 0.2.0

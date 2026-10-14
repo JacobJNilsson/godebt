@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/JacobJNilsson/scree/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/contract"
 )
 
 func renderBoth(t *testing.T, c *Comparison) (terminal, markdown string) {

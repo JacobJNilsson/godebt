@@ -5,7 +5,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/JacobJNilsson/scree/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/contract"
 )
 
 // TestMetricIDsMatchTheMeasures asserts that contract.MetricIDs lists exactly the ids that the measures emit.

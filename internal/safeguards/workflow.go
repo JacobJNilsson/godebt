@@ -6,7 +6,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/JacobJNilsson/scree/internal/discover"
+	"github.com/JacobJNilsson/godebt/internal/discover"
 )
 
 // Workflow is the trigger and step model of one GitHub Actions workflow file.

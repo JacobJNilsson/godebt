@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/JacobJNilsson/scree"
-	"github.com/JacobJNilsson/scree/internal/compare"
+	"github.com/JacobJNilsson/godebt"
+	"github.com/JacobJNilsson/godebt/internal/compare"
 )
 
 func compareCommand(args []string, stdout, stderr io.Writer) int {
-	fs := flag.NewFlagSet("scree compare", flag.ContinueOnError)
+	fs := flag.NewFlagSet("godebt compare", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	fs.Usage = func() { _, _ = fmt.Fprintln(stderr, usage) }
 	wantHelp := helpFlags(fs)
@@ -29,7 +29,7 @@ func compareCommand(args []string, stdout, stderr io.Writer) int {
 	}
 	cmp, err := compareFiles(paths[0], paths[1], *asJSON, *asMarkdown, stdout)
 	if err != nil {
-		_, _ = fmt.Fprintf(stderr, "scree: %v\n", err)
+		_, _ = fmt.Fprintf(stderr, "godebt: %v\n", err)
 		return 1
 	}
 	if !cmp.Comparable {
@@ -39,7 +39,7 @@ func compareCommand(args []string, stdout, stderr io.Writer) int {
 }
 
 // compareFiles loads both reports and prints their comparison.
-func compareFiles(beforePath, afterPath string, asJSON, asMarkdown bool, stdout io.Writer) (*scree.Comparison, error) {
+func compareFiles(beforePath, afterPath string, asJSON, asMarkdown bool, stdout io.Writer) (*godebt.Comparison, error) {
 	if asJSON && asMarkdown {
 		return nil, errExclusive
 	}
@@ -50,19 +50,19 @@ func compareFiles(beforePath, afterPath string, asJSON, asMarkdown bool, stdout 
 	case asMarkdown:
 		render = compare.RenderMarkdown
 	}
-	before, err := scree.LoadReport(beforePath)
+	before, err := godebt.LoadReport(beforePath)
 	if err != nil {
 		return nil, err
 	}
-	after, err := scree.LoadReport(afterPath)
+	after, err := godebt.LoadReport(afterPath)
 	if err != nil {
 		return nil, err
 	}
-	cmp := scree.Compare(before, after)
+	cmp := godebt.Compare(before, after)
 	return cmp, render(stdout, cmp)
 }
 
-func writeComparisonJSON(w io.Writer, cmp *scree.Comparison) error {
+func writeComparisonJSON(w io.Writer, cmp *godebt.Comparison) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 	return enc.Encode(cmp)

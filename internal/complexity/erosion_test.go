@@ -8,9 +8,9 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/JacobJNilsson/scree/internal/contract"
-	"github.com/JacobJNilsson/scree/internal/discover"
-	"github.com/JacobJNilsson/scree/internal/inventory"
+	"github.com/JacobJNilsson/godebt/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/discover"
+	"github.com/JacobJNilsson/godebt/internal/inventory"
 )
 
 // checkNear compares a metric to a tolerance, because the expected sums below add their terms in another order.

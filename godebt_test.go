@@ -1,4 +1,4 @@
-package scree
+package godebt
 
 import (
 	"bytes"
@@ -12,10 +12,10 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/JacobJNilsson/scree/internal/config"
-	"github.com/JacobJNilsson/scree/internal/contract"
-	"github.com/JacobJNilsson/scree/internal/formula"
-	"github.com/JacobJNilsson/scree/internal/report"
+	"github.com/JacobJNilsson/godebt/internal/config"
+	"github.com/JacobJNilsson/godebt/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/formula"
+	"github.com/JacobJNilsson/godebt/internal/report"
 )
 
 // TestAuditMergesMeasures asserts that a report holds the metrics and findings of both measures in the order of spec 002.
@@ -104,7 +104,7 @@ func TestAuditErrors(t *testing.T) {
 	if _, err := Audit(ctx, filepath.Join(t.TempDir(), "missing"), Options{}); !errors.Is(err, fs.ErrNotExist) {
 		t.Errorf("missing root: error %v, want fs.ErrNotExist", err)
 	}
-	if _, err := Audit(ctx, "scree.go", Options{}); err == nil {
+	if _, err := Audit(ctx, "godebt.go", Options{}); err == nil {
 		t.Error("a file as root gave no error")
 	}
 	cancelled, cancel := context.WithCancel(ctx)
@@ -214,7 +214,7 @@ func TestBaselineErrors(t *testing.T) {
 // TestAuditOmit asserts that Options.Omit keeps the output file out of the coverage counts.
 func TestAuditOmit(t *testing.T) {
 	root := fixtureCopy(t, "functions")
-	out := filepath.Join(root, "scree-baseline.json")
+	out := filepath.Join(root, "godebt-baseline.json")
 	if err := os.WriteFile(out, []byte("{}\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}

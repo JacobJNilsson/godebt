@@ -3,9 +3,9 @@
 ## Layout
 
 ```
-scree/
-├─ scree.go               # public package: Audit, Compare, Evaluate, LoadReport, LoadConfig
-├─ cmd/scree/             # flag parsing and dispatch only
+godebt/
+├─ godebt.go               # public package: Audit, Compare, Evaluate, LoadReport, LoadConfig
+├─ cmd/godebt/             # flag parsing and dispatch only
 ├─ internal/
 │  ├─ discover/           # walk, .gitignore, source-set classification
 │  ├─ inventory/          # one parse per file; functions with identity, CC, nesting, SLOC
@@ -14,7 +14,7 @@ scree/
 │  ├─ contract/           # shared metric, finding, and report types; imports nothing internal
 │  ├─ formula/            # every constant and the scoring function
 │  ├─ report/             # report assembly, JSON round-trip, terminal and Markdown renderers
-│  ├─ config/             # scree.yaml load and strict validation
+│  ├─ config/             # godebt.yaml load and strict validation
 │  ├─ compare/            # report comparison
 │  ├─ policy/             # policy evaluation over a report and a comparison
 │  ├─ safeguards/         # configuration inspection
@@ -63,12 +63,12 @@ package.
   value is reported.
 - The coverage gate is the same two-tier `make check` and `make check-scoped`
   as `anti-slop-go`, with `COVERAGE_MIN` at 90.
-- `make selfcheck` runs `scree audit .` over this repository and is part of
+- `make selfcheck` runs `godebt audit .` over this repository and is part of
   `make check` from step 1 on. Each step extends what the self-audit prints.
   From step 1 it must exit 0. From step 4 a rise in the repository's own
-  index above the committed budget in `scree.yaml` fails the gate.
-  `make selfcheck` also runs `scree baseline --check` against the committed
-  `scree-baseline.json`, so a change that alters a measurement must
+  index above the committed budget in `godebt.yaml` fails the gate.
+  `make selfcheck` also runs `godebt baseline --check` against the committed
+  `godebt-baseline.json`, so a change that alters a measurement must
   regenerate that file.
 - No private repository names or identifiers in this repository. Corpus
   entries are public modules at pinned revisions.
@@ -85,7 +85,7 @@ pass, draft PR.
 1. Discover and inventory. Walk, `.gitignore`, source sets, coverage counts,
    parse, functions with identity, CC, nesting, SLOC. Golden tests over
    fixture modules including build-tag variants and nested `go.mod`.
-   `scree.Audit` and `scree audit <path> [--json]` exist from this step and
+   `godebt.Audit` and `godebt audit <path> [--json]` exist from this step and
    print the provisional summary: repo, coverage, function counts, parse
    errors. `make selfcheck` runs it over this repository.
 2. Complexity and erosion. Distributions, mass, eroded share and count,
@@ -98,8 +98,8 @@ pass, draft PR.
    with apportionment, terminal and Markdown renderers, golden reports over
    five fixture repositories: clean, sloppy, incomplete, function-free,
    mixed-language.
-5. Config, compare, policy, CLI. `scree.yaml`, `Compare`, `Evaluate`,
-   `cmd/scree` with exit codes, CLI-to-package parity test.
+5. Config, compare, policy, CLI. `godebt.yaml`, `Compare`, `Evaluate`,
+   `cmd/godebt` with exit codes, CLI-to-package parity test.
 6. Safeguards. Every surface in 002, evidence levels, broken references.
 7. Corpus and calibration, as the next section states. Tag `v0.1.0`
    after this step.

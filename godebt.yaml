@@ -1,0 +1,3 @@
+# The self-audit policy, which make selfcheck enforces through the exit code of godebt audit.
+policy:
+  maxIndex: 12

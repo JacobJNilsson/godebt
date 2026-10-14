@@ -1,4 +1,4 @@
-package scree
+package godebt
 
 import (
 	"context"
@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/JacobJNilsson/scree/internal/config"
-	"github.com/JacobJNilsson/scree/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/config"
+	"github.com/JacobJNilsson/godebt/internal/contract"
 )
 
 // fixtureCopy copies a fixture module into a temporary directory, so a test can add or remove files.
@@ -35,7 +35,7 @@ func audit(t *testing.T, root string) *Report {
 func TestAuditReadsDefaultConfig(t *testing.T) {
 	root := fixtureCopy(t, "functions")
 	plain := audit(t, root)
-	if err := os.WriteFile(filepath.Join(root, "scree.yaml"), []byte("exclude: [\"sub/**\"]\n"), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(root, "godebt.yaml"), []byte("exclude: [\"sub/**\"]\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	configured := audit(t, root)
@@ -49,13 +49,13 @@ func TestAuditReadsDefaultConfig(t *testing.T) {
 		t.Errorf("digest %s, want %s", configured.ConfigDigest, want)
 	}
 	if configured.ConfigDigest == plain.ConfigDigest {
-		t.Error("the scree.yaml did not change the digest")
+		t.Error("the godebt.yaml did not change the digest")
 	}
 }
 
 func TestAuditRejectsInvalidDefaultConfig(t *testing.T) {
 	root := fixtureCopy(t, "functions")
-	if err := os.WriteFile(filepath.Join(root, "scree.yaml"), []byte("scoring: {}\n"), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(root, "godebt.yaml"), []byte("scoring: {}\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	var fe *contract.FieldError
@@ -77,7 +77,7 @@ func TestLoadConfig(t *testing.T) {
 		t.Errorf("missing named config: error %v, want fs.ErrNotExist", err)
 	}
 	if cfg, err := LoadDefaultConfig(t.TempDir()); cfg != nil || err != nil {
-		t.Errorf("LoadDefaultConfig without scree.yaml = %+v, %v, want nil, nil", cfg, err)
+		t.Errorf("LoadDefaultConfig without godebt.yaml = %+v, %v, want nil, nil", cfg, err)
 	}
 }
 
@@ -92,7 +92,7 @@ func TestLoadReport(t *testing.T) {
 	if _, err := LoadReport(filepath.Join(t.TempDir(), "absent.json")); !errors.Is(err, fs.ErrNotExist) {
 		t.Errorf("missing report: error %v, want fs.ErrNotExist", err)
 	}
-	if _, err := LoadReport("scree.go"); err == nil {
+	if _, err := LoadReport("godebt.go"); err == nil {
 		t.Error("a Go file loaded as a report")
 	}
 }

@@ -33,13 +33,13 @@ Each file belongs to exactly one source set. The first matching rule wins.
 1. `testdata`: any path with a `testdata` directory segment. The Go tool
    ignores these directories, and their contents are fixtures, not code.
 2. `vendored`: any path with a `vendor` directory segment.
-3. `excluded`: a path matched by an `exclude` pattern in `scree.yaml`, or
+3. `excluded`: a path matched by an `exclude` pattern in `godebt.yaml`, or
    with a directory segment or file name that starts with `.` or `_`. The
    Go tool ignores such files and directories.
 4. `unsupported`: a file whose name does not end in `.go`.
 5. `generated`: a `.go` file that `ast.IsGenerated` recognises.
 6. `test`: a file whose name ends in `_test.go`, or a `.go` file matched by
-   a `classify.test` pattern in `scree.yaml`.
+   a `classify.test` pattern in `godebt.yaml`.
 7. `production`: every other `.go` file.
 
 Only `production` and `test` are parsed and measured. They are measured

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/JacobJNilsson/scree/internal/formula"
+	"github.com/JacobJNilsson/godebt/internal/formula"
 )
 
 // baselinedCopy copies the sets fixture and writes its baseline at the default path.
@@ -61,7 +61,7 @@ func TestBaselineCheckStaleByCoverage(t *testing.T) {
 		t.Fatal(err)
 	}
 	code, stdout, stderr := runArgs(t, "baseline", root, "--check")
-	head := "baseline has not been updated: " + file + "\nregenerate it with: scree baseline " + root + "\n"
+	head := "baseline has not been updated: " + file + "\nregenerate it with: godebt baseline " + root + "\n"
 	if code != 2 || stdout != "" || !strings.HasPrefix(stderr, head) || stderr[len(head):] != "index 0 to 0  new 0  resolved 0\nchanged: coverage.unsupported.files 2 to 3\n" {
 		t.Errorf("exit %d, stdout %q, stderr %q", code, stdout, stderr)
 	}
@@ -93,7 +93,7 @@ func TestBaselineCheckStaleByVersion(t *testing.T) {
 		t.Fatal(err)
 	}
 	code, _, stderr := runArgs(t, "baseline", root, "--check")
-	head := "baseline has not been updated: " + file + "\nregenerate it with: scree baseline " + root + "\n"
+	head := "baseline has not been updated: " + file + "\nregenerate it with: godebt baseline " + root + "\n"
 	if code != 2 || !strings.HasPrefix(stderr, head) || !strings.Contains(stderr, "refused: scoringVersion differs") || !strings.HasSuffix(stderr, "changed: scoringVersion \"0.1.0\" to \""+formula.ScoringVersion+"\"\n") {
 		t.Errorf("exit %d, stderr %q", code, stderr)
 	}
@@ -113,7 +113,7 @@ func TestBaselineCheckRegenerateCommand(t *testing.T) {
 		t.Fatal(err)
 	}
 	_, _, stderr := runArgs(t, "baseline", root, "--check", "--out", out, "--config", cfg)
-	if !strings.Contains(stderr, "regenerate it with: scree baseline "+root+" --config "+cfg+" --out "+out+"\n") {
+	if !strings.Contains(stderr, "regenerate it with: godebt baseline "+root+" --config "+cfg+" --out "+out+"\n") {
 		t.Errorf("stderr = %q", stderr)
 	}
 }
@@ -122,14 +122,14 @@ func TestBaselineCheckUnusableFile(t *testing.T) {
 	root := copyFixture(t, "sets")
 	file := filepath.Join(root, baselineFile)
 	code, stdout, stderr := runArgs(t, "baseline", root, "--check")
-	if code != 1 || stdout != "" || !strings.HasPrefix(stderr, "scree: open "+file+": ") {
+	if code != 1 || stdout != "" || !strings.HasPrefix(stderr, "godebt: open "+file+": ") {
 		t.Errorf("missing: exit %d, stderr %q", code, stderr)
 	}
 	if err := os.WriteFile(file, []byte("{}\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	code, _, stderr = runArgs(t, "baseline", root, "--check")
-	if code != 1 || !strings.Contains(stderr, file) || !strings.Contains(stderr, "regenerate it with: scree baseline "+root+"\n") {
+	if code != 1 || !strings.Contains(stderr, file) || !strings.Contains(stderr, "regenerate it with: godebt baseline "+root+"\n") {
 		t.Errorf("invalid: exit %d, stderr %q", code, stderr)
 	}
 	schema := strings.Replace(string(committedBaseline(t, root)), `"schemaVersion": "1.0.0"`, `"schemaVersion": "9.0.0"`, 1)
@@ -146,8 +146,8 @@ func TestBaselineCheckUnusableFile(t *testing.T) {
 
 func TestBaselineCheckAuditError(t *testing.T) {
 	_, file := baselinedCopy(t)
-	code, _, stderr := runArgs(t, "baseline", "/nonexistent-scree-path", "--check", "--out", file)
-	if code != 1 || !strings.HasPrefix(stderr, "scree: stat ") {
+	code, _, stderr := runArgs(t, "baseline", "/nonexistent-godebt-path", "--check", "--out", file)
+	if code != 1 || !strings.HasPrefix(stderr, "godebt: stat ") {
 		t.Errorf("exit %d, stderr %q", code, stderr)
 	}
 }
@@ -164,7 +164,7 @@ func TestBaselineCheckQuotesRegenerateCommand(t *testing.T) {
 		t.Fatal(err)
 	}
 	_, _, stderr := runArgs(t, "baseline", root, "--check")
-	if !strings.Contains(stderr, "regenerate it with: scree baseline '"+root+"'\n") {
+	if !strings.Contains(stderr, "regenerate it with: godebt baseline '"+root+"'\n") {
 		t.Errorf("stderr = %q", stderr)
 	}
 	if got := shellQuote("it's.yaml"); got != `'it'\''s.yaml'` {

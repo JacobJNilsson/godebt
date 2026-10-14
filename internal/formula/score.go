@@ -4,7 +4,7 @@ import (
 	"math"
 	"sort"
 
-	"github.com/JacobJNilsson/scree/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/contract"
 )
 
 // DirectionLowerIsBetter is the only direction of the index.

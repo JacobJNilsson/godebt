@@ -1,10 +1,10 @@
-scree
+godebt
 Copyright (c) 2026 Jacob Nilsson
 
 This project is influenced by trellis (https://github.com/jayminwest/trellis),
 Copyright (c) 2026 Jaymin West, released under the MIT License. The metric
 definitions, scoring shape, and report contract derive from that work.
-Where scree ports trellis code directly, the file says so in a comment, and
+Where godebt ports trellis code directly, the file says so in a comment, and
 the trellis license below applies to that code.
 
 MIT License

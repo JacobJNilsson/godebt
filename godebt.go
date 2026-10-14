@@ -1,5 +1,5 @@
-// Package scree measures the structural debt of a Go module.
-package scree
+// Package godebt measures the structural debt of a Go module.
+package godebt
 
 import (
 	"bytes"
@@ -9,25 +9,25 @@ import (
 	"os"
 	"time"
 
-	"github.com/JacobJNilsson/scree/internal/compare"
-	"github.com/JacobJNilsson/scree/internal/complexity"
-	"github.com/JacobJNilsson/scree/internal/config"
-	"github.com/JacobJNilsson/scree/internal/contract"
-	"github.com/JacobJNilsson/scree/internal/discover"
-	"github.com/JacobJNilsson/scree/internal/duplication"
-	"github.com/JacobJNilsson/scree/internal/inventory"
-	"github.com/JacobJNilsson/scree/internal/policy"
-	"github.com/JacobJNilsson/scree/internal/report"
-	"github.com/JacobJNilsson/scree/internal/safeguards"
+	"github.com/JacobJNilsson/godebt/internal/compare"
+	"github.com/JacobJNilsson/godebt/internal/complexity"
+	"github.com/JacobJNilsson/godebt/internal/config"
+	"github.com/JacobJNilsson/godebt/internal/contract"
+	"github.com/JacobJNilsson/godebt/internal/discover"
+	"github.com/JacobJNilsson/godebt/internal/duplication"
+	"github.com/JacobJNilsson/godebt/internal/inventory"
+	"github.com/JacobJNilsson/godebt/internal/policy"
+	"github.com/JacobJNilsson/godebt/internal/report"
+	"github.com/JacobJNilsson/godebt/internal/safeguards"
 )
 
-// Version is the scree release that produced a report.
+// Version is the godebt release that produced a report.
 const Version = "0.4.0-dev"
 
 // Report is the result of one audit.
 type Report = report.Report
 
-// Config is the content of one scree.yaml.
+// Config is the content of one godebt.yaml.
 type Config = config.File
 
 // Policy is the policy block of a Config.
@@ -44,7 +44,7 @@ type PolicyResult = policy.Result
 
 // Options holds the configuration of an audit.
 type Options struct {
-	// Config is the configuration of the audit, and nil reads scree.yaml at the audited root when it exists.
+	// Config is the configuration of the audit, and nil reads godebt.yaml at the audited root when it exists.
 	Config *Config
 	// Omit is the path of one file that the audit leaves out of the walk and the coverage counts, and "" omits none.
 	Omit string
@@ -104,7 +104,7 @@ func LoadConfig(path string) (*Config, error) {
 	return config.Load(path)
 }
 
-// LoadDefaultConfig reads scree.yaml at root, and returns nil and no error when root has none.
+// LoadDefaultConfig reads godebt.yaml at root, and returns nil and no error when root has none.
 func LoadDefaultConfig(root string) (*Config, error) {
 	return config.LoadDefault(root)
 }
