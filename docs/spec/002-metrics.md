@@ -197,8 +197,16 @@ Duplication runs per source set over a normalized token stream.
 
 Token stream. Each measured file is scanned with `go/scanner`. Comments are
 dropped. The package clause and every import declaration are dropped, so
-files never match on their import blocks. Every other token becomes one
-symbol:
+files never match on their import blocks. A top-level `var` or `const`
+declaration is dropped when every value in it is a literal or a call of a
+named function whose arguments are all literals, such as
+`errors.New("not found")` or `newPool()`. A named function is an identifier
+or a selector of identifiers. Two such blocks share their tokens, but a
+shared helper would hide the names they declare. The whole declaration stays
+when one value is anything else, such as `-1`, `"a" + "b"`, or a function
+literal, or when one spec has no value. A dropped declaration ends a token
+run like the end of a file, so no clone spans it. Every other token becomes
+one symbol:
 
 - an identifier becomes the symbol `IDENT`
 - an integer, float, imaginary, rune, or string literal becomes one symbol
