@@ -10,7 +10,7 @@ Three versions travel with every report:
 - `schemaVersion`: the shape of this document. Starts at `1.0.0`.
 - `analyzerVersion`: the `godebt` release that produced the measurements.
   Equals the module version.
-- `scoringVersion`: the formula constants. It is `0.2.0`, the version the
+- `scoringVersion`: the formula constants. It is `0.3.0`, the version the
   calibration in [004-implementation.md](004-implementation.md) checked. A
   change to any constant raises it.
 
@@ -40,7 +40,7 @@ reaches the output.
 {
   "schemaVersion": "1.0.0",
   "analyzerVersion": "0.1.0",
-  "scoringVersion": "0.2.0",
+  "scoringVersion": "0.3.0",
   "repo": { "root": "/abs/path", "module": "github.com/x/y" },   // module "" when no go.mod
   "configDigest": "sha256:…",                                      // of the normalized effective config
   "coverage": {
