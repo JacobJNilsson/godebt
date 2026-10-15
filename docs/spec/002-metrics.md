@@ -161,6 +161,21 @@ a small tangled one.
 - `erosion.eroded-share`: sum of mass over eroded functions divided by
   `erosion.mass`. A set with zero mass reports `not-applicable` for the share
   and `0` for the count.
+- Function excess is `(CC − ErosionCCThreshold) × sqrt(SLOC)` for an eroded
+  function and `0` for any other function. Excess grows with every branch
+  above the threshold, so a function at CC 11 has a small excess and a
+  function at CC 30 a large one.
+- `erosion.excess-mass`: sum of excess over all functions in the set. `0`,
+  `complete` on an empty set.
+- `erosion.excess-share`: `erosion.excess-mass` divided by `erosion.mass`. A
+  set with zero mass reports `not-applicable`.
+
+The score reads the two excess metrics. `erosion.eroded-count` and
+`erosion.eroded-share` stay in the report and never enter the index. A
+function that drops from CC 11 to CC 10 leaves the eroded count and moves its
+whole mass out of the eroded share. The same step removes only `sqrt(SLOC)`
+from the excess, so the excess falls by the same amount for each removed
+branch.
 
 Every floating-point sum in a report adds its terms in ascending numeric
 order, with ties in any order. The result then depends only on the values,
@@ -295,16 +310,24 @@ coverage, and safeguards never enter it.
 
 | dimension          | weight | terms                                                                                  |
 | ------------------ | ------ | -------------------------------------------------------------------------------------- |
-| complexity-erosion | 0.6    | `erosion.eroded-share` saturates at 0.8 (share 0.5); `erosion.eroded-count` count scale 20 (share 0.5) |
+| complexity-erosion | 0.6    | `erosion.excess-share` saturates at 0.55 (share 0.5); `erosion.excess-mass` count scale 700 (share 0.5) |
 | duplication        | 0.4    | `duplication.density` saturates at 0.3 (share 0.5); `duplication.groups` count scale 15 (share 0.5) |
 
 - A saturating term scores `100 × min(1, value / saturatesAt)`.
   The saturation points sit at the largest share and density in the corpus
   of [004-implementation.md](004-implementation.md), so the share terms
   still separate large modules.
-- A count term scores `100 × b / (1 + b)` where `b = ln(1 + count / scale)`.
-  It has no finite cap and no size denominator, so a large clean addition
-  cannot erase a hotspot count.
+- A count term scores `100 × b / (1 + b)` where `b = ln(1 + value / scale)`.
+  Its value is a count or a mass. It has no finite cap and no size
+  denominator, so a large clean addition cannot erase a hotspot.
+- The count terms exist because the share terms divide debt by the size of
+  the code. A module could lower a share term by adding clean code, and a
+  large module with many hotspots would score as low as a small clean one.
+  The count terms keep rising with the debt itself. A repository therefore
+  compares with its own baseline, not with a repository of another size.
+- The excess-mass scale is 20 times the median excess of an eroded function
+  in the corpus, which is 34. The excess-share saturation point sits just
+  above the largest excess share in the corpus, 0.532.
 - A dimension scores the share-weighted sum of its terms, 0–100.
 - `index = clamp(floor(Σ weight × dimension + 0.5), 0, 100)`. Round half up
   over IEEE-754 doubles.

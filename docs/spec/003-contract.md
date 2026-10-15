@@ -55,22 +55,22 @@ reaches the output.
   },
   "completeness": "complete",            // complete | incomplete, rolled up over production metrics
   "metrics": {
-    "erosion.eroded-share.production": {
+    "erosion.excess-share.production": {
       "state": "complete",               // complete | incomplete | not-applicable
-      "value": 0.18, "unit": "ratio",
-      "numerator": 412.5, "denominator": 2291.7,
+      "value": 0.05, "unit": "ratio",
+      "numerator": 114.6, "denominator": 2291.7,
       "detail": {}
     }
   },
   "score": {
-    "index": 10,
+    "index": 7,
     "direction": "lower-is-better",
     "partial": false,
     "contributions": [
-      { "dimension": "complexity-erosion", "points": 10, "weight": 0.6,
+      { "dimension": "complexity-erosion", "points": 7, "weight": 0.6,
         "terms": [
-          { "metricId": "erosion.eroded-share.production", "state": "complete", "value": 0.18, "saturatesAt": 0.8, "score": 22.5 },
-          { "metricId": "erosion.eroded-count.production", "state": "complete", "value": 3, "countScale": 20, "score": 12.26 }
+          { "metricId": "erosion.excess-share.production", "state": "complete", "value": 0.05, "saturatesAt": 0.55, "score": 9.09 },
+          { "metricId": "erosion.excess-mass.production", "state": "complete", "value": 114.6, "countScale": 700, "score": 13.17 }
         ] },
       { "dimension": "duplication", "points": 0, "weight": 0.4,
         "terms": [

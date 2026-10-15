@@ -129,6 +129,8 @@ asserts the direction of the index.
 | `split-function` | A function with cc above 10 becomes functions with cc 10 or less. | lower |
 | `add-clone` | A function gets a copy in another file. | higher |
 | `add-branches` | A function with cc 10 or less gets branches to cc above 10. | higher |
+| `reduce-branches` | A function with cc 20 loses branches and keeps cc above 10. | lower |
+| `trim-to-threshold` | The module holds a function at cc 11 and a function at cc 20. The cc 11 function moves one branch into a new helper with one caller, so both have cc 10 or less. | near |
 | `rename` | Every identifier and literal gets a new name or value. | equal |
 | `move` | A function moves to a file in another package. | equal |
 | `tests-only` | A test file with a clone group and an eroded function appears. | equal |
@@ -150,7 +152,8 @@ downloads each module through the Go module proxy and audits the module
 directory with no configuration. The audit sees the files of the module
 zip. `make corpus` writes `corpus/results.md` with one row per module:
 path, version, index, the two contributions, production code lines,
-production functions, eroded functions, clone groups, and completeness.
+production functions, eroded functions, excess mass, clone groups, and
+completeness.
 The repository commits that file. `make corpus` needs the network, so
 `make check` does not run it.
 
