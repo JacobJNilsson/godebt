@@ -20,7 +20,7 @@ func Score(metrics map[string]contract.Metric) contract.Score {
 	for i, d := range Dimensions {
 		terms, dimension, partial := scoreDimension(d, metrics)
 		out.Partial = out.Partial || partial
-		weighted[i] = d.Weight * dimension
+		weighted[i] = float64(d.Weight * dimension)
 		out.Contributions[i] = contract.Contribution{Dimension: d.ID, Weight: d.Weight, Terms: terms}
 	}
 	total := sum(append([]float64(nil), weighted...))
@@ -58,7 +58,7 @@ func scoreDimension(d Dimension, metrics map[string]contract.Metric) ([]contract
 			term.Score, partial = fullScore, true
 		}
 		terms[i] = term
-		parts[i] = t.Share * term.Score
+		parts[i] = float64(t.Share * term.Score)
 	}
 	if partial {
 		return terms, fullScore, true
@@ -71,7 +71,7 @@ func termScore(t Term, value float64) float64 {
 	if t.SaturatesAt > 0 {
 		return fullScore * min(1, value/t.SaturatesAt)
 	}
-	b := math.Log(1 + value/t.CountScale)
+	b := naturalLog(1 + value/t.CountScale)
 	return fullScore * b / (1 + b)
 }
 
