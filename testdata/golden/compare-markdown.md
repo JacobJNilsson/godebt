@@ -14,7 +14,7 @@ The index delta is +23.
 | complexity.cc.p50.test | 2 | 2 | 0 |
 | complexity.cc.p90.production | 1 | 11 | +10 |
 | complexity.cc.p90.test | 2 | 12 | +10 |
-| complexity.functions.production | 2 | 23 | +21 |
+| complexity.functions.production | 5 | 23 | +18 |
 | complexity.functions.test | 1 | 3 | +2 |
 | duplication.density.production | 0 | 0 | 0 |
 | duplication.density.test | 0 | 0 | 0 |
@@ -26,7 +26,7 @@ The index delta is +23.
 | erosion.eroded-count.test | 0 | 1 | +1 |
 | erosion.eroded-share.production | 0 | 0.5179 | +0.5179 |
 | erosion.eroded-share.test | 0 | 0.7713 | +0.7713 |
-| erosion.mass.production | 2 | 222.1 | +220.1 |
+| erosion.mass.production | 5 | 222.1 | +217.1 |
 | erosion.mass.test | 4.472 | 31.12 | +26.65 |
 
 ## New findings

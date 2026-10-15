@@ -9,8 +9,8 @@
   "configDigest": "sha256:4c50bb6e6bc006a5b9243824f1685a5379c85d70169e618006d2edfe7d505d66",
   "coverage": {
     "production": {
-      "files": 2,
-      "sloc": 4
+      "files": 5,
+      "sloc": 10
     },
     "test": {
       "files": 1,
@@ -75,7 +75,7 @@
     },
     "complexity.functions.production": {
       "state": "complete",
-      "value": 2,
+      "value": 5,
       "unit": "count",
       "detail": {}
     },
@@ -90,7 +90,7 @@
       "value": 0,
       "unit": "ratio",
       "numerator": 0,
-      "denominator": 4,
+      "denominator": 10,
       "detail": {}
     },
     "duplication.density.test": {
@@ -142,7 +142,7 @@
       "value": 0,
       "unit": "ratio",
       "numerator": 0,
-      "denominator": 2,
+      "denominator": 5,
       "detail": {}
     },
     "erosion.eroded-share.test": {
@@ -155,7 +155,7 @@
     },
     "erosion.mass.production": {
       "state": "complete",
-      "value": 2,
+      "value": 5,
       "unit": "mass",
       "detail": {}
     },

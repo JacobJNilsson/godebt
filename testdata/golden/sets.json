@@ -36,6 +36,10 @@
         "set": "test"
       },
       {
+        "path": "build/out.go",
+        "set": "production"
+      },
+      {
         "path": "gen.go",
         "set": "generated"
       },
@@ -44,11 +48,19 @@
         "set": "unsupported"
       },
       {
+        "path": "ignored.go",
+        "set": "production"
+      },
+      {
         "path": "nested/.gitignore",
         "set": "excluded"
       },
       {
         "path": "nested/keep.go",
+        "set": "production"
+      },
+      {
+        "path": "nested/skip.go",
         "set": "production"
       },
       {
@@ -72,7 +84,7 @@
         "files": 1
       },
       "production": {
-        "files": 2
+        "files": 5
       },
       "test": {
         "files": 1
@@ -112,6 +124,28 @@
       "sloc": 5
     },
     {
+      "identity": "build:Out",
+      "ambiguous": false,
+      "path": "build/out.go",
+      "set": "production",
+      "startLine": 3,
+      "endLine": 3,
+      "cc": 1,
+      "nesting": 0,
+      "sloc": 1
+    },
+    {
+      "identity": ".:ignored",
+      "ambiguous": false,
+      "path": "ignored.go",
+      "set": "production",
+      "startLine": 3,
+      "endLine": 3,
+      "cc": 1,
+      "nesting": 0,
+      "sloc": 1
+    },
+    {
       "identity": "nested:Keep",
       "ambiguous": false,
       "path": "nested/keep.go",
@@ -121,10 +155,21 @@
       "cc": 1,
       "nesting": 0,
       "sloc": 1
+    },
+    {
+      "identity": "nested:skip",
+      "ambiguous": false,
+      "path": "nested/skip.go",
+      "set": "production",
+      "startLine": 3,
+      "endLine": 3,
+      "cc": 1,
+      "nesting": 0,
+      "sloc": 1
     }
   ],
   "sloc": {
-    "production": 4,
+    "production": 10,
     "test": 7
   },
   "errors": []

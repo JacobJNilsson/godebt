@@ -85,24 +85,17 @@ type Tree struct {
 
 // Walk visits every regular file under root in lexical order and classifies it.
 func Walk(ctx context.Context, root string, opts Options) (*Tree, error) {
-	abs, err := filepath.Abs(root)
+	abs, err := resolveRoot(root)
 	if err != nil {
 		return nil, err
 	}
-	info, err := os.Stat(abs)
-	if err != nil {
-		return nil, err
-	}
-	if !info.IsDir() {
-		return nil, fmt.Errorf("%s is not a directory", abs)
-	}
-	// WalkDir does not follow a symbolic link at the root, so the walk starts at the target.
-	abs, err = filepath.EvalSymlinks(abs)
+	listed, err := listGitFiles(ctx, abs)
 	if err != nil {
 		return nil, err
 	}
 	w := &walker{
 		ctx:         ctx,
+		git:         listed,
 		root:        abs,
 		opts:        opts,
 		omit:        resolveOmit(opts.Omit),
@@ -116,18 +109,46 @@ func Walk(ctx context.Context, root string, opts Options) (*Tree, error) {
 			Fset:          token.NewFileSet(),
 		},
 	}
-	// Any file name other than the exact string ".gitignore" stops the library from reading .git/info/exclude.
-	w.ignore = gitignore.NewRepositoryWithCache(abs, "./.gitignore", w.ignoreFiles, w.ignoreError)
-	module, err := readModule(abs)
-	if err != nil {
-		w.readError("go.mod", "", err)
-	}
-	w.tree.Module = module
+	w.readSetup()
 	if err := filepath.WalkDir(abs, w.visit); err != nil {
 		return nil, err
 	}
 	finish(w.tree)
 	return w.tree, nil
+}
+
+// resolveRoot returns the absolute path of an audit root that is a directory, with symbolic links resolved.
+func resolveRoot(root string) (string, error) {
+	abs, err := filepath.Abs(root)
+	if err != nil {
+		return "", err
+	}
+	info, err := os.Stat(abs)
+	if err != nil {
+		return "", err
+	}
+	if !info.IsDir() {
+		return "", fmt.Errorf("%s is not a directory", abs)
+	}
+	// WalkDir does not follow a symbolic link at the root, so the walk starts at the target.
+	return filepath.EvalSymlinks(abs)
+}
+
+// readSetup opens the ignore source, reads the module path, and records the directories that Git could not open.
+func (w *walker) readSetup() {
+	if w.git == nil {
+		// Any file name other than the exact string ".gitignore" stops the library from reading .git/info/exclude.
+		w.ignore = gitignore.NewRepositoryWithCache(w.root, "./.gitignore", w.ignoreFiles, w.ignoreError)
+	} else {
+		for _, e := range w.git.unopened {
+			w.readError(e.Path, w.dirSet(e.Path), errors.New(e.Message))
+		}
+	}
+	module, err := readModule(w.root)
+	if err != nil {
+		w.readError("go.mod", "", err)
+	}
+	w.tree.Module = module
 }
 
 // resolveOmit returns the path that the walk sees for the omitted file, with the symbolic links of its directory resolved like the root.
@@ -165,7 +186,9 @@ type walker struct {
 	root string
 	opts Options
 	// omit is the resolved path of Options.Omit.
-	omit   string
+	omit string
+	// git is the file list from Git, and it is nil when the walk reads .gitignore files instead.
+	git    *gitFiles
 	ignore gitignore.GitIgnore
 	// ignoreFiles is the library's cache of parsed .gitignore files, and the walk adds an empty entry for each unreadable one.
 	ignoreFiles gitignore.Cache
@@ -196,7 +219,7 @@ func (w *walker) visit(path string, d fs.DirEntry, err error) error {
 	if d.IsDir() {
 		return w.visitDir(path, rel)
 	}
-	if !w.keeps(path, d) {
+	if !w.keeps(path, rel, d) {
 		return nil
 	}
 	file, err := w.classify(path, rel)
@@ -210,8 +233,8 @@ func (w *walker) visit(path string, d fs.DirEntry, err error) error {
 }
 
 // keeps reports whether a non-directory entry is a regular file that the walk classifies.
-func (w *walker) keeps(path string, d fs.DirEntry) bool {
-	return d.Type().IsRegular() && path != w.omit && !w.ignored(path, false)
+func (w *walker) keeps(path, rel string, d fs.DirEntry) bool {
+	return d.Type().IsRegular() && path != w.omit && !w.excluded(path, rel, false)
 }
 
 // readError records an error without the absolute path, which must not reach a report.
@@ -252,6 +275,9 @@ func (w *walker) ignoreError(e gitignore.Error) bool {
 
 // checkIgnoreFile records a .gitignore that the library could not read, and it gives the library an empty pattern list instead.
 func (w *walker) checkIgnoreFile(dir, rel string) {
+	if w.git != nil {
+		return
+	}
 	file := filepath.Join(dir, ".gitignore")
 	// Lstat treats a symbolic link as no regular file, because Git does not follow a link named .gitignore.
 	info, err := os.Lstat(file)
@@ -292,7 +318,7 @@ func (w *walker) dirSet(rel string) SourceSet {
 }
 
 func (w *walker) visitDir(path, rel string) error {
-	if w.ignored(path, true) {
+	if w.excluded(path, rel, true) {
 		return filepath.SkipDir
 	}
 	w.checkIgnoreFile(path, rel)
@@ -311,6 +337,14 @@ func skipEntry(d fs.DirEntry) error {
 		return filepath.SkipDir
 	}
 	return nil
+}
+
+// excluded reports whether the walk leaves out a file, or a directory with its contents.
+func (w *walker) excluded(path, rel string, isDir bool) bool {
+	if w.git != nil {
+		return !w.git.has(rel, isDir)
+	}
+	return w.ignored(path, isDir)
 }
 
 // ignored calls Absolute because the promoted Ignore and MatchIsDir methods of the repository see no patterns.
