@@ -72,7 +72,8 @@ the size of the code. Compare a repository with its own baseline, not with a
 repository of another size. The report also lists the eroded count and the
 eroded share, which never enter the index.
 
-Test code is measured apart and never enters the index. Safeguards, such as a
+Test code is measured apart and never enters the index. The report scores
+it with the same formula as a separate test index. Safeguards, such as a
 tracked pre-commit hook, are reported with their evidence and never scored. A
 default run writes nothing, and audits run offline.
 
