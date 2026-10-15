@@ -9,12 +9,12 @@
   "configDigest": "sha256:4c50bb6e6bc006a5b9243824f1685a5379c85d70169e618006d2edfe7d505d66",
   "coverage": {
     "production": {
-      "files": 46,
-      "sloc": 6261
+      "files": 47,
+      "sloc": 6314
     },
     "test": {
-      "files": 40,
-      "sloc": 8774
+      "files": 41,
+      "sloc": 8823
     },
     "generated": {
       "files": 0
@@ -73,30 +73,30 @@
     },
     "complexity.functions.production": {
       "state": "complete",
-      "value": 449,
+      "value": 454,
       "unit": "count",
       "detail": {}
     },
     "complexity.functions.test": {
       "state": "complete",
-      "value": 713,
+      "value": 716,
       "unit": "count",
       "detail": {}
     },
     "duplication.density.production": {
       "state": "complete",
-      "value": 0.0028749401054144704,
+      "value": 0.0028508077288565093,
       "unit": "ratio",
       "numerator": 18,
-      "denominator": 6261,
+      "denominator": 6314,
       "detail": {}
     },
     "duplication.density.test": {
       "state": "complete",
-      "value": 0.05960793252792341,
+      "value": 0.05927688994673014,
       "unit": "ratio",
       "numerator": 523,
-      "denominator": 8774,
+      "denominator": 8823,
       "detail": {}
     },
     "duplication.duplicated-lines.production": {
@@ -137,18 +137,18 @@
     },
     "erosion.eroded-share.production": {
       "state": "complete",
-      "value": 0.0831568435265405,
+      "value": 0.08249557865928782,
       "unit": "ratio",
       "numerator": 536.794547166376,
-      "denominator": 6455.205902507008,
+      "denominator": 6506.9492921962865,
       "detail": {}
     },
     "erosion.eroded-share.test": {
       "state": "complete",
-      "value": 0.07545248368429767,
+      "value": 0.07498878196213522,
       "unit": "ratio",
       "numerator": 667.0710300899331,
-      "denominator": 8840.941974568246,
+      "denominator": 8895.610951872286,
       "detail": {}
     },
     "erosion.excess-mass.production": {
@@ -165,29 +165,29 @@
     },
     "erosion.excess-share.production": {
       "state": "complete",
-      "value": 0.015214648716082737,
+      "value": 0.015093661528055025,
       "unit": "ratio",
       "numerator": 98.21369019662797,
-      "denominator": 6455.205902507008,
+      "denominator": 6506.9492921962865,
       "detail": {}
     },
     "erosion.excess-share.test": {
       "state": "complete",
-      "value": 0.02118668712252341,
+      "value": 0.021056481954636067,
       "unit": "ratio",
       "numerator": 187.31027148356176,
-      "denominator": 8840.941974568246,
+      "denominator": 8895.610951872286,
       "detail": {}
     },
     "erosion.mass.production": {
       "state": "complete",
-      "value": 6455.205902507008,
+      "value": 6506.9492921962865,
       "unit": "mass",
       "detail": {}
     },
     "erosion.mass.test": {
       "state": "complete",
-      "value": 8840.941974568246,
+      "value": 8895.610951872286,
       "unit": "mass",
       "detail": {}
     }
@@ -205,9 +205,9 @@
           {
             "metricId": "erosion.excess-share.production",
             "state": "complete",
-            "value": 0.015214648716082737,
+            "value": 0.015093661528055025,
             "saturatesAt": 0.55,
-            "score": 2.7662997665604974
+            "score": 2.744302096010004
           },
           {
             "metricId": "erosion.excess-mass.production",
@@ -226,9 +226,9 @@
           {
             "metricId": "duplication.density.production",
             "state": "complete",
-            "value": 0.0028749401054144704,
+            "value": 0.0028508077288565093,
             "saturatesAt": 0.3,
-            "score": 0.9583133684714902
+            "score": 0.9502692429521697
           },
           {
             "metricId": "duplication.groups.production",
@@ -254,9 +254,9 @@
           {
             "metricId": "erosion.excess-share.test",
             "state": "complete",
-            "value": 0.02118668712252341,
+            "value": 0.021056481954636067,
             "saturatesAt": 0.55,
-            "score": 3.8521249313678925
+            "score": 3.8284512644792845
           },
           {
             "metricId": "erosion.excess-mass.test",
@@ -275,9 +275,9 @@
           {
             "metricId": "duplication.density.test",
             "state": "complete",
-            "value": 0.05960793252792341,
+            "value": 0.05927688994673014,
             "saturatesAt": 0.3,
-            "score": 19.869310842641134
+            "score": 19.758963315576715
           },
           {
             "metricId": "duplication.groups.test",
