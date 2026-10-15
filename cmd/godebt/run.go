@@ -9,7 +9,7 @@ import (
 	"github.com/JacobJNilsson/godebt"
 )
 
-const usage = "usage: godebt audit <path> [--config <file>] [--baseline <report.json>] [--json|--md] [--out <file>] [--quiet]\n       godebt compare <before.json> <after.json> [--json|--md]\n       godebt baseline [path] [--config <file>] [--out <file>] [--check] [--quiet]\n       godebt version"
+const usage = "usage: godebt audit <path> [--config <file>] [--baseline <report.json>] [--json|--md] [--out <file>] [--quiet]\n       godebt compare <before.json> <after.json> [--json|--md]\n       godebt baseline [path] [--config <file>] [--out <file>] [--check] [--quiet]\n       godebt version\n       godebt --version"
 
 const help = `usage: godebt <command>
 
@@ -17,7 +17,7 @@ commands:
   audit <path>                        measure the Go module at path and print the report
   compare <before.json> <after.json>  compare two saved JSON reports and print the comparison
   baseline [path]                     write the reproducible baseline report of the module at path
-  version                             print the godebt version
+  version, --version                  print the godebt version
 
 Run godebt audit --help for the audit flags and terms.
 Run godebt baseline --help for the baseline flags.
@@ -89,13 +89,14 @@ func run(args []string, stdout, stderr io.Writer) int {
 	// The program has no other place to report a failed write to stderr.
 	fs.Usage = func() { _, _ = fmt.Fprintln(stderr, usage) }
 	wantHelp := helpFlags(fs)
+	wantVersion := fs.Bool("version", false, "print the version")
 	if err := fs.Parse(args); err != nil {
 		return 1
 	}
 	switch {
 	case *wantHelp:
 		return writeText(stdout, help)
-	case fs.NArg() == 1 && fs.Arg(0) == "version":
+	case *wantVersion, fs.NArg() == 1 && fs.Arg(0) == "version":
 		return writeText(stdout, "godebt "+godebt.Version+"\n")
 	case fs.NArg() > 0 && fs.Arg(0) == "audit":
 		return audit(fs.Args()[1:], stdout, stderr)
