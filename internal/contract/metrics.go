@@ -4,7 +4,7 @@ package contract
 var metricNames = []string{
 	"complexity.cc.max", "complexity.cc.p50", "complexity.cc.p90", "complexity.functions",
 	"duplication.density", "duplication.duplicated-lines", "duplication.groups",
-	"erosion.eroded-count", "erosion.eroded-share", "erosion.mass",
+	"erosion.eroded-count", "erosion.eroded-share", "erosion.excess-mass", "erosion.excess-share", "erosion.mass",
 }
 
 // MetricIDs returns every metric id that a report holds, for both measured sets, in sorted order.

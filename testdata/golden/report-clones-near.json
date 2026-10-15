@@ -142,6 +142,31 @@
       "unit": "ratio",
       "detail": {}
     },
+    "erosion.excess-mass.production": {
+      "state": "complete",
+      "value": 12.489995996796797,
+      "unit": "mass",
+      "detail": {}
+    },
+    "erosion.excess-mass.test": {
+      "state": "complete",
+      "value": 0,
+      "unit": "mass",
+      "detail": {}
+    },
+    "erosion.excess-share.production": {
+      "state": "complete",
+      "value": 0.09090909090909091,
+      "unit": "ratio",
+      "numerator": 12.489995996796797,
+      "denominator": 137.38995596476477,
+      "detail": {}
+    },
+    "erosion.excess-share.test": {
+      "state": "not-applicable",
+      "unit": "ratio",
+      "detail": {}
+    },
     "erosion.mass.production": {
       "state": "complete",
       "value": 137.38995596476477,

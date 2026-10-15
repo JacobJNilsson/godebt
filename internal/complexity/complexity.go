@@ -49,17 +49,18 @@ func Measure(inv *inventory.Inventory) (map[string]contract.Metric, []contract.F
 // measureSet returns the metrics of the functions of one set, keyed by id without the set suffix.
 func measureSet(fns []inventory.Function) map[string]contract.Metric {
 	ccs := make([]int, 0, len(fns))
-	var masses, erodedMasses []float64
+	var masses, erodedMasses, excesses []float64
 	for _, f := range fns {
 		ccs = append(ccs, f.CC)
 		m := functionMass(f)
 		masses = append(masses, m)
 		if f.CC > formula.ErosionCCThreshold {
 			erodedMasses = append(erodedMasses, m)
+			excesses = append(excesses, functionExcess(f))
 		}
 	}
 	sort.Ints(ccs)
-	mass, erodedMass, eroded := sum(masses), sum(erodedMasses), len(erodedMasses)
+	mass, erodedMass, eroded, excess := sum(masses), sum(erodedMasses), len(erodedMasses), sum(excesses)
 	metrics := map[string]contract.Metric{
 		"complexity.functions": measured(float64(len(ccs)), unitCount),
 		"complexity.cc.p50":    notApplicable(unitCount),
@@ -68,6 +69,8 @@ func measureSet(fns []inventory.Function) map[string]contract.Metric {
 		"erosion.mass":         measured(mass, unitMass),
 		"erosion.eroded-count": measured(float64(eroded), unitCount),
 		"erosion.eroded-share": notApplicable(unitRatio),
+		"erosion.excess-mass":  measured(excess, unitMass),
+		"erosion.excess-share": notApplicable(unitRatio),
 	}
 	if len(ccs) > 0 {
 		metrics["complexity.cc.p50"] = measured(float64(percentile(ccs, 50)), unitCount)
@@ -77,6 +80,9 @@ func measureSet(fns []inventory.Function) map[string]contract.Metric {
 	if mass > 0 {
 		metrics["erosion.eroded-share"] = contract.Metric{
 			State: contract.Complete, Value: erodedMass / mass, Unit: unitRatio, Numerator: erodedMass, Denominator: mass,
+		}
+		metrics["erosion.excess-share"] = contract.Metric{
+			State: contract.Complete, Value: excess / mass, Unit: unitRatio, Numerator: excess, Denominator: mass,
 		}
 	}
 	return metrics
@@ -94,6 +100,11 @@ func sum(values []float64) float64 {
 
 func functionMass(f inventory.Function) float64 {
 	return float64(float64(f.CC) * math.Sqrt(float64(f.SLOC)))
+}
+
+// functionExcess is the complexity of an eroded function above the threshold, times the square root of its lines.
+func functionExcess(f inventory.Function) float64 {
+	return float64(float64(f.CC-formula.ErosionCCThreshold) * math.Sqrt(float64(f.SLOC)))
 }
 
 func measured(value float64, unit string) contract.Metric {
