@@ -599,6 +599,8 @@ func (s *stream) halfPeriods(nodes []node, sa, lcp []int32, work *budget) []int3
 	}
 	work.spend(len(sa))
 	out := make([]int32, len(nodes))
+	// exact marks a node whose entry in out is its true smallest half period, or its true absence.
+	exact := make([]bool, len(nodes))
 	children := childLists(nodes)
 	level := make([]int, len(nodes))
 	var stack []int32
@@ -615,11 +617,20 @@ func (s *stream) halfPeriods(nodes []node, sa, lcp []int32, work *budget) []int3
 			level[k] = level[n.parent] + 1
 		}
 		f.path = append(f.path[:level[k]], k)
-		switch z := parentUnit(out, n); {
+		z, floor, parentExact := parentUnit(out, n), int32(1), n.parent >= 0 && exact[n.parent]
+		switch {
 		case z > 0 && f.holds(n, level[k], z):
 			out[k] = z
-		case n.length <= 2*parentDepth(n, lcp):
-			out[k] = f.search(n, level[k])
+			exact[k] = parentExact
+			continue
+		case parentExact && z > 0:
+			floor = z + 1
+		case parentExact:
+			floor = nodes[n.parent].length/2 + 1
+		}
+		if n.length <= 2*parentDepth(n, lcp) {
+			out[k] = f.search(n, level[k], floor)
+			exact[k] = n.length >= 2*nodeMinLength
 		}
 	}
 	return out
@@ -656,23 +667,27 @@ func (f *halfFinder) holds(n node, level int, p int32) bool {
 	return a.lb <= r && r <= a.rb
 }
 
-// search returns the smallest period of at most half the run length, from the shorter of two lists of candidate offsets.
-func (f *halfFinder) search(n node, level int) int32 {
+// search returns the smallest period from floor to half the run length, from the shorter of two lists of candidate offsets.
+// The caller sets the floor above every offset that the parent rules out.
+func (f *halfFinder) search(n node, level int, floor int32) int32 {
 	half := n.length / 2
+	if floor > half {
+		return 0
+	}
 	start := f.sa[n.lb]
 	a := f.ancestor(level, (n.length+1)/2)
 	var offsets []int32
-	if size := int(a.rb-a.lb) + 1; size < int(half) {
+	if size, span := int(a.rb-a.lb)+1, int(half-floor)+1; size < span {
 		f.work.spend(size)
 		for _, p := range f.sa[a.lb : a.rb+1] {
-			if p > start && p <= start+half {
+			if p >= start+floor && p <= start+half {
 				offsets = append(offsets, p-start)
 			}
 		}
 		slices.Sort(offsets)
 	} else {
-		f.work.spend(int(half))
-		for p := int32(1); p <= half; p++ {
+		f.work.spend(span)
+		for p := floor; p <= half; p++ {
 			if r := f.rank[start+p]; a.lb <= r && r <= a.rb {
 				offsets = append(offsets, p)
 			}
