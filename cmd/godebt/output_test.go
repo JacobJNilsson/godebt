@@ -31,7 +31,7 @@ func TestHelpText(t *testing.T) {
 			t.Errorf("term %s uses %d words, want under 20", name, n)
 		}
 	}
-	want := []string{"index", "production/test", "cc", "p50/p90/max", "eroded", "excess mass", "mass", "count term", "saturating term", "clones", "dup lines", "partial", "baseline", "policy", "safeguards"}
+	want := []string{"index", "test index", "production/test", "cc", "p50/p90/max", "eroded", "excess mass", "mass", "count term", "saturating term", "clones", "dup lines", "partial", "baseline", "policy", "safeguards"}
 	if !slices.Equal(names, want) {
 		t.Errorf("terms = %q, want %q", names, want)
 	}

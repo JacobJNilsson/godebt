@@ -33,24 +33,34 @@ func validate(r *Report) error {
 	if r.Completeness != Complete && r.Completeness != Incomplete {
 		return &contract.FieldError{Field: "completeness", Reason: fmt.Sprintf("%q is unknown", r.Completeness)}
 	}
-	s := r.Score
+	if err := validateScore("score", r.Score); err != nil {
+		return err
+	}
+	if err := validateScore("testScore", r.TestScore); err != nil {
+		return err
+	}
+	if err := checkFindings(r.Findings); err != nil {
+		return err
+	}
+	return checkSafeguards(r.Safeguards)
+}
+
+// validateScore checks the direction, the range, and the point sum of one score block.
+func validateScore(name string, s contract.Score) error {
 	if s.Direction != formula.DirectionLowerIsBetter {
-		return &contract.FieldError{Field: "score.direction", Reason: fmt.Sprintf("%q, want %q", s.Direction, formula.DirectionLowerIsBetter)}
+		return &contract.FieldError{Field: name + ".direction", Reason: fmt.Sprintf("%q, want %q", s.Direction, formula.DirectionLowerIsBetter)}
 	}
 	if s.Index < 0 || s.Index > maxIndex {
-		return &contract.FieldError{Field: "score.index", Reason: fmt.Sprintf("%d is outside 0..%d", s.Index, maxIndex)}
+		return &contract.FieldError{Field: name + ".index", Reason: fmt.Sprintf("%d is outside 0..%d", s.Index, maxIndex)}
 	}
 	points := 0
 	for _, c := range s.Contributions {
 		points += c.Points
 	}
 	if points != s.Index {
-		return &contract.FieldError{Field: "score.contributions", Reason: fmt.Sprintf("sum to %d, want the index %d", points, s.Index)}
+		return &contract.FieldError{Field: name + ".contributions", Reason: fmt.Sprintf("sum to %d, want the index %d", points, s.Index)}
 	}
-	if err := checkFindings(r.Findings); err != nil {
-		return err
-	}
-	return checkSafeguards(r.Safeguards)
+	return nil
 }
 
 // checkSafeguards requires the eight ids of spec 002 in order, each with a known evidence level.

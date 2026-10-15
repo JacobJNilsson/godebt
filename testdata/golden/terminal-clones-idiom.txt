@@ -2,6 +2,7 @@ godebt 0.0.0-test  example.com/clones/idiom
 
 index  0/100  lower is better  scoring 0.3.0
        complexity-erosion 0  duplication 0
+test index  0/100  not part of the index
 
                    files    sloc   funcs   cc p50/p90/max     eroded  clones    dup lines
 production             2      82       7            3/4/4          0       0            0

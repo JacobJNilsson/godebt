@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
   "analyzerVersion": "0.0.0-test",
   "scoringVersion": "0.3.0",
   "repo": {
@@ -224,6 +224,53 @@
             "value": 2,
             "countScale": 15,
             "score": 11.123999549558864
+          }
+        ]
+      }
+    ]
+  },
+  "testScore": {
+    "index": 0,
+    "direction": "lower-is-better",
+    "partial": false,
+    "contributions": [
+      {
+        "dimension": "complexity-erosion",
+        "points": 0,
+        "weight": 0.6,
+        "terms": [
+          {
+            "metricId": "erosion.excess-share.test",
+            "state": "not-applicable",
+            "saturatesAt": 0.55,
+            "score": 0
+          },
+          {
+            "metricId": "erosion.excess-mass.test",
+            "state": "complete",
+            "value": 0,
+            "countScale": 700,
+            "score": 0
+          }
+        ]
+      },
+      {
+        "dimension": "duplication",
+        "points": 0,
+        "weight": 0.4,
+        "terms": [
+          {
+            "metricId": "duplication.density.test",
+            "state": "not-applicable",
+            "saturatesAt": 0.3,
+            "score": 0
+          },
+          {
+            "metricId": "duplication.groups.test",
+            "state": "complete",
+            "value": 0,
+            "countScale": 15,
+            "score": 0
           }
         ]
       }

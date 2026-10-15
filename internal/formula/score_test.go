@@ -3,6 +3,7 @@ package formula
 import (
 	"math"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/JacobJNilsson/godebt/internal/contract"
@@ -261,5 +262,63 @@ func TestNotApplicableExcessShareBesideZeroExcessMass(t *testing.T) {
 	s := Score(m)
 	if s.Index != 0 || s.Partial || scoreOf(t, s, excessShare) != 0 {
 		t.Errorf("score = %+v, want 0, not partial, and a share term of 0", s)
+	}
+}
+
+// testMirror returns test metrics that hold the values of the production metrics.
+func testMirror(m map[string]contract.Metric) map[string]contract.Metric {
+	out := map[string]contract.Metric{}
+	for id, metric := range m {
+		out[strings.TrimSuffix(id, ".production")+".test"] = metric
+	}
+	return out
+}
+
+func TestTestScoreEqualsProductionFormulaOnTestMetrics(t *testing.T) {
+	m := clean()
+	m[excessShare] = complete(0.05)
+	m[excessMass] = complete(114.6)
+	m[density] = complete(0.12)
+	m[groups] = complete(4)
+	got, want := TestScore(testMirror(m)), Score(m)
+	for i := range want.Contributions {
+		for j := range want.Contributions[i].Terms {
+			want.Contributions[i].Terms[j].MetricID = strings.TrimSuffix(want.Contributions[i].Terms[j].MetricID, ".production") + ".test"
+		}
+	}
+	if want.Index == 0 || !reflect.DeepEqual(got, want) {
+		t.Errorf("test score = %+v, want %+v", got, want)
+	}
+}
+
+func TestTestScoreIgnoresProductionMetrics(t *testing.T) {
+	m := testMirror(clean())
+	m[excessShare] = complete(1)
+	m[groups] = contract.Metric{State: contract.Incomplete}
+	if s := TestScore(m); s.Index != 0 || s.Partial {
+		t.Errorf("test score = %+v, want 0 and not partial", s)
+	}
+}
+
+func TestTestScoreIsPartialWhenATestMetricIsMissing(t *testing.T) {
+	m := testMirror(clean())
+	m["duplication.groups.test"] = contract.Metric{State: contract.Incomplete}
+	if s := TestScore(m); !s.Partial {
+		t.Errorf("test score = %+v, want partial", s)
+	}
+}
+
+func TestEveryDimensionTermIsAProductionMetricWithATestTwin(t *testing.T) {
+	for i, d := range Dimensions {
+		for j, term := range d.Terms {
+			if !strings.HasSuffix(term.MetricID, ".production") {
+				t.Errorf("%s term %d metric = %q, want a .production id", d.ID, j, term.MetricID)
+				continue
+			}
+			twin := testDimensions[i].Terms[j].MetricID
+			if !strings.HasSuffix(twin, ".test") || twin == term.MetricID {
+				t.Errorf("%s term %d test metric = %q, want a .test id distinct from %q", d.ID, j, twin, term.MetricID)
+			}
+		}
 	}
 }

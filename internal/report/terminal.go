@@ -69,14 +69,18 @@ func renderIndex(b *strings.Builder, r *Report, base *Baseline) {
 	if reasons := incompleteReasons(r); len(reasons) > 0 {
 		fmt.Fprintf(b, "incomplete: %s\n", strings.Join(reasons, ", "))
 	}
-	if len(r.Score.Contributions) == 0 {
-		return
+	if len(r.Score.Contributions) > 0 {
+		parts := make([]string, 0, len(r.Score.Contributions))
+		for _, c := range r.Score.Contributions {
+			parts = append(parts, fmt.Sprintf("%s %d", c.Dimension, c.Points))
+		}
+		fmt.Fprintf(b, "       %s\n", strings.Join(parts, "  "))
 	}
-	parts := make([]string, 0, len(r.Score.Contributions))
-	for _, c := range r.Score.Contributions {
-		parts = append(parts, fmt.Sprintf("%s %d", c.Dimension, c.Points))
+	fmt.Fprintf(b, "test index  %d/100  not part of the index", r.TestScore.Index)
+	if r.TestScore.Partial {
+		b.WriteString(" (partial)")
 	}
-	fmt.Fprintf(b, "       %s\n", strings.Join(parts, "  "))
+	b.WriteString("\n")
 }
 
 // incompleteReasons lists every error path and every budget cap with its set, sorted and without repeats.

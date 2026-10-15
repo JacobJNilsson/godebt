@@ -66,6 +66,7 @@ flags:
 
 terms:
   index            0 to 100, the structural debt of the production code, lower is better
+  test index       the index formula applied to the test code, reported beside the index and never part of it
   production/test  the measured sets, test holds _test.go files and classify.test matches, production the other measured Go files
   cc               the cyclomatic complexity of one function
   p50/p90/max      the median, the 90th percentile, and the highest cc of a set

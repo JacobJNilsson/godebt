@@ -40,6 +40,11 @@ func RenderMarkdownCompared(w io.Writer, r *Report, base *Baseline) error {
 		}
 		fmt.Fprintf(&b, "Contributions: %s.\n", strings.Join(parts, ", "))
 	}
+	fmt.Fprintf(&b, "The test index is %d/100, not part of the index", r.TestScore.Index)
+	if r.TestScore.Partial {
+		b.WriteString(", partial")
+	}
+	b.WriteString(".\n")
 	b.WriteString("\n")
 	row(&b, "set", "files", "sloc", "funcs", "cc p50/p90/max", "eroded", "clones", "dup lines")
 	row(&b, "---", "---:", "---:", "---:", "---:", "---:", "---:", "---:")

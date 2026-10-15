@@ -16,6 +16,7 @@ import (
 	"github.com/JacobJNilsson/godebt/internal/contract"
 	"github.com/JacobJNilsson/godebt/internal/discover"
 	"github.com/JacobJNilsson/godebt/internal/duplication"
+	"github.com/JacobJNilsson/godebt/internal/formula"
 	"github.com/JacobJNilsson/godebt/internal/inventory"
 	"github.com/JacobJNilsson/godebt/internal/safeguards"
 )
@@ -155,5 +156,30 @@ func TestNewSortsLimits(t *testing.T) {
 	}
 	if got := New(inv, nil, nil, nil, nil, Run{}).Safeguards; got == nil || len(got) != 0 {
 		t.Errorf("safeguards = %#v, want an empty list", got)
+	}
+}
+
+func TestTestScoreFollowsTestMetrics(t *testing.T) {
+	r := newReport(t, "functions")
+	want := formula.TestScore(r.Metrics)
+	if want.Index == 0 || !reflect.DeepEqual(r.TestScore, want) {
+		t.Errorf("test score = %+v, want %+v with an index above 0", r.TestScore, want)
+	}
+}
+
+func TestModuleWithoutTestFilesHasTestIndexZero(t *testing.T) {
+	r := newReport(t, "clones/nested")
+	if r.Coverage.Test.Files != 0 || r.TestScore.Index != 0 || r.Score.Index == 0 {
+		t.Errorf("test files %d, test index %d, index %d, want no test files, test index 0, index above 0", r.Coverage.Test.Files, r.TestScore.Index, r.Score.Index)
+	}
+}
+
+func TestTestScorePartialFollowsTestMetrics(t *testing.T) {
+	r := newReport(t, "broken")
+	if !r.TestScore.Partial {
+		t.Errorf("test score = %+v, want partial, because the test set has an unreadable file", r.TestScore)
+	}
+	if clean := newReport(t, "functions"); clean.TestScore.Partial {
+		t.Errorf("test score = %+v, want not partial", clean.TestScore)
 	}
 }

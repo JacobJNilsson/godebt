@@ -13,7 +13,7 @@ import (
 
 func TestNewVersionsAndScore(t *testing.T) {
 	r := newReport(t, "clones/nested")
-	if r.SchemaVersion != SchemaVersion || SchemaVersion != "1.0.0" {
+	if r.SchemaVersion != SchemaVersion || SchemaVersion != "1.1.0" {
 		t.Errorf("schema version = %q", r.SchemaVersion)
 	}
 	if r.AnalyzerVersion != testAnalyzer || r.ScoringVersion != formula.ScoringVersion {
@@ -78,12 +78,13 @@ func TestLoadRejects(t *testing.T) {
 		name, old, replacement, field string
 	}{
 		{"unknown field", `"repo":`, `"extra":1,"repo":`, "extra"},
-		{"schema version", `"schemaVersion":"1.0.0"`, `"schemaVersion":"2.0.0"`, "schemaVersion"},
+		{"schema version", `"schemaVersion":"1.1.0"`, `"schemaVersion":"2.0.0"`, "schemaVersion"},
 		{"metric state", `"state":"complete"`, `"state":"done"`, "state"},
 		{"metric type", `"state":"complete"`, `"state":7`, "state"},
 		{"metric value", `"state":"not-applicable","unit":"ratio"`, `"state":"not-applicable","value":1,"unit":"ratio"`, "value"},
 		{"completeness", `"completeness":"complete"`, `"completeness":"most"`, "completeness"},
 		{"direction", `"direction":"lower-is-better"`, `"direction":"up"`, "score.direction"},
+		{"test score unknown field", `"testScore":{`, `"testScore":{"extra":1,`, "extra"},
 		{"trailing object", `"meta":{"durationMs":0}}`, `"meta":{"durationMs":0}}{}`, "(end)"},
 		{"trailing brace", `"meta":{"durationMs":0}}`, `"meta":{"durationMs":0}}}`, "(end)"},
 		{"trailing bracket", `"meta":{"durationMs":0}}`, `"meta":{"durationMs":0}}]`, "(end)"},
@@ -115,6 +116,9 @@ func TestLoadValidates(t *testing.T) {
 		{"index above 100", func(r *Report) { r.Score.Index = 101 }, "score.index"},
 		{"index below 0", func(r *Report) { r.Score.Index = -1 }, "score.index"},
 		{"contributions", func(r *Report) { r.Score.Contributions[0].Points++ }, "score.contributions"},
+		{"test index above 100", func(r *Report) { r.TestScore.Index = 101 }, "testScore.index"},
+		{"test direction", func(r *Report) { r.TestScore.Direction = "up" }, "testScore.direction"},
+		{"test contributions", func(r *Report) { r.TestScore.Contributions[0].Points++ }, "testScore.contributions"},
 		{"findings order", func(r *Report) { r.Findings[0], r.Findings[1] = r.Findings[1], r.Findings[0] }, "findings[1]"},
 		{"clone facts on a hotspot", func(r *Report) { r.Findings[0].Facts = r.Findings[2].Facts }, "findings[0].facts"},
 		{"hotspot facts on a clone", func(r *Report) { r.Findings[2].Facts = r.Findings[0].Facts }, "findings[2].facts"},

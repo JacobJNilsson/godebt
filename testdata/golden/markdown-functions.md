@@ -4,6 +4,7 @@ example.com/functions, godebt 0.0.0-test.
 
 The index is 5/100, lower is better, scoring 0.3.0.
 Contributions: complexity-erosion 5, duplication 0.
+The test index is 7/100, not part of the index.
 
 | set | files | sloc | funcs | cc p50/p90/max | eroded | clones | dup lines |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
