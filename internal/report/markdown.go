@@ -22,6 +22,9 @@ func RenderMarkdownCompared(w io.Writer, r *Report, base *Baseline) error {
 		module = "(no go.mod)"
 	}
 	fmt.Fprintf(&b, "# godebt report\n\n%s, godebt %s.\n\n", module, r.AnalyzerVersion)
+	if r.Dir != "" {
+		fmt.Fprintf(&b, "Printed findings are under `%s`.\n\n", r.Dir)
+	}
 	fmt.Fprintf(&b, "The index is %d/100, lower is better, scoring %s", r.Score.Index, r.ScoringVersion)
 	if r.Score.Partial {
 		b.WriteString(", partial")

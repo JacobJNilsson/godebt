@@ -36,6 +36,9 @@ func RenderCompared(w io.Writer, r *Report, base *Baseline) error {
 		module = "(no go.mod)"
 	}
 	fmt.Fprintf(&b, "godebt %s  %s\n\n", r.AnalyzerVersion, module)
+	if r.Dir != "" {
+		fmt.Fprintf(&b, "findings under %s\n\n", r.Dir)
+	}
 	renderIndex(&b, r, base)
 	b.WriteString("\n")
 	fmt.Fprintf(&b, tableRow, "", "files", "sloc", "funcs", "cc p50/p90/max", "eroded", "clones", "dup lines")
