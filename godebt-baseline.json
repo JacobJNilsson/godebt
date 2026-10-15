@@ -10,11 +10,11 @@
   "coverage": {
     "production": {
       "files": 47,
-      "sloc": 6314
+      "sloc": 6389
     },
     "test": {
       "files": 41,
-      "sloc": 8823
+      "sloc": 8872
     },
     "generated": {
       "files": 0
@@ -73,30 +73,30 @@
     },
     "complexity.functions.production": {
       "state": "complete",
-      "value": 454,
+      "value": 458,
       "unit": "count",
       "detail": {}
     },
     "complexity.functions.test": {
       "state": "complete",
-      "value": 716,
+      "value": 720,
       "unit": "count",
       "detail": {}
     },
     "duplication.density.production": {
       "state": "complete",
-      "value": 0.0028508077288565093,
+      "value": 0.0028173423070903115,
       "unit": "ratio",
       "numerator": 18,
-      "denominator": 6314,
+      "denominator": 6389,
       "detail": {}
     },
     "duplication.density.test": {
       "state": "complete",
-      "value": 0.05927688994673014,
+      "value": 0.05894950405770965,
       "unit": "ratio",
       "numerator": 523,
-      "denominator": 8823,
+      "denominator": 8872,
       "detail": {}
     },
     "duplication.duplicated-lines.production": {
@@ -125,7 +125,7 @@
     },
     "erosion.eroded-count.production": {
       "state": "complete",
-      "value": 7,
+      "value": 8,
       "unit": "count",
       "detail": {}
     },
@@ -137,23 +137,23 @@
     },
     "erosion.eroded-share.production": {
       "state": "complete",
-      "value": 0.08249557865928782,
+      "value": 0.09409545654196205,
       "unit": "ratio",
-      "numerator": 536.794547166376,
-      "denominator": 6506.9492921962865,
+      "numerator": 624.0011982888677,
+      "denominator": 6631.576286689179,
       "detail": {}
     },
     "erosion.eroded-share.test": {
       "state": "complete",
-      "value": 0.07498878196213522,
+      "value": 0.07449968995098712,
       "unit": "ratio",
       "numerator": 667.0710300899331,
-      "denominator": 8895.610951872286,
+      "denominator": 8954.010822444965,
       "detail": {}
     },
     "erosion.excess-mass.production": {
       "state": "complete",
-      "value": 98.21369019662797,
+      "value": 118.33830199412608,
       "unit": "mass",
       "detail": {}
     },
@@ -165,29 +165,29 @@
     },
     "erosion.excess-share.production": {
       "state": "complete",
-      "value": 0.015093661528055025,
+      "value": 0.017844671745939695,
       "unit": "ratio",
-      "numerator": 98.21369019662797,
-      "denominator": 6506.9492921962865,
+      "numerator": 118.33830199412608,
+      "denominator": 6631.576286689179,
       "detail": {}
     },
     "erosion.excess-share.test": {
       "state": "complete",
-      "value": 0.021056481954636067,
+      "value": 0.020919147318208757,
       "unit": "ratio",
       "numerator": 187.31027148356176,
-      "denominator": 8895.610951872286,
+      "denominator": 8954.010822444965,
       "detail": {}
     },
     "erosion.mass.production": {
       "state": "complete",
-      "value": 6506.9492921962865,
+      "value": 6631.576286689179,
       "unit": "mass",
       "detail": {}
     },
     "erosion.mass.test": {
       "state": "complete",
-      "value": 8895.610951872286,
+      "value": 8954.010822444965,
       "unit": "mass",
       "detail": {}
     }
@@ -199,36 +199,36 @@
     "contributions": [
       {
         "dimension": "complexity-erosion",
-        "points": 4,
+        "points": 5,
         "weight": 0.6,
         "terms": [
           {
             "metricId": "erosion.excess-share.production",
             "state": "complete",
-            "value": 0.015093661528055025,
+            "value": 0.017844671745939695,
             "saturatesAt": 0.55,
-            "score": 2.744302096010004
+            "score": 3.244485771989035
           },
           {
             "metricId": "erosion.excess-mass.production",
             "state": "complete",
-            "value": 98.21369019662797,
+            "value": 118.33830199412608,
             "countScale": 700,
-            "score": 11.60580500096515
+            "score": 13.509435885062622
           }
         ]
       },
       {
         "dimension": "duplication",
-        "points": 2,
+        "points": 1,
         "weight": 0.4,
         "terms": [
           {
             "metricId": "duplication.density.production",
             "state": "complete",
-            "value": 0.0028508077288565093,
+            "value": 0.0028173423070903115,
             "saturatesAt": 0.3,
-            "score": 0.9502692429521697
+            "score": 0.9391141023634373
           },
           {
             "metricId": "duplication.groups.production",
@@ -254,9 +254,9 @@
           {
             "metricId": "erosion.excess-share.test",
             "state": "complete",
-            "value": 0.021056481954636067,
+            "value": 0.020919147318208757,
             "saturatesAt": 0.55,
-            "score": 3.8284512644792845
+            "score": 3.80348133058341
           },
           {
             "metricId": "erosion.excess-mass.test",
@@ -275,9 +275,9 @@
           {
             "metricId": "duplication.density.test",
             "state": "complete",
-            "value": 0.05927688994673014,
+            "value": 0.05894950405770965,
             "saturatesAt": 0.3,
-            "score": 19.758963315576715
+            "score": 19.649834685903215
           },
           {
             "metricId": "duplication.groups.test",
@@ -399,8 +399,23 @@
     {
       "kind": "complexity.hotspot",
       "path": "internal/duplication/duplication.go",
-      "startLine": 521,
-      "endLine": 564,
+      "startLine": 474,
+      "endLine": 520,
+      "identity": "internal/duplication:stream.units",
+      "ambiguous": false,
+      "sourceSet": "production",
+      "facts": {
+        "cc": 13,
+        "nesting": 2,
+        "sloc": 45,
+        "mass": 87.2066511224918
+      }
+    },
+    {
+      "kind": "complexity.hotspot",
+      "path": "internal/duplication/duplication.go",
+      "startLine": 525,
+      "endLine": 568,
       "identity": "internal/duplication:stream.deferredPeriods",
       "ambiguous": false,
       "sourceSet": "production",
@@ -414,8 +429,8 @@
     {
       "kind": "complexity.hotspot",
       "path": "internal/duplication/duplication.go",
-      "startLine": 595,
-      "endLine": 637,
+      "startLine": 599,
+      "endLine": 641,
       "identity": "internal/duplication:stream.halfPeriods",
       "ambiguous": false,
       "sourceSet": "production",
@@ -429,8 +444,8 @@
     {
       "kind": "complexity.hotspot",
       "path": "internal/duplication/duplication.go",
-      "startLine": 672,
-      "endLine": 702,
+      "startLine": 676,
+      "endLine": 706,
       "identity": "internal/duplication:halfFinder.search",
       "ambiguous": false,
       "sourceSet": "production",

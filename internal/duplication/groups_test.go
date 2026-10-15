@@ -894,3 +894,58 @@ func TestHalfPeriodsWorkIsLinear(t *testing.T) {
 		t.Errorf("half period work %d for %d symbols, want at most 20 per symbol", got, len(s.symbols))
 	}
 }
+
+// closestGap returns the smallest distance between two of the positions, or 0 for fewer than two.
+func closestGap(positions []int32) int32 {
+	sorted := slices.Sorted(slices.Values(positions))
+	gap := int32(0)
+	for i := 1; i < len(sorted); i++ {
+		if d := sorted[i] - sorted[i-1]; gap == 0 || d < gap {
+			gap = d
+		}
+	}
+	return gap
+}
+
+// TestClosestPairsMatchBruteForce compares the gap of every requested node with a sort of its positions.
+func TestClosestPairsMatchBruteForce(t *testing.T) {
+	checked := 0
+	for seed := range 40 {
+		rng := rand.New(rand.NewSource(int64(seed)))
+		units := [][]int32{randomTokens(rng, 3), randomTokens(rng, 5)}
+		s := streamOf(repeatingFile(rng, units), repeatingFile(rng, units))
+		work := &budget{max: 1 << 40}
+		nodes, sa, _ := treeOf(s, work)
+		needs := make([]bool, len(nodes))
+		for k := range needs {
+			needs[k] = rng.Intn(3) > 0
+		}
+		gaps := closestPairs(nodes, childLists(nodes), needs, sa, work)
+		for k, n := range nodes {
+			if !needs[k] {
+				continue
+			}
+			checked++
+			if want := closestGap(sa[n.lb : n.rb+1]); gaps[k] != want {
+				t.Fatalf("seed %d node %d: gap %d, want %d", seed, k, gaps[k], want)
+			}
+		}
+	}
+	if checked < 500 {
+		t.Errorf("checked %d nodes, want at least 500", checked)
+	}
+}
+
+// TestNestedRepeatsWorkIsLinear checks that doubling the rows of nested repeats does not raise the work per symbol.
+func TestNestedRepeatsWorkIsLinear(t *testing.T) {
+	perSymbol := func(rows int) float64 {
+		inv := buildSource(t, map[string]string{"go.mod": "module example.com/m\n", "rows.go": nestedRepeats(rows)})
+		s := newStream(inv, contract.Production, 1<<30)
+		_, work := findGroups(s, 1<<40)
+		return float64(work.used) / float64(len(s.symbols))
+	}
+	small, large := perSymbol(200), perSymbol(400)
+	if large > 1.25*small {
+		t.Errorf("work per symbol is %.1f at 200 rows and %.1f at 400 rows, want at most 1.25 times as much", small, large)
+	}
+}
