@@ -133,7 +133,7 @@ asserts the direction of the index.
 | `trim-to-threshold` | The module holds a function at cc 11 and a function at cc 20. The cc 11 function moves one branch into a new helper with one caller, so both have cc 10 or less. | near |
 | `rename` | Every identifier and literal gets a new name or value. | equal |
 | `move` | A function moves to a file in another package. | equal |
-| `tests-only` | A test file with a clone group and an eroded function appears. | equal |
+| `tests-only` | A test file with a clone group and an eroded function appears. The test index rises. | equal |
 | `comments` | Comments and blank lines appear. | equal |
 | `pad` | The `after` module holds `before` plus a second package of clean code, about as many production lines as `before`, with no eroded function and no clone group. | near |
 

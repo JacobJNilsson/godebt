@@ -7,7 +7,8 @@ package. Everything here is versioned and tested with golden files.
 
 Three versions travel with every report:
 
-- `schemaVersion`: the shape of this document. Starts at `1.0.0`.
+- `schemaVersion`: the shape of this document. It is `1.1.0`, which added
+  `testScore`.
 - `analyzerVersion`: the `godebt` release that produced the measurements.
   Equals the module version.
 - `scoringVersion`: the formula constants. It is `0.3.0`, the version the
@@ -38,7 +39,7 @@ reaches the output.
 
 ```jsonc
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
   "analyzerVersion": "0.1.0",
   "scoringVersion": "0.3.0",
   "repo": { "root": "/abs/path", "module": "github.com/x/y" },   // module "" when no go.mod
@@ -78,6 +79,12 @@ reaches the output.
           { "metricId": "duplication.groups.production", "state": "complete", "value": 0, "countScale": 15, "score": 0 }
         ] }
     ]
+  },
+  "testScore": {                         // same shape as score, over the .test metrics
+    "index": 31,
+    "direction": "lower-is-better",
+    "partial": false,
+    "contributions": [ /* ... */ ]
   },
   "findings": [
     { "kind": "complexity.hotspot", "path": "internal/audit/run.go", "startLine": 41, "endLine": 128,

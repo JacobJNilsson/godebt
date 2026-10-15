@@ -316,6 +316,11 @@ Every metric carries one state:
 The index is a pure function of production-set metrics. Test metrics,
 coverage, and safeguards never enter it.
 
+The test index applies the same table, rules, and constants to the test-set
+metrics, with `.test` in place of `.production`. It shows the structural debt
+of the test code. It never enters the index, and the policy never reads it.
+A module without test files has a test index of 0.
+
 | dimension          | weight | terms                                                                                  |
 | ------------------ | ------ | -------------------------------------------------------------------------------------- |
 | complexity-erosion | 0.6    | `erosion.excess-share` saturates at 0.55 (share 0.5); `erosion.excess-mass` count scale 700 (share 0.5) |
@@ -348,7 +353,10 @@ coverage, and safeguards never enter it.
   debt.
 
 Every renderer shows the index as `N/100`, the words `lower is better`, and
-`scoring <version>` on one line.
+`scoring <version>` on one line. After the index and its contributions, one
+line shows the words `test index`, the test index as `N/100`, and the words
+`not part of the index`. A partial test index carries the same mark as a
+partial index.
 The index is not a percentage of bad code and is never shown as one.
 
 Every constant in this file, the weights, saturation points, count scales,
