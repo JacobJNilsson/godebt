@@ -478,6 +478,14 @@ func (s *stream) units(nodes []node, sa, lcp []int32, work *budget) []int32 {
 	if work.exceeded() {
 		return nil
 	}
+	needs := make([]bool, len(nodes))
+	for k, n := range nodes {
+		needs[k] = halves[k] == 0 && inheritedUnit(children[k], halves, n.length) == 0
+	}
+	gaps := closestPairs(nodes, children, needs, sa, work)
+	if work.exceeded() {
+		return nil
+	}
 	// A deferred node has a period above half its length, so no parent can inherit it.
 	deferred := make([]bool, len(nodes))
 	for _, k := range longestFirst(nodes) {
@@ -486,17 +494,13 @@ func (s *stream) units(nodes []node, sa, lcp []int32, work *budget) []int32 {
 			out[k] = d
 			continue
 		}
-		if !work.spend(int(n.rb-n.lb) + 1) {
-			return nil
-		}
-		gap := closestPair(sa[n.lb:n.rb+1], n.length)
-		if gap == 0 {
+		// Two occurrences gap symbols apart show a period of at most gap, so a half period decides the unit whatever the gap is.
+		if halves[k] > 0 {
 			out[k] = halves[k]
 			continue
 		}
-		// A run with two occurrences gap symbols apart has a period of at most gap, which its first 2*gap symbols show.
-		if halves[k] > 0 {
-			out[k] = halves[k]
+		gap := gaps[k]
+		if gap == 0 || gap >= n.length {
 			continue
 		}
 		prefix := min(n.length, 2*gap)
@@ -711,16 +715,95 @@ func inheritedUnit(children, units []int32, length int32) int32 {
 	return 0
 }
 
-// closestPair returns the smallest distance between two positions below length, or 0.
-func closestPair(positions []int32, length int32) int32 {
-	sorted := slices.Sorted(slices.Values(positions))
-	gap := int32(0)
-	for i := 1; i < len(sorted); i++ {
-		if d := sorted[i] - sorted[i-1]; d < length && (gap == 0 || d < gap) {
-			gap = d
+// closestPairs returns, for each node that needs one, the smallest distance between two of its positions, or 0 for the others.
+// It returns nil once the budget runs out.
+// Along each chain of largest children one set of positions grows from the lowest needed node upward, so a position joins a set once per smaller child above it.
+func closestPairs(nodes []node, children [][]int32, needs []bool, sa []int32, work *budget) []int32 {
+	gaps := make([]int32, len(nodes))
+	heavy := heavyChildren(nodes, children)
+	isHeavy := make([]bool, len(nodes))
+	for _, h := range heavy {
+		if h >= 0 {
+			isHeavy[h] = true
 		}
 	}
-	return gap
+	set := newPosSet(len(sa))
+	var chain []int32
+	for top := range nodes {
+		if isHeavy[top] {
+			continue
+		}
+		chain = neededChain(chain[:0], heavy, needs, int32(top))
+		if len(chain) == 0 {
+			continue
+		}
+		highest := nodes[chain[0]]
+		if !work.spend(int(highest.rb-highest.lb) + 1) {
+			return nil
+		}
+		growChain(set, nodes, chain, sa, gaps)
+		for _, p := range sa[highest.lb : highest.rb+1] {
+			set.remove(p)
+		}
+	}
+	return gaps
+}
+
+// heavyChildren returns the child with the most suffixes of each node, or -1.
+func heavyChildren(nodes []node, children [][]int32) []int32 {
+	heavy := make([]int32, len(nodes))
+	for k := range nodes {
+		heavy[k] = -1
+		for _, c := range children[k] {
+			if h := heavy[k]; h < 0 || nodes[c].rb-nodes[c].lb > nodes[h].rb-nodes[h].lb {
+				heavy[k] = c
+			}
+		}
+	}
+	return heavy
+}
+
+// neededChain appends the nodes from the highest to the lowest needed node on the chain of largest children that starts at top.
+func neededChain(chain, heavy []int32, needs []bool, top int32) []int32 {
+	first, last := -1, -1
+	for k := top; k >= 0; k = heavy[k] {
+		chain = append(chain, k)
+		if needs[k] {
+			if first < 0 {
+				first = len(chain) - 1
+			}
+			last = len(chain) - 1
+		}
+	}
+	if first < 0 {
+		return chain[:0]
+	}
+	return chain[first : last+1]
+}
+
+// growChain fills the set with the positions of the chain from its lowest node up, and records the closest pair at each needed node.
+func growChain(set *posSet, nodes []node, chain, sa []int32, gaps []int32) {
+	best := int32(0)
+	add := func(from, to int32) {
+		for _, p := range sa[from : to+1] {
+			if q := set.prev(p); q >= 0 && (best == 0 || p-q < best) {
+				best = p - q
+			}
+			if q := set.next(p); q >= 0 && (best == 0 || q-p < best) {
+				best = q - p
+			}
+			set.insert(p)
+		}
+	}
+	bottom := len(chain) - 1
+	add(nodes[chain[bottom]].lb, nodes[chain[bottom]].rb)
+	gaps[chain[bottom]] = best
+	for i := bottom - 1; i >= 0; i-- {
+		n, h := nodes[chain[i]], nodes[chain[i+1]]
+		add(n.lb, h.lb-1)
+		add(h.rb+1, n.rb)
+		gaps[chain[i]] = best
+	}
 }
 
 // smallestPeriod returns the smallest p for which the symbols equal themselves shifted by p.
