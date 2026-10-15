@@ -197,6 +197,42 @@
         ]
       }
     },
+    "erosion.excess-mass.production": {
+      "state": "incomplete",
+      "unit": "mass",
+      "detail": {
+        "errors": [
+          "bad.go"
+        ]
+      }
+    },
+    "erosion.excess-mass.test": {
+      "state": "incomplete",
+      "unit": "mass",
+      "detail": {
+        "errors": [
+          "bad_test.go"
+        ]
+      }
+    },
+    "erosion.excess-share.production": {
+      "state": "incomplete",
+      "unit": "ratio",
+      "detail": {
+        "errors": [
+          "bad.go"
+        ]
+      }
+    },
+    "erosion.excess-share.test": {
+      "state": "incomplete",
+      "unit": "ratio",
+      "detail": {
+        "errors": [
+          "bad_test.go"
+        ]
+      }
+    },
     "erosion.mass.production": {
       "state": "incomplete",
       "unit": "mass",

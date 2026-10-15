@@ -323,6 +323,78 @@
       "delta": 0.7712605870313493
     },
     {
+      "id": "erosion.excess-mass.production",
+      "before": {
+        "state": "complete",
+        "value": 0,
+        "unit": "mass",
+        "detail": {}
+      },
+      "after": {
+        "state": "complete",
+        "value": 17.732050807568875,
+        "unit": "mass",
+        "detail": {}
+      },
+      "delta": 17.732050807568875
+    },
+    {
+      "id": "erosion.excess-mass.test",
+      "before": {
+        "state": "complete",
+        "value": 0,
+        "unit": "mass",
+        "detail": {}
+      },
+      "after": {
+        "state": "complete",
+        "value": 4,
+        "unit": "mass",
+        "detail": {}
+      },
+      "delta": 4
+    },
+    {
+      "id": "erosion.excess-share.production",
+      "before": {
+        "state": "complete",
+        "value": 0,
+        "unit": "ratio",
+        "numerator": 0,
+        "denominator": 5,
+        "detail": {}
+      },
+      "after": {
+        "state": "complete",
+        "value": 0.07982378074242436,
+        "unit": "ratio",
+        "numerator": 17.732050807568875,
+        "denominator": 222.13995181193832,
+        "detail": {}
+      },
+      "delta": 0.07982378074242436
+    },
+    {
+      "id": "erosion.excess-share.test",
+      "before": {
+        "state": "complete",
+        "value": 0,
+        "unit": "ratio",
+        "numerator": 0,
+        "denominator": 4.47213595499958,
+        "detail": {}
+      },
+      "after": {
+        "state": "complete",
+        "value": 0.12854343117189154,
+        "unit": "ratio",
+        "numerator": 4,
+        "denominator": 31.11788726606417,
+        "detail": {}
+      },
+      "delta": 0.12854343117189154
+    },
+    {
       "id": "erosion.mass.production",
       "before": {
         "state": "complete",

@@ -78,9 +78,9 @@ func TestDistributionsEmptyFixture(t *testing.T) {
 func TestIncomplete(t *testing.T) {
 	got, _ := Measure(build(t, "broken"))
 	wantErrors := map[string][]string{"production": {"bad.go"}, "test": {"bad_test.go"}}
-	// Seven metrics for each of the two sets.
-	if len(got) != 14 {
-		t.Fatalf("%d metrics, want 14: %v", len(got), got)
+	// Nine metrics for each of the two sets.
+	if len(got) != 18 {
+		t.Fatalf("%d metrics, want 18: %v", len(got), got)
 	}
 	for id, m := range got {
 		set := id[strings.LastIndex(id, ".")+1:]

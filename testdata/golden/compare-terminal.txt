@@ -23,6 +23,10 @@ erosion.eroded-count.production                   0         3        +3
 erosion.eroded-count.test                         0         1        +1
 erosion.eroded-share.production                   0    0.5179   +0.5179
 erosion.eroded-share.test                         0    0.7713   +0.7713
+erosion.excess-mass.production                    0     17.73    +17.73
+erosion.excess-mass.test                          0         4        +4
+erosion.excess-share.production                   0   0.07982  +0.07982
+erosion.excess-share.test                         0    0.1285   +0.1285
 erosion.mass.production                           5     222.1    +217.1
 erosion.mass.test                             4.472     31.12    +26.65
 

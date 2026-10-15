@@ -30,6 +30,8 @@ func TestErosionFunctionsFixture(t *testing.T) {
 	// Long has mass 11 × sqrt(36) = 66, Short 15 × sqrt(4) = 30, and the closure wrap#1 11 × sqrt(3) = 19.053.
 	wrapMass := 11 * math.Sqrt(3)
 	erodedMass := 66 + 30 + wrapMass
+	// Excess is (cc - 10) × sqrt(sloc): Long 1 × 6, Short 5 × 2, wrap#1 1 × sqrt(3). The test function allSet adds 2 × 2.
+	excess := 6 + 10 + math.Sqrt(3)
 	// Production mass is 222.140 over 23 functions.
 	prodMass := 10*math.Sqrt(29) + math.Sqrt(15) + math.Sqrt(12) + 3 + 2*math.Sqrt(6) + 4 + 2*math.Sqrt(3) +
 		5*math.Sqrt(14) + 1 + math.Sqrt(6) + math.Sqrt(3) + 3 + math.Sqrt(7) + 1 + erodedMass
@@ -39,6 +41,10 @@ func TestErosionFunctionsFixture(t *testing.T) {
 		"erosion.mass.production":         {State: contract.Complete, Value: prodMass, Unit: "mass"},
 		"erosion.eroded-count.production": {State: contract.Complete, Value: 3, Unit: "count"},
 		"erosion.eroded-share.production": {State: contract.Complete, Value: erodedMass / prodMass, Unit: "ratio", Numerator: erodedMass, Denominator: prodMass},
+		"erosion.excess-mass.production":  {State: contract.Complete, Value: excess, Unit: "mass"},
+		"erosion.excess-share.production": {State: contract.Complete, Value: excess / prodMass, Unit: "ratio", Numerator: excess, Denominator: prodMass},
+		"erosion.excess-mass.test":        {State: contract.Complete, Value: 4, Unit: "mass"},
+		"erosion.excess-share.test":       {State: contract.Complete, Value: 4 / testMass, Unit: "ratio", Numerator: 4, Denominator: testMass},
 		"erosion.mass.test":               {State: contract.Complete, Value: testMass, Unit: "mass"},
 		"erosion.eroded-count.test":       {State: contract.Complete, Value: 1, Unit: "count"},
 		"erosion.eroded-share.test":       {State: contract.Complete, Value: 24 / testMass, Unit: "ratio", Numerator: 24, Denominator: testMass},
@@ -73,6 +79,8 @@ func TestErosionEmptyFixture(t *testing.T) {
 		checkNear(t, got, "erosion.mass."+set, contract.Metric{State: contract.Complete, Unit: "mass"})
 		checkNear(t, got, "erosion.eroded-count."+set, contract.Metric{State: contract.Complete, Unit: "count"})
 		checkNear(t, got, "erosion.eroded-share."+set, contract.Metric{State: contract.NotApplicable, Unit: "ratio"})
+		checkNear(t, got, "erosion.excess-mass."+set, contract.Metric{State: contract.Complete, Unit: "mass"})
+		checkNear(t, got, "erosion.excess-share."+set, contract.Metric{State: contract.NotApplicable, Unit: "ratio"})
 	}
 	if len(findings) != 0 {
 		t.Errorf("findings = %v, want none", findings)
@@ -161,6 +169,41 @@ func TestFindingsOrder(t *testing.T) {
 		}
 		if !reflect.DeepEqual(got, want) {
 			t.Fatalf("order:\n got %v\nwant %v", got, want)
+		}
+	}
+}
+
+// TestErosionExcessIgnoresThresholdFunctions proves that a function at the threshold adds no excess and one branch above adds sqrt(SLOC).
+func TestErosionExcessIgnoresThresholdFunctions(t *testing.T) {
+	inv := &inventory.Inventory{Functions: []inventory.Function{
+		{Identity: "a:At", Path: "a.go", Set: discover.Production, CC: 10, SLOC: 100},
+		{Identity: "a:Over", Path: "a.go", Set: discover.Production, CC: 11, SLOC: 100},
+		{Identity: "a:Far", Path: "a.go", Set: discover.Production, CC: 30, SLOC: 4},
+	}}
+	got, _ := Measure(inv)
+	mass := 10*10.0 + 11*10.0 + 30*2.0
+	checkNear(t, got, "erosion.excess-mass.production", contract.Metric{State: contract.Complete, Value: 10 + 40, Unit: "mass"})
+	checkNear(t, got, "erosion.excess-share.production", contract.Metric{
+		State: contract.Complete, Value: 50 / mass, Unit: "ratio", Numerator: 50, Denominator: mass,
+	})
+}
+
+// TestErosionExcessSumsAscending shuffles the functions and asserts that the excess keeps every bit.
+func TestErosionExcessSumsAscending(t *testing.T) {
+	var fns []inventory.Function
+	for i, sloc := range []int{3, 5, 6, 7, 10, 11, 13, 14, 17, 19} {
+		fns = append(fns, inventory.Function{Identity: fmt.Sprint(i), Path: "a.go", Set: discover.Production, CC: 11 + i, SLOC: sloc})
+	}
+	want, _ := Measure(&inventory.Inventory{Functions: fns})
+	rng := rand.New(rand.NewSource(2))
+	for range 20 {
+		shuffled := append([]inventory.Function(nil), fns...)
+		rng.Shuffle(len(shuffled), func(i, j int) { shuffled[i], shuffled[j] = shuffled[j], shuffled[i] })
+		got, _ := Measure(&inventory.Inventory{Functions: shuffled})
+		for _, id := range []string{"erosion.excess-mass.production", "erosion.excess-share.production"} {
+			if !reflect.DeepEqual(got[id], want[id]) {
+				t.Fatalf("%s changes with the order:\n got %+v\nwant %+v", id, got[id], want[id])
+			}
 		}
 	}
 }

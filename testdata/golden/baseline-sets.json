@@ -153,6 +153,34 @@
       "denominator": 4.47213595499958,
       "detail": {}
     },
+    "erosion.excess-mass.production": {
+      "state": "complete",
+      "value": 0,
+      "unit": "mass",
+      "detail": {}
+    },
+    "erosion.excess-mass.test": {
+      "state": "complete",
+      "value": 0,
+      "unit": "mass",
+      "detail": {}
+    },
+    "erosion.excess-share.production": {
+      "state": "complete",
+      "value": 0,
+      "unit": "ratio",
+      "numerator": 0,
+      "denominator": 5,
+      "detail": {}
+    },
+    "erosion.excess-share.test": {
+      "state": "complete",
+      "value": 0,
+      "unit": "ratio",
+      "numerator": 0,
+      "denominator": 4.47213595499958,
+      "detail": {}
+    },
     "erosion.mass.production": {
       "state": "complete",
       "value": 5,
