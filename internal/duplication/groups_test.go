@@ -647,3 +647,146 @@ func TestSharedHeaderAndRowsFormAGroup(t *testing.T) {
 		t.Errorf("groups = %+v, want one group of two members", got)
 	}
 }
+
+// nestedRepeats builds a function body of the row groups "A B", "A A B", up to n copies of A before each B.
+func nestedRepeats(n int) string {
+	var sb strings.Builder
+	sb.WriteString("package p\n\nfunc f() {\n")
+	for k := 1; k <= n; k++ {
+		for range k {
+			sb.WriteString("\tx = f(a, b, c)\n")
+		}
+		sb.WriteString("\ty = g(d)\n")
+	}
+	sb.WriteString("}\n")
+	return sb.String()
+}
+
+// TestNestedRepeatsFitTheWorkCap runs 220 row groups of growing repeats, which cost quadratic work when every interval searches its period from its first symbol.
+func TestNestedRepeatsFitTheWorkCap(t *testing.T) {
+	inv := buildSource(t, map[string]string{"go.mod": "module example.com/m\n", "rows.go": nestedRepeats(220)})
+	s := newStream(inv, contract.Production, 1<<30)
+	got, work := findGroups(s, formula.DuplicationMaxWork)
+	if work.exceeded() || len(got) == 0 {
+		t.Errorf("%d groups, work %d of %d, want groups within the cap", len(got), work.used, work.max)
+	}
+}
+
+// unitStreams returns streams whose long repeats have a period above half their length, which is where units defers the work.
+// The Fibonacci word and its prefix joins nest such repeats, and the u v u u v u shapes give overlapping copies in one file.
+func unitStreams() []*stream {
+	fib := func(n int) []int32 {
+		a, b := []int32{int32(token.IDENT)}, []int32{int32(token.IDENT), int32(token.IDENT + 1)}
+		for len(b) < n {
+			a, b = b, append(slices.Clone(b), a...)
+		}
+		return b
+	}
+	var out []*stream
+	for _, n := range []int{300, 500, 800} {
+		out = append(out, streamOf(fib(n)))
+	}
+	for seed := range 30 {
+		rng := rand.New(rand.NewSource(int64(seed)))
+		w := fib(150 + rng.Intn(250))
+		join := append(slices.Clone(w[:100+rng.Intn(100)]), randomTokens(rng, 1+rng.Intn(8))...)
+		out = append(out, streamOf(append(join, w...), w[:len(w)-rng.Intn(60)]))
+	}
+	for seed := range 30 {
+		rng := rand.New(rand.NewSource(int64(seed)))
+		u, v := randomTokens(rng, 60+rng.Intn(60)), randomTokens(rng, 1+rng.Intn(60))
+		var file []int32
+		for range 2 + rng.Intn(3) {
+			file = append(file, u...)
+			file = append(file, v...)
+		}
+		file = append(file, u...)
+		out = append(out, streamOf(file, append(slices.Clone(u), v...)))
+	}
+	return out
+}
+
+// referenceUnit applies the spec rule to a node.
+// It returns the smallest period, whether two occurrences overlap, and whether units defers the node, which holds when the period is above half the length and the closest occurrences are at least half the length apart.
+func referenceUnit(s *stream, sa []int32, n node) (period int32, overlap, deferred bool) {
+	period = int32(naivePeriod(s.symbols[sa[n.lb] : sa[n.lb]+n.length]))
+	positions := slices.Sorted(slices.Values(sa[n.lb : n.rb+1]))
+	gap := n.length
+	for i := 1; i < len(positions); i++ {
+		overlap = overlap || positions[i]-positions[i-1] < n.length
+		gap = min(gap, positions[i]-positions[i-1])
+	}
+	return period, overlap, overlap && 2*period > n.length && n.length <= 2*gap
+}
+
+// TestUnitsMatchSmallestPeriod compares the unit of every node with the smallest period of the full node, including deferred nodes that share a deferred ancestor.
+func TestUnitsMatchSmallestPeriod(t *testing.T) {
+	var nested, siblings int
+	for i, s := range unitStreams() {
+		work := &budget{max: 1 << 40}
+		sa := suffixArray(s.symbols, s.alphabet(), &work.used)
+		lcp := lcpArray(s.symbols, sa, &work.used)
+		nodes := intervalTree(sa, lcp, work)
+		got := s.units(nodes, sa, lcp, work)
+		deferred := make([]bool, len(nodes))
+		for k, n := range nodes {
+			period, overlap, isDeferred := referenceUnit(s, sa, n)
+			deferred[k] = isDeferred
+			if overlap && got[k] != period || !overlap && (got[k] != 0 && got[k] != period || 2*period > n.length && got[k] != 0) {
+				t.Errorf("stream %d node %d (length %d, overlap %t): unit %d, smallest period %d", i, k, n.length, overlap, got[k], period)
+			}
+		}
+		children := map[int32]int{}
+		for k, n := range nodes {
+			if !deferred[k] {
+				continue
+			}
+			ancestor := n.parent
+			for ancestor >= 0 && !deferred[ancestor] {
+				ancestor = nodes[ancestor].parent
+			}
+			if ancestor < 0 {
+				continue
+			}
+			if ancestor != n.parent {
+				nested++
+			}
+			children[ancestor]++
+			if children[ancestor] == 2 {
+				siblings++
+			}
+		}
+	}
+	if nested == 0 || siblings == 0 {
+		t.Errorf("the streams hold %d deferred nodes below a deferred grandparent and %d sibling pairs, want both above 0", nested, siblings)
+	}
+}
+
+// TestWorkCapInDeferredPeriods runs out the budget inside deferredPeriods, where units charges the failure-array work of deferred nodes, and expects no groups and no units.
+func TestWorkCapInDeferredPeriods(t *testing.T) {
+	s := unitStreams()[0]
+	full := &budget{max: 1 << 40}
+	sa := suffixArray(s.symbols, s.alphabet(), &full.used)
+	lcp := lcpArray(s.symbols, sa, &full.used)
+	nodes := intervalTree(sa, lcp, full)
+	base := full.used
+	s.units(nodes, sa, lcp, full)
+	deferred := make([]bool, len(nodes))
+	for k, n := range nodes {
+		_, _, deferred[k] = referenceUnit(s, sa, n)
+	}
+	only := &budget{max: 1 << 40}
+	s.deferredPeriods(nodes, sa, childLists(nodes), deferred, make([]int32, len(nodes)), only)
+	first := full.used - only.used
+	if only.used == 0 || first < base {
+		t.Fatalf("deferredPeriods used %d of %d units after a base of %d, want a share inside units", only.used, full.used, base)
+	}
+	for _, limit := range []int{first, first + only.used/2, full.used - 1} {
+		if got, work := findGroups(s, limit); got != nil || !work.exceeded() {
+			t.Errorf("cap %d: %d groups, work %d, want none past the cap", limit, len(got), work.used)
+		}
+		if got := s.units(nodes, sa, lcp, &budget{used: base, max: limit}); got != nil {
+			t.Errorf("cap %d: units returned %d entries, want nil", limit, len(got))
+		}
+	}
+}

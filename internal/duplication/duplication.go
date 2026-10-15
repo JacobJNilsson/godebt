@@ -478,6 +478,8 @@ func (s *stream) units(nodes []node, sa, lcp []int32, work *budget) []int32 {
 	if work.exceeded() {
 		return nil
 	}
+	// A deferred node has a period above half its length, so no parent can inherit it.
+	deferred := make([]bool, len(nodes))
 	for _, k := range longestFirst(nodes) {
 		n := nodes[k]
 		if d := inheritedUnit(children[k], out, n.length); d > 0 {
@@ -493,13 +495,91 @@ func (s *stream) units(nodes []node, sa, lcp []int32, work *budget) []int32 {
 			continue
 		}
 		// A run with two occurrences gap symbols apart has a period of at most gap, which its first 2*gap symbols show.
+		if halves[k] > 0 {
+			out[k] = halves[k]
+			continue
+		}
 		prefix := min(n.length, 2*gap)
+		if prefix == n.length {
+			deferred[k] = true
+			continue
+		}
 		if !work.spend(int(prefix)) {
 			return nil
 		}
 		out[k] = smallestPeriod(s.symbols[sa[n.lb] : sa[n.lb]+prefix])
 	}
+	if !s.deferredPeriods(nodes, sa, children, deferred, out, work) {
+		return nil
+	}
 	return out
+}
+
+// deferredPeriods sets the smallest period of each deferred node and reports whether the budget held.
+// A depth-first walk keeps one failure array, so a node extends the array of its nearest deferred ancestor and computes only the new symbols.
+// Nodes in other branches write only at or above the length of that ancestor.
+func (s *stream) deferredPeriods(nodes []node, sa []int32, children [][]int32, deferred []bool, out []int32, work *budget) bool {
+	var longest int32
+	for k, n := range nodes {
+		if deferred[k] {
+			longest = max(longest, n.length)
+		}
+	}
+	if longest == 0 {
+		return true
+	}
+	prefix := make([]int32, longest)
+	// from is the nearest deferred ancestor of each node, or -1.
+	from := make([]int32, len(nodes))
+	var stack []int32
+	for k, n := range nodes {
+		if n.parent < 0 {
+			from[k] = -1
+			stack = append(stack, int32(k))
+		}
+	}
+	for len(stack) > 0 {
+		k := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+		self := from[k]
+		if deferred[k] {
+			n := nodes[k]
+			done := int32(1)
+			if self >= 0 {
+				done = nodes[self].length
+			}
+			steps := extendPrefix(prefix, s.symbols[sa[n.lb]:sa[n.lb]+n.length], done)
+			if !work.spend(steps) {
+				return false
+			}
+			out[k] = n.length - prefix[n.length-1]
+			self = k
+		}
+		for _, c := range children[k] {
+			from[c] = self
+			stack = append(stack, c)
+		}
+	}
+	return true
+}
+
+// extendPrefix fills prefix[from:len(symbols)] with the failure function of the symbols and returns the steps it took.
+// It expects prefix[:from] to hold the failure function of the first from symbols.
+func extendPrefix(prefix []int32, symbols []int32, from int32) int {
+	steps := 0
+	for i := from; i < int32(len(symbols)); i++ {
+		m := prefix[i-1]
+		for m > 0 && symbols[i] != symbols[m] {
+			m = prefix[m-1]
+			steps++
+		}
+		if symbols[i] == symbols[m] {
+			m++
+		}
+		prefix[i] = m
+		steps++
+	}
+	return steps
 }
 
 // halfFinder holds the state of the search for periods of at most half the run length.
