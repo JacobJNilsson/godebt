@@ -124,7 +124,7 @@ func explainStale(stderr io.Writer, committed, fresh []byte) {
 	if errBefore == nil && errAfter == nil {
 		cmp := godebt.Compare(before, after)
 		if cmp.Comparable {
-			_, _ = fmt.Fprintf(stderr, "index %d to %d  new %d  resolved %d\n", cmp.Before.Index, cmp.After.Index, len(cmp.New), len(cmp.Resolved))
+			_, _ = fmt.Fprintf(stderr, "index %d to %d  new %d  resolved %d  changed %d\n", cmp.Before.Index, cmp.After.Index, len(cmp.New), len(cmp.Resolved), len(cmp.Changed))
 		} else {
 			_, _ = fmt.Fprintf(stderr, "refused: %s\n", cmp.Refusal)
 		}

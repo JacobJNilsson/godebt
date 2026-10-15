@@ -1,7 +1,7 @@
 godebt 0.0.0-test  example.com/functions
 
 index  5/100  lower is better  scoring 0.3.0
-       baseline 0  delta +5  new 4  resolved 0
+       baseline 0  delta +5  new 4  resolved 0  changed 0
        complexity-erosion 5  duplication 0
 test index  7/100  not part of the index
 

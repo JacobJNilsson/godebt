@@ -46,4 +46,8 @@ The index delta is +5.
 
 None.
 
+## Changed findings
+
+None.
+
 Persistent findings: 0.

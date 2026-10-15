@@ -66,7 +66,7 @@ func TestRenderUnmeasuredCells(t *testing.T) {
 
 func TestRenderEmptyLists(t *testing.T) {
 	terminal, markdown := renderBoth(t, Compare(rep(20), rep(20)))
-	if !strings.Contains(terminal, "\nnew 0\n\nresolved 0\n\npersistent 0\n") {
+	if !strings.Contains(terminal, "\nnew 0\n\nresolved 0\n\nchanged 0\n\npersistent 0\n") {
 		t.Errorf("terminal counts:\n%s", terminal)
 	}
 	if !strings.Contains(markdown, "## New findings\n\nNone.\n") {
@@ -95,5 +95,38 @@ func TestRenderPartialAndPipes(t *testing.T) {
 	}
 	if !strings.Contains(markdown, `| production | complexity.hotspot | a/x\|y.go | 3-13 | a:F |`) {
 		t.Errorf("Markdown does not escape the pipe:\n%s", markdown)
+	}
+}
+
+func changedComparison() *Comparison {
+	before := rep(20, cloneGroup("old", 50, span{"a.go", 10, 20}, span{"b.go", 30, 40}))
+	after := rep(20, cloneGroup("new", 70, span{"a.go", 10, 24}, span{"b.go", 30, 44}))
+	return Compare(before, after)
+}
+
+func TestRenderChanged(t *testing.T) {
+	terminal, markdown := renderBoth(t, changedComparison())
+	if !strings.Contains(terminal, "\nchanged 1\n  production  duplication.clone-group  a.go:10-24  new  tokens 50 to 70\n") {
+		t.Errorf("terminal changed list:\n%s", terminal)
+	}
+	if !strings.Contains(markdown, "## Changed findings\n\n| set | kind | path | lines | identity | tokens before | tokens after |\n") ||
+		!strings.Contains(markdown, "| production | duplication.clone-group | a.go | 10-24 | new | 50 | 70 |\n") {
+		t.Errorf("Markdown changed list:\n%s", markdown)
+	}
+}
+
+func TestRenderChangedIsBounded(t *testing.T) {
+	var before, after []contract.Finding
+	for i := range 12 {
+		p := fmt.Sprintf("p%02d", i)
+		before = append(before, cloneGroup("o"+p, 5, span{p + "/x.go", 1, 9}, span{p + "/y.go", 1, 9}))
+		after = append(after, cloneGroup("n"+p, 6, span{p + "/x.go", 1, 9}, span{p + "/y.go", 1, 9}))
+	}
+	terminal, markdown := renderBoth(t, Compare(rep(10, before...), rep(10, after...)))
+	if !strings.Contains(terminal, "\nchanged 12\n") || !strings.Contains(terminal, "\n  and 2 more\n") || strings.Contains(terminal, "p10/x.go") {
+		t.Errorf("terminal changed list is not bounded:\n%s", terminal)
+	}
+	if !strings.Contains(markdown, "## Changed findings\n\nThe list shows 10 of 12.\n") || strings.Contains(markdown, "p10/x.go") {
+		t.Errorf("Markdown changed list is not bounded:\n%s", markdown)
 	}
 }

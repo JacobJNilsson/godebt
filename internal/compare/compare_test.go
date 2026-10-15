@@ -261,7 +261,7 @@ func TestJSONNames(t *testing.T) {
 	if err := json.Unmarshal(data, &keys); err != nil {
 		t.Fatal(err)
 	}
-	for _, key := range []string{"comparable", "before", "after", "indexDelta", "metrics", "new", "resolved", "persistent"} {
+	for _, key := range []string{"comparable", "before", "after", "indexDelta", "metrics", "new", "resolved", "persistent", "changed"} {
 		if _, ok := keys[key]; !ok {
 			t.Errorf("JSON lacks %q: %s", key, data)
 		}

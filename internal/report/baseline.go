@@ -8,6 +8,7 @@ type Baseline struct {
 	Delta    int
 	New      int
 	Resolved int
+	Changed  int
 }
 
 // Signed prints a delta with its sign, so a rise reads as +3 and no change as 0.

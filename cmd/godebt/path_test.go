@@ -9,6 +9,8 @@ import (
 	"testing"
 
 	"github.com/JacobJNilsson/godebt"
+	"github.com/JacobJNilsson/godebt/internal/compare"
+	"github.com/JacobJNilsson/godebt/internal/contract"
 )
 
 // movedTree copies the named fixture and moves the listed files into the directory dir, next to an empty directory named pk.
@@ -132,7 +134,7 @@ func TestAuditPathFiltersComparison(t *testing.T) {
 		t.Errorf("index delta %d, want %d", got.Comparison.IndexDelta, all.Comparison.IndexDelta)
 	}
 	text := runText(t, root, "--baseline", base, "--path", "pkg")
-	want := fmt.Sprintf("new %d  resolved 0\n", len(all.Comparison.New))
+	want := fmt.Sprintf("new %d  resolved 0  changed 0\n", len(all.Comparison.New))
 	if !strings.Contains(text, want) {
 		t.Errorf("text lacks %q:\n%s", want, text)
 	}
@@ -203,5 +205,20 @@ func TestAuditPathRejectsSymlink(t *testing.T) {
 func TestHelpListsPath(t *testing.T) {
 	if !strings.Contains(auditHelp, "\n  --path <dir>") || !strings.Contains(usage, "[--path <dir>]") {
 		t.Error("help or usage lacks --path <dir>")
+	}
+}
+
+func TestFilterComparisonKeepsChangedUnderDir(t *testing.T) {
+	changed := func(id string, paths ...string) compare.Changed {
+		facts := &contract.CloneFacts{GroupID: id}
+		for _, p := range paths {
+			facts.Members = append(facts.Members, contract.CloneMember{Path: p, StartLine: 1, EndLine: 5})
+		}
+		return compare.Changed{After: contract.Finding{Kind: "duplication.clone-group", Path: paths[0], Identity: id, Facts: contract.Facts{Clone: facts}}}
+	}
+	cmp := &godebt.Comparison{Changed: []compare.Changed{changed("in", "pkg/a.go", "x/b.go"), changed("member", "x/b.go", "pkg/c.go"), changed("out", "x/b.go", "y/c.go")}}
+	got := filterComparison(cmp, "pkg").Changed
+	if len(got) != 2 || got[0].After.Identity != "in" || got[1].After.Identity != "member" {
+		t.Errorf("filtered changed = %+v, want in and member", got)
 	}
 }

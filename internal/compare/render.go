@@ -10,7 +10,7 @@ import (
 	"github.com/JacobJNilsson/godebt/internal/report"
 )
 
-// maxListed bounds the new and the resolved list of both renderers.
+// maxListed bounds the new, resolved, and changed list of both renderers.
 const maxListed = 10
 
 // unmeasured is the cell text for a number that one report did not measure.
@@ -35,6 +35,7 @@ func Render(w io.Writer, c *Comparison) error {
 	}
 	terminalList(&b, "new", c.New)
 	terminalList(&b, "resolved", c.Resolved)
+	terminalChanged(&b, c.Changed)
 	fmt.Fprintf(&b, "\npersistent %d\n", len(c.Persistent))
 	return write(w, &b)
 }
@@ -57,6 +58,7 @@ func RenderMarkdown(w io.Writer, c *Comparison) error {
 	}
 	markdownList(&b, "New findings", c.New)
 	markdownList(&b, "Resolved findings", c.Resolved)
+	markdownChanged(&b, c.Changed)
 	fmt.Fprintf(&b, "\nPersistent findings: %d.\n", len(c.Persistent))
 	return write(w, &b)
 }
@@ -134,4 +136,37 @@ func markdownList(b *strings.Builder, title string, findings []contract.Finding)
 
 func lines(f contract.Finding) string {
 	return strconv.Itoa(f.StartLine) + "-" + strconv.Itoa(f.EndLine)
+}
+
+// terminalChanged writes the changed clone groups as a terminal list with their token counts before and after.
+func terminalChanged(b *strings.Builder, changed []Changed) {
+	fmt.Fprintf(b, "\nchanged %d\n", len(changed))
+	for _, ch := range changed[:min(len(changed), maxListed)] {
+		f := ch.After
+		fmt.Fprintf(b, "  %s  %s  %s:%s  %s  tokens %d to %d\n", f.SourceSet, f.Kind, f.Path, lines(f), f.Identity, ch.BeforeTokens, f.Facts.Clone.Tokens)
+	}
+	if len(changed) > maxListed {
+		fmt.Fprintf(b, "  and %d more\n", len(changed)-maxListed)
+	}
+}
+
+// markdownChanged writes the changed clone groups as a Markdown table with their token counts before and after.
+func markdownChanged(b *strings.Builder, changed []Changed) {
+	b.WriteString("\n## Changed findings\n\n")
+	if len(changed) == 0 {
+		b.WriteString("None.\n")
+		return
+	}
+	if len(changed) > maxListed {
+		fmt.Fprintf(b, "The list shows %d of %d.\n\n", maxListed, len(changed))
+	}
+	b.WriteString("| set | kind | path | lines | identity | tokens before | tokens after |\n| --- | --- | --- | ---: | --- | ---: | ---: |\n")
+	for _, ch := range changed[:min(len(changed), maxListed)] {
+		f := ch.After
+		cells := []string{string(f.SourceSet), f.Kind, f.Path, lines(f), f.Identity}
+		for i, cell := range cells {
+			cells[i] = strings.ReplaceAll(cell, "|", `\|`)
+		}
+		fmt.Fprintf(b, "| %s | %d | %d |\n", strings.Join(cells, " | "), ch.BeforeTokens, f.Facts.Clone.Tokens)
+	}
 }

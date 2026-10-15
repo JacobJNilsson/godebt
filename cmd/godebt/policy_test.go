@@ -49,7 +49,7 @@ func TestAuditPolicyPass(t *testing.T) {
 	if code != 0 || stderr != "" {
 		t.Errorf("exit %d, stderr %q, want 0 and nothing", code, stderr)
 	}
-	if !strings.Contains(stdout, "\n       baseline 5  delta 0  new 0  resolved 0\n") {
+	if !strings.Contains(stdout, "\n       baseline 5  delta 0  new 0  resolved 0  changed 0\n") {
 		t.Errorf("stdout lacks the baseline line:\n%s", stdout)
 	}
 }

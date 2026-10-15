@@ -38,4 +38,6 @@ new 4
 
 resolved 0
 
+changed 0
+
 persistent 0
