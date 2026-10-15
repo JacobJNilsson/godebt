@@ -18,9 +18,10 @@ const exitPolicy = 2
 
 // auditFlags holds the parsed command line of godebt audit.
 type auditFlags struct {
-	root, out, config, baseline string
-	asJSON, asMarkdown, quiet   bool
-	help                        bool
+	root, out, config, baseline, dir string
+	dirSet                           bool
+	asJSON, asMarkdown, quiet        bool
+	help                             bool
 }
 
 // auditResult is what gate needs after the command writes the report.
@@ -63,11 +64,13 @@ func parseAudit(args []string, stderr io.Writer) (auditFlags, bool) {
 	fs.BoolVar(&f.quiet, "quiet", false, "do not name the written file")
 	fs.StringVar(&f.config, "config", "", "read the configuration from the file")
 	fs.StringVar(&f.baseline, "baseline", "", "compare with a saved JSON report")
+	fs.StringVar(&f.dir, "path", "", "print only the findings under the directory")
 	paths, ok := parseInterleaved(fs, args)
 	if !ok {
 		return f, false
 	}
 	f.help = *wantHelp
+	fs.Visit(func(fl *flag.Flag) { f.dirSet = f.dirSet || fl.Name == "path" })
 	if len(paths) != 1 && !f.help {
 		fs.Usage()
 		return f, false
@@ -81,6 +84,10 @@ func parseAudit(args []string, stderr io.Writer) (auditFlags, bool) {
 // auditTo audits, writes the report, and evaluates the policy, so the report exists before gate picks the exit code.
 func auditTo(f auditFlags, stdout io.Writer) (auditResult, error) {
 	render, err := format(f.asJSON, f.asMarkdown, f.out)
+	if err != nil {
+		return auditResult{}, err
+	}
+	dir, err := checkDir(f)
 	if err != nil {
 		return auditResult{}, err
 	}
@@ -102,7 +109,8 @@ func auditTo(f auditFlags, stdout io.Writer) (auditResult, error) {
 	if baseline != nil {
 		result.cmp = godebt.Compare(baseline, r)
 	}
-	if err := writeReport(f.out, stdout, render, r, result.cmp); err != nil {
+	shown, shownCmp := printable(r, result.cmp, dir)
+	if err := writeReport(f.out, stdout, render, shown, shownCmp); err != nil {
 		return auditResult{}, err
 	}
 	var p godebt.Policy

@@ -9,12 +9,12 @@
   "configDigest": "sha256:4c50bb6e6bc006a5b9243824f1685a5379c85d70169e618006d2edfe7d505d66",
   "coverage": {
     "production": {
-      "files": 44,
-      "sloc": 5797
+      "files": 45,
+      "sloc": 5908
     },
     "test": {
-      "files": 38,
-      "sloc": 7850
+      "files": 39,
+      "sloc": 8041
     },
     "generated": {
       "files": 0
@@ -61,7 +61,7 @@
     },
     "complexity.cc.p90.production": {
       "state": "complete",
-      "value": 8,
+      "value": 7,
       "unit": "count",
       "detail": {}
     },
@@ -73,30 +73,30 @@
     },
     "complexity.functions.production": {
       "state": "complete",
-      "value": 417,
+      "value": 428,
       "unit": "count",
       "detail": {}
     },
     "complexity.functions.test": {
       "state": "complete",
-      "value": 630,
+      "value": 642,
       "unit": "count",
       "detail": {}
     },
     "duplication.density.production": {
       "state": "complete",
-      "value": 0.003105054338450923,
+      "value": 0.003046716316858497,
       "unit": "ratio",
       "numerator": 18,
-      "denominator": 5797,
+      "denominator": 5908,
       "detail": {}
     },
     "duplication.density.test": {
       "state": "complete",
-      "value": 0.056178343949044585,
+      "value": 0.054843924884964555,
       "unit": "ratio",
       "numerator": 441,
-      "denominator": 7850,
+      "denominator": 8041,
       "detail": {}
     },
     "duplication.duplicated-lines.production": {
@@ -137,18 +137,18 @@
     },
     "erosion.eroded-share.production": {
       "state": "complete",
-      "value": 0.05697479794559585,
+      "value": 0.05584764827313139,
       "unit": "ratio",
       "numerator": 333.91960221030877,
-      "denominator": 5860.829950273141,
+      "denominator": 5979.116624163373,
       "detail": {}
     },
     "erosion.eroded-share.test": {
       "state": "complete",
-      "value": 0.0702610759523917,
+      "value": 0.06814564628995318,
       "unit": "ratio",
       "numerator": 545.4116695787089,
-      "denominator": 7762.643286992576,
+      "denominator": 8003.617241489423,
       "detail": {}
     },
     "erosion.excess-mass.production": {
@@ -165,29 +165,29 @@
     },
     "erosion.excess-share.production": {
       "state": "complete",
-      "value": 0.014004070136789379,
+      "value": 0.013727023378625813,
       "unit": "ratio",
       "numerator": 82.07547368342087,
-      "denominator": 5860.829950273141,
+      "denominator": 5979.116624163373,
       "detail": {}
     },
     "erosion.excess-share.test": {
       "state": "complete",
-      "value": 0.016705927163234102,
+      "value": 0.01620294292365899,
       "unit": "ratio",
       "numerator": 129.68215334666613,
-      "denominator": 7762.643286992576,
+      "denominator": 8003.617241489423,
       "detail": {}
     },
     "erosion.mass.production": {
       "state": "complete",
-      "value": 5860.829950273141,
+      "value": 5979.116624163373,
       "unit": "mass",
       "detail": {}
     },
     "erosion.mass.test": {
       "state": "complete",
-      "value": 7762.643286992576,
+      "value": 8003.617241489423,
       "unit": "mass",
       "detail": {}
     }
@@ -205,9 +205,9 @@
           {
             "metricId": "erosion.excess-share.production",
             "state": "complete",
-            "value": 0.014004070136789379,
+            "value": 0.013727023378625813,
             "saturatesAt": 0.55,
-            "score": 2.5461945703253415
+            "score": 2.49582243247742
           },
           {
             "metricId": "erosion.excess-mass.production",
@@ -226,9 +226,9 @@
           {
             "metricId": "duplication.density.production",
             "state": "complete",
-            "value": 0.003105054338450923,
+            "value": 0.003046716316858497,
             "saturatesAt": 0.3,
-            "score": 1.0350181128169744
+            "score": 1.015572105619499
           },
           {
             "metricId": "duplication.groups.production",
@@ -275,8 +275,8 @@
     {
       "kind": "complexity.hotspot",
       "path": "cmd/godebt/run.go",
-      "startLine": 87,
-      "endLine": 111,
+      "startLine": 88,
+      "endLine": 112,
       "identity": "cmd/godebt:run",
       "ambiguous": false,
       "sourceSet": "production",

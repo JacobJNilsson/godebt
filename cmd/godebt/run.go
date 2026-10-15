@@ -9,7 +9,7 @@ import (
 	"github.com/JacobJNilsson/godebt"
 )
 
-const usage = "usage: godebt audit <path> [--config <file>] [--baseline <report.json>] [--json|--md] [--out <file>] [--quiet]\n       godebt compare <before.json> <after.json> [--json|--md]\n       godebt baseline [path] [--config <file>] [--out <file>] [--check] [--quiet]\n       godebt version\n       godebt --version"
+const usage = "usage: godebt audit <path> [--config <file>] [--baseline <report.json>] [--path <dir>] [--json|--md] [--out <file>] [--quiet]\n       godebt compare <before.json> <after.json> [--json|--md]\n       godebt baseline [path] [--config <file>] [--out <file>] [--check] [--quiet]\n       godebt version\n       godebt --version"
 
 const help = `usage: godebt <command>
 
@@ -52,11 +52,12 @@ flags:
   --help, -h  print this help
 `
 
-const auditHelp = `usage: godebt audit <path> [--config <file>] [--baseline <report.json>] [--json|--md] [--out <file>] [--quiet]
+const auditHelp = `usage: godebt audit <path> [--config <file>] [--baseline <report.json>] [--path <dir>] [--json|--md] [--out <file>] [--quiet]
 
 flags:
   --config <file>           read the configuration from the file, not from godebt.yaml at the path
   --baseline <report.json>  compare with a report that godebt audit --out saved, and run the policy checks that need a baseline
+  --path <dir>              print only the findings under the directory, a slash path below the audited path, and keep the index of the whole module
   --json                    print the report as JSON
   --md                      print the report as Markdown
   --out <file>              write the report to the file, in the format of --json, --md, the .json or .md extension, else text

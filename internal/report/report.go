@@ -38,6 +38,8 @@ type Report struct {
 	Safeguards      []contract.Safeguard       `json:"safeguards"`
 	Limits          []contract.Limit           `json:"limits"`
 	Meta            Meta                       `json:"meta"`
+	// Dir is the directory whose findings the renderers print, and "" means the whole module. It never reaches the JSON.
+	Dir string `json:"-"`
 }
 
 // Meta holds the facts of one run that two equal audits may not share.
