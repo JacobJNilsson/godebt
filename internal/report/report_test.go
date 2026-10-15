@@ -115,10 +115,11 @@ func compareGolden(t *testing.T, name string, got []byte) {
 	}
 }
 
+// The sets fixture tracks three files that its .gitignore files match, and the Git file list counts them.
 func TestNewSetsFixture(t *testing.T) {
 	r := newReport(t, "sets")
 	want := Coverage{
-		Production:    Measured{Files: 2, SLOC: 4},
+		Production:    Measured{Files: 5, SLOC: 10},
 		Test:          Measured{Files: 1, SLOC: 7},
 		Generated:     Counted{Files: 1},
 		Vendored:      Counted{Files: 1},
@@ -131,8 +132,8 @@ func TestNewSetsFixture(t *testing.T) {
 		t.Errorf("coverage:\n got %+v\nwant %+v", r.Coverage, want)
 	}
 	got := []float64{r.Metrics["complexity.functions.production"].Value, r.Metrics["complexity.functions.test"].Value}
-	if !reflect.DeepEqual(got, []float64{2, 1}) {
-		t.Errorf("functions = %v, want [2 1]", got)
+	if !reflect.DeepEqual(got, []float64{5, 1}) {
+		t.Errorf("functions = %v, want [5 1]", got)
 	}
 }
 

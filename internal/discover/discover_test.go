@@ -75,11 +75,18 @@ func write(t *testing.T, root string, files map[string]string) {
 	}
 }
 
-func TestWalkSetsFixture(t *testing.T) {
-	root, err := filepath.Abs(filepath.Join(fixtures, "sets"))
-	if err != nil {
+// copyFixture copies a fixture to a temporary directory outside any work tree, so the walk reads .gitignore files.
+func copyFixture(t *testing.T, name string) string {
+	t.Helper()
+	dst := realTempDir(t)
+	if err := os.CopyFS(dst, os.DirFS(filepath.Join(fixtures, name))); err != nil {
 		t.Fatal(err)
 	}
+	return dst
+}
+
+func TestWalkSetsFixture(t *testing.T) {
+	root := copyFixture(t, "sets")
 	tree := walk(t, root, Options{})
 
 	want := shape{

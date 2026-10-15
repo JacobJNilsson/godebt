@@ -118,7 +118,7 @@
       "id": "complexity.functions.production",
       "before": {
         "state": "complete",
-        "value": 2,
+        "value": 5,
         "unit": "count",
         "detail": {}
       },
@@ -128,7 +128,7 @@
         "unit": "count",
         "detail": {}
       },
-      "delta": 21
+      "delta": 18
     },
     {
       "id": "complexity.functions.test",
@@ -153,7 +153,7 @@
         "value": 0,
         "unit": "ratio",
         "numerator": 0,
-        "denominator": 4,
+        "denominator": 10,
         "detail": {}
       },
       "after": {
@@ -289,7 +289,7 @@
         "value": 0,
         "unit": "ratio",
         "numerator": 0,
-        "denominator": 2,
+        "denominator": 5,
         "detail": {}
       },
       "after": {
@@ -326,7 +326,7 @@
       "id": "erosion.mass.production",
       "before": {
         "state": "complete",
-        "value": 2,
+        "value": 5,
         "unit": "mass",
         "detail": {}
       },
@@ -336,7 +336,7 @@
         "unit": "mass",
         "detail": {}
       },
-      "delta": 220.13995181193832
+      "delta": 217.13995181193832
     },
     {
       "id": "erosion.mass.test",
