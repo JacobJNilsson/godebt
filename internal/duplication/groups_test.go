@@ -821,3 +821,76 @@ func TestUnitNodesClimbIsLogarithmic(t *testing.T) {
 		t.Errorf("work %d for %d nodes, want at most 20 per node", work.used, size)
 	}
 }
+
+// treeOf returns the interval tree of a stream with its suffix and LCP arrays.
+func treeOf(s *stream, work *budget) ([]node, []int32, []int32) {
+	sa := suffixArray(s.symbols, s.alphabet(), &work.used)
+	lcp := lcpArray(s.symbols, sa, &work.used)
+	return intervalTree(sa, lcp, work), sa, lcp
+}
+
+// repeatingFile returns a file of runs that repeat short units a varying number of times, so nodes nest and have half periods.
+func repeatingFile(rng *rand.Rand, units [][]int32) []int32 {
+	var file []int32
+	for range 4 + rng.Intn(4) {
+		unit := units[rng.Intn(len(units))]
+		for range 20 + rng.Intn(50) {
+			file = append(file, unit...)
+		}
+		file = append(file, randomTokens(rng, 1+rng.Intn(3))...)
+	}
+	return file
+}
+
+// smallestHalfPeriod returns the smallest period of the symbols at start that is at most half of length, or 0.
+func smallestHalfPeriod(symbols []int32, start, length int32) int32 {
+	for p := int32(1); p <= length/2; p++ {
+		if slices.Equal(symbols[start:start+length-p], symbols[start+p:start+length]) {
+			return p
+		}
+	}
+	return 0
+}
+
+// TestHalfPeriodsMatchBruteForce compares the half period of every searched node with a check of all offsets.
+// A node more than twice as long as its parent is not searched, because the unit step finds its period from the closest pair.
+// A node shorter than 2*nodeMinLength can have an offset whose ancestor is no node, so the search can miss that offset.
+func TestHalfPeriodsMatchBruteForce(t *testing.T) {
+	checked := 0
+	for seed := range 30 {
+		rng := rand.New(rand.NewSource(int64(seed)))
+		var units [][]int32
+		for range 3 {
+			units = append(units, randomTokens(rng, 1+rng.Intn(7)))
+		}
+		s := streamOf(repeatingFile(rng, units), repeatingFile(rng, units))
+		work := &budget{max: 1 << 40}
+		nodes, sa, lcp := treeOf(s, work)
+		halves := s.halfPeriods(nodes, sa, lcp, work)
+		for k, n := range nodes {
+			if n.length > 2*parentDepth(n, lcp) || n.length < 2*nodeMinLength {
+				continue
+			}
+			checked++
+			if want := smallestHalfPeriod(s.symbols, sa[n.lb], n.length); halves[k] != want {
+				t.Fatalf("seed %d node %d of length %d: half period %d, want %d", seed, k, n.length, halves[k], want)
+			}
+		}
+	}
+	if checked < 500 {
+		t.Errorf("checked %d nodes, want at least 500", checked)
+	}
+}
+
+// TestHalfPeriodsWorkIsLinear bounds the search work on nested repeats, where every node scanned the suffix array range of an ancestor.
+func TestHalfPeriodsWorkIsLinear(t *testing.T) {
+	inv := buildSource(t, map[string]string{"go.mod": "module example.com/m\n", "rows.go": nestedRepeats(200)})
+	s := newStream(inv, contract.Production, 1<<30)
+	work := &budget{max: 1 << 40}
+	nodes, sa, lcp := treeOf(s, work)
+	before := work.used
+	s.halfPeriods(nodes, sa, lcp, work)
+	if got := work.used - before; got > 20*len(s.symbols) {
+		t.Errorf("half period work %d for %d symbols, want at most 20 per symbol", got, len(s.symbols))
+	}
+}
