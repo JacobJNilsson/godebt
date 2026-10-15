@@ -790,3 +790,34 @@ func TestWorkCapInDeferredPeriods(t *testing.T) {
 		}
 	}
 }
+
+// TestUnitNodesClimbIsLogarithmic gives a chain of 3000 nested nodes whose units each reach about halfway up the chain.
+// A climb of one node per step costs about 2 million units, and the bound allows 20 per node.
+func TestUnitNodesClimbIsLogarithmic(t *testing.T) {
+	const size = 3000
+	nodes := make([]node, size)
+	units := make([]int32, size)
+	for i := range nodes {
+		nodes[i] = node{length: int32(formula.DuplicationMinTokens + i), parent: int32(i - 1)}
+		if d := nodes[i].length / 2; d >= formula.DuplicationMinTokens {
+			units[i] = d
+		}
+	}
+	work := &budget{max: 1 << 40}
+	got := unitNodes(nodes, units, work)
+	for i, d := range units {
+		if d == 0 {
+			continue
+		}
+		want := int32(i)
+		for nodes[want].parent >= 0 && nodes[nodes[want].parent].length >= d {
+			want = nodes[want].parent
+		}
+		if got[i] != want {
+			t.Fatalf("node %d with unit %d: got ancestor %d, want %d", i, d, got[i], want)
+		}
+	}
+	if work.used > 20*size {
+		t.Errorf("work %d for %d nodes, want at most 20 per node", work.used, size)
+	}
+}

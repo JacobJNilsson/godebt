@@ -731,6 +731,7 @@ type target struct{ node, length int32 }
 func unitNodes(nodes []node, units []int32, work *budget) []int32 {
 	out := make([]int32, len(nodes))
 	order := longestFirst(nodes)
+	var jump []int32
 	for i := len(order) - 1; i >= 0; i-- {
 		k, d := order[i], units[order[i]]
 		if d < formula.DuplicationMinTokens {
@@ -743,15 +744,49 @@ func unitNodes(nodes []node, units []int32, work *budget) []int32 {
 		case units[parent] == d:
 			out[k] = out[parent]
 		default:
-			u := parent
-			for nodes[u].parent >= 0 && nodes[nodes[u].parent].length >= d {
-				u = nodes[u].parent
-				work.spend(1)
+			if jump == nil {
+				jump = jumpPointers(nodes, order, work)
 			}
-			out[k] = u
+			out[k] = shallowest(nodes, jump, parent, d, work)
 		}
 	}
 	return out
+}
+
+// jumpPointers returns for each node an ancestor so that a climb of any distance takes a logarithmic number of steps.
+// The pointer of a node skips as many levels as the pointers of the two nodes above it together, and a root points to itself.
+func jumpPointers(nodes []node, order []int32, work *budget) []int32 {
+	jump := make([]int32, len(nodes))
+	depth := make([]int32, len(nodes))
+	work.spend(len(nodes))
+	for i := len(order) - 1; i >= 0; i-- {
+		k := order[i]
+		p := nodes[k].parent
+		if p < 0 {
+			jump[k] = k
+			continue
+		}
+		depth[k] = depth[p] + 1
+		if j := jump[p]; depth[p]-depth[j] == depth[j]-depth[jump[j]] {
+			jump[k] = jump[j]
+		} else {
+			jump[k] = p
+		}
+	}
+	return jump
+}
+
+// shallowest returns the shallowest ancestor of node v, or v itself, that is at least length symbols long.
+func shallowest(nodes []node, jump []int32, v int32, length int32, work *budget) int32 {
+	for p := nodes[v].parent; p >= 0 && nodes[p].length >= length; p = nodes[v].parent {
+		work.spend(1)
+		if j := jump[v]; nodes[j].length >= length {
+			v = j
+		} else {
+			v = p
+		}
+	}
+	return v
 }
 
 // candidates returns each maximal repeat's group after the unit and line rules.
