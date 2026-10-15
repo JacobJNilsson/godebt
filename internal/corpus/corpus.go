@@ -41,6 +41,7 @@ type tableRow struct {
 	productionLines   int
 	functions         int
 	eroded            int
+	excessMass        float64
 	cloneGroups       int
 	completeness      string
 }
@@ -230,6 +231,7 @@ func row(e entry, r *godebt.Report) tableRow {
 	out.productionLines = r.Coverage.Production.SLOC
 	out.functions = metric(r, "complexity.functions.production")
 	out.eroded = metric(r, "erosion.eroded-count.production")
+	out.excessMass = r.Metrics["erosion.excess-mass.production"].Value
 	out.cloneGroups = metric(r, "duplication.groups.production")
 	return out
 }
@@ -282,9 +284,9 @@ func writeTable(w io.Writer, rows []tableRow) error {
 		return err
 	}
 	for _, r := range rows {
-		if _, err := fmt.Fprintf(w, "| %s | %s | %d | %d | %d | %d | %d | %d | %d | %s |\n",
+		if _, err := fmt.Fprintf(w, "| %s | %s | %d | %d | %d | %d | %d | %d | %.1f | %d | %s |\n",
 			r.path, r.version, r.index, r.complexityPoints, r.duplicationPoints,
-			r.productionLines, r.functions, r.eroded, r.cloneGroups, r.completeness); err != nil {
+			r.productionLines, r.functions, r.eroded, r.excessMass, r.cloneGroups, r.completeness); err != nil {
 			return err
 		}
 	}
@@ -374,6 +376,6 @@ configuration. The index is 0 to 100 and lower is better. The two points columns
 hold the points that each dimension contributed to the index. Production counts
 cover the measured production set only. A run of make corpus rewrites this file.
 
-| module | version | index | complexity-erosion points | duplication points | production code lines | production functions | eroded functions | clone groups | completeness |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| module | version | index | complexity-erosion points | duplication points | production code lines | production functions | eroded functions | excess mass | clone groups | completeness |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 `

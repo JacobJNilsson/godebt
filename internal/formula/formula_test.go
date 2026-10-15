@@ -48,7 +48,7 @@ func TestTableMatchesSpec(t *testing.T) {
 			t.Errorf("%s: %d terms, want 2", d.ID, len(d.Terms))
 		}
 	}
-	if ScoringVersion != "0.2.0" {
+	if ScoringVersion != "0.3.0" {
 		t.Errorf("ScoringVersion = %q", ScoringVersion)
 	}
 }

@@ -63,15 +63,15 @@ func TestScoreJSON(t *testing.T) {
 		Contributions: []Contribution{{
 			Dimension: "complexity-erosion", Points: 25, Weight: 0.6,
 			Terms: []Term{
-				{MetricID: "erosion.eroded-share.production", State: Complete, Value: 0.18, SaturatesAt: 0.25, Score: 72},
-				{MetricID: "erosion.eroded-count.production", State: Complete, Value: 3, CountScale: 20, Score: 12.5},
+				{MetricID: "erosion.excess-share.production", State: Complete, Value: 0.18, SaturatesAt: 0.25, Score: 72},
+				{MetricID: "erosion.excess-mass.production", State: Complete, Value: 3, CountScale: 20, Score: 12.5},
 			},
 		}},
 	}
 	want := `{"index":25,"direction":"lower-is-better","partial":false,"contributions":[` +
 		`{"dimension":"complexity-erosion","points":25,"weight":0.6,"terms":[` +
-		`{"metricId":"erosion.eroded-share.production","state":"complete","value":0.18,"saturatesAt":0.25,"score":72},` +
-		`{"metricId":"erosion.eroded-count.production","state":"complete","value":3,"countScale":20,"score":12.5}]}]}`
+		`{"metricId":"erosion.excess-share.production","state":"complete","value":0.18,"saturatesAt":0.25,"score":72},` +
+		`{"metricId":"erosion.excess-mass.production","state":"complete","value":3,"countScale":20,"score":12.5}]}]}`
 	got, err := json.Marshal(s)
 	if err != nil {
 		t.Fatal(err)

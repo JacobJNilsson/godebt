@@ -36,6 +36,8 @@ var calibrationPairs = []struct {
 	{name: "split-function", want: lower},
 	{name: "add-clone", want: higher},
 	{name: "add-branches", want: higher},
+	{name: "reduce-branches", want: lower},
+	{name: "trim-to-threshold", want: near},
 	{name: "rename", want: equal},
 	{name: "move", want: equal},
 	{name: "tests-only", want: equal},
@@ -130,6 +132,13 @@ func someToNone(before, after float64) string {
 	return ""
 }
 
+func unchangedAboveZero(before, after float64) string {
+	if before < 1 || before != after {
+		return fmt.Sprintf("%v -> %v, want the same count of at least 1", before, after)
+	}
+	return ""
+}
+
 func rises(before, after float64) string {
 	if after <= before {
 		return fmt.Sprintf("%v -> %v, want a rise", before, after)
@@ -144,9 +153,20 @@ func falls(before, after float64) string {
 	return ""
 }
 
+func fallsAboveZero(before, after float64) string {
+	if after >= before || after <= 0 {
+		return fmt.Sprintf("%v -> %v, want a fall that stays above 0", before, after)
+	}
+	return ""
+}
+
 // pairChanges pins the named change of each pair, so fixture drift cannot pass on the index direction alone.
 var pairChanges = []pairChange{
 	{pair: "add-branches", metric: "erosion.eroded-count.production", check: rises},
+	{pair: "reduce-branches", metric: "erosion.excess-mass.production", check: falls},
+	{pair: "reduce-branches", metric: "erosion.eroded-count.production", check: unchangedAboveZero},
+	{pair: "trim-to-threshold", metric: "erosion.eroded-count.production", check: falls},
+	{pair: "trim-to-threshold", metric: "erosion.excess-mass.production", check: fallsAboveZero},
 	{pair: "split-function", metric: "erosion.eroded-count.production", check: someToNone},
 	{pair: "add-clone", metric: "duplication.groups.production", check: rises},
 	{pair: "extract-clone", metric: "duplication.groups.production", check: falls},
@@ -157,7 +177,7 @@ var equalPairs = []string{"rename", "move", "tests-only", "comments"}
 
 // productionMetrics are the four metrics that feed the index.
 var productionMetrics = []string{
-	"erosion.eroded-share.production", "erosion.eroded-count.production",
+	"erosion.excess-share.production", "erosion.excess-mass.production",
 	"duplication.density.production", "duplication.groups.production",
 }
 
@@ -199,8 +219,8 @@ func TestPadPairAddsOnlyCleanCode(t *testing.T) {
 	before := pairReport(t, "pad/before")
 	after := pairReport(t, "pad/after")
 	assertAboutDouble(t, before, after)
-	assertMetricsMove(t, before, after, 0, "erosion.eroded-count.production", "duplication.groups.production")
-	assertMetricsMove(t, before, after, 0.05, "erosion.eroded-share.production", "duplication.density.production")
+	assertMetricsMove(t, before, after, 0, "erosion.excess-mass.production", "duplication.groups.production")
+	assertMetricsMove(t, before, after, 0.05, "erosion.excess-share.production", "duplication.density.production")
 }
 
 // TestMovePairMovesTheFunction asserts that the move pair takes tangle.go out of the root and into a helper package.

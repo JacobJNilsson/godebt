@@ -68,10 +68,11 @@ terms:
   production/test  the measured sets, test holds _test.go files and classify.test matches, production the other measured Go files
   cc               the cyclomatic complexity of one function
   p50/p90/max      the median, the 90th percentile, and the highest cc of a set
-  eroded           the functions with cc above 10, with their share of the set mass
+  eroded           the functions with cc above 10, with their share of the set mass, reported and not scored
+  excess mass      the cc above 10 of each eroded function, times the square root of its source lines
   mass             the cc of a function times the square root of its source lines
-  count term       scores the number of eroded functions or clone groups, with no division by size
-  saturating term  scores the eroded share or the duplication density, which divide debt by size
+  count term       scores the excess mass or the number of clone groups, with no division by size
+  saturating term  scores the excess share or the duplication density, which divide debt by size
   clones           the groups of repeated code of at least 100 tokens and 3 lines
   dup lines        the source lines in clones, with their share of the set lines
   partial          a production input failed or hit a cap, so the index counts that part as full debt

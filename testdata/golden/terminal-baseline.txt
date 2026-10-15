@@ -1,8 +1,8 @@
 godebt 0.0.0-test  example.com/functions
 
-index  23/100  lower is better  scoring 0.2.0
-       baseline 0  delta +23  new 4  resolved 0
-       complexity-erosion 23  duplication 0
+index  5/100  lower is better  scoring 0.3.0
+       baseline 0  delta +5  new 4  resolved 0
+       complexity-erosion 5  duplication 0
 
                    files    sloc   funcs   cc p50/p90/max     eroded  clones    dup lines
 production             9     146      23          1/11/15    3 (52%)       0            0

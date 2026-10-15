@@ -49,13 +49,13 @@ func TestAuditPolicyPass(t *testing.T) {
 	if code != 0 || stderr != "" {
 		t.Errorf("exit %d, stderr %q, want 0 and nothing", code, stderr)
 	}
-	if !strings.Contains(stdout, "\n       baseline 23  delta 0  new 0  resolved 0\n") {
+	if !strings.Contains(stdout, "\n       baseline 5  delta 0  new 0  resolved 0\n") {
 		t.Errorf("stdout lacks the baseline line:\n%s", stdout)
 	}
 }
 
 func TestAuditPolicyFailKeepsReport(t *testing.T) {
-	cfg := writeFile(t, "fail.yaml", "policy:\n  maxIndex: 10\n  regression: {maxIncrease: 0}\n")
+	cfg := writeFile(t, "fail.yaml", "policy:\n  maxIndex: 4\n  regression: {maxIncrease: 0}\n")
 	code, stdout, stderr := runArgs(t, "audit", filepath.Join(fixtures, "functions"), "--json", "--config", cfg)
 	if code != 2 {
 		t.Errorf("exit code %d, want 2", code)
@@ -63,7 +63,7 @@ func TestAuditPolicyFailKeepsReport(t *testing.T) {
 	if _, err := report.Load(strings.NewReader(stdout)); err != nil {
 		t.Errorf("stdout is not the full report: %v", err)
 	}
-	want := "policy: maxIndex: index 23 is above 10\npolicy: regression skipped, no baseline\n"
+	want := "policy: maxIndex: index 5 is above 4\npolicy: regression skipped, no baseline\n"
 	if stderr != want {
 		t.Errorf("stderr = %q, want %q", stderr, want)
 	}

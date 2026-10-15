@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "analyzerVersion": "0.0.0-test",
-  "scoringVersion": "0.2.0",
+  "scoringVersion": "0.3.0",
   "repo": {
     "root": "<root>",
     "module": "example.com/clones/nested"
@@ -181,28 +181,28 @@
     }
   },
   "score": {
-    "index": 55,
+    "index": 46,
     "direction": "lower-is-better",
     "partial": false,
     "contributions": [
       {
         "dimension": "complexity-erosion",
-        "points": 33,
+        "points": 24,
         "weight": 0.6,
         "terms": [
           {
-            "metricId": "erosion.eroded-share.production",
+            "metricId": "erosion.excess-share.production",
             "state": "complete",
-            "value": 0.8757861042305908,
-            "saturatesAt": 0.8,
-            "score": 100
+            "value": 0.36061780762436096,
+            "saturatesAt": 0.55,
+            "score": 65.56687411352017
           },
           {
-            "metricId": "erosion.eroded-count.production",
+            "metricId": "erosion.excess-mass.production",
             "state": "complete",
-            "value": 2,
-            "countScale": 20,
-            "score": 8.70166109670887
+            "value": 107.53604047016051,
+            "countScale": 700,
+            "score": 12.503843908803102
           }
         ]
       },

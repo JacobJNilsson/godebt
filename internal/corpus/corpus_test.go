@@ -23,6 +23,7 @@ func stubAudit(index int) *godebt.Report {
 		Metrics: map[string]contract.Metric{
 			"complexity.functions.production": {State: contract.Complete, Value: 40},
 			"erosion.eroded-count.production": {State: contract.Complete, Value: 3},
+			"erosion.excess-mass.production":  {State: contract.Complete, Value: 114.64},
 			"duplication.groups.production":   {State: contract.Complete, Value: 2},
 		},
 		Score: contract.Score{Index: index, Contributions: []contract.Contribution{
@@ -59,7 +60,7 @@ func TestMeasureRows(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := tableRow{entry: entries[0], index: 17, complexityPoints: 12, duplicationPoints: 5, productionLines: 900, functions: 40, eroded: 3, cloneGroups: 2, completeness: string(report.Complete)}
+	want := tableRow{entry: entries[0], index: 17, complexityPoints: 12, duplicationPoints: 5, productionLines: 900, functions: 40, eroded: 3, excessMass: 114.64, cloneGroups: 2, completeness: string(report.Complete)}
 	if len(rows) != 1 || rows[0] != want {
 		t.Errorf("rows = %+v, want %+v", rows, want)
 	}
@@ -79,7 +80,7 @@ func TestMeasureReportsAFailedModule(t *testing.T) {
 
 func TestWriteTable(t *testing.T) {
 	var out strings.Builder
-	if err := writeTable(&out, []tableRow{{entry: entry{path: "example.com/a", version: "v1.0.0"}, index: 17, complexityPoints: 12, duplicationPoints: 5, productionLines: 900, functions: 40, eroded: 3, cloneGroups: 2, completeness: string(report.Complete)}}); err != nil {
+	if err := writeTable(&out, []tableRow{{entry: entry{path: "example.com/a", version: "v1.0.0"}, index: 17, complexityPoints: 12, duplicationPoints: 5, productionLines: 900, functions: 40, eroded: 3, excessMass: 114.64, cloneGroups: 2, completeness: string(report.Complete)}}); err != nil {
 		t.Fatal(err)
 	}
 	lines := strings.Split(strings.TrimSpace(out.String()), "\n")
@@ -90,7 +91,7 @@ func TestWriteTable(t *testing.T) {
 	for _, line := range lines {
 		if strings.HasPrefix(line, "| example.com/a") {
 			rows++
-			for _, cell := range []string{"v1.0.0", "17", "12", "5", "900", "40", "3", "2", "complete"} {
+			for _, cell := range []string{"v1.0.0", "17", "12", "5", "900", "40", "3", "114.6", "2", "complete"} {
 				if !strings.Contains(line, cell) {
 					t.Errorf("row %q lacks the cell %q", line, cell)
 				}
