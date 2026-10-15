@@ -12,7 +12,7 @@ import (
 )
 
 // SchemaVersion is the version of the report shape of spec 003.
-const SchemaVersion = "1.0.0"
+const SchemaVersion = "1.1.0"
 
 // Completeness says whether every production metric was measured.
 type Completeness string
@@ -34,6 +34,7 @@ type Report struct {
 	Completeness    Completeness               `json:"completeness"`
 	Metrics         map[string]contract.Metric `json:"metrics"`
 	Score           contract.Score             `json:"score"`
+	TestScore       contract.Score             `json:"testScore"`
 	Findings        []contract.Finding         `json:"findings"`
 	Safeguards      []contract.Safeguard       `json:"safeguards"`
 	Limits          []contract.Limit           `json:"limits"`
@@ -110,6 +111,7 @@ func New(inv *inventory.Inventory, metrics map[string]contract.Metric, findings 
 		Completeness: completeness(metrics),
 		Metrics:      metrics,
 		Score:        formula.Score(metrics),
+		TestScore:    formula.TestScore(metrics),
 		Findings:     findings,
 		Safeguards:   append([]contract.Safeguard{}, guards...),
 		Limits:       sorted,

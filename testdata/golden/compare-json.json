@@ -5,7 +5,7 @@
     "partial": false,
     "analyzerVersion": "0.0.0-test",
     "scoringVersion": "0.3.0",
-    "schemaVersion": "1.0.0",
+    "schemaVersion": "1.1.0",
     "configDigest": "sha256:4c50bb6e6bc006a5b9243824f1685a5379c85d70169e618006d2edfe7d505d66"
   },
   "after": {
@@ -13,7 +13,7 @@
     "partial": false,
     "analyzerVersion": "0.0.0-test",
     "scoringVersion": "0.3.0",
-    "schemaVersion": "1.0.0",
+    "schemaVersion": "1.1.0",
     "configDigest": "sha256:4c50bb6e6bc006a5b9243824f1685a5379c85d70169e618006d2edfe7d505d66"
   },
   "indexDelta": 5,

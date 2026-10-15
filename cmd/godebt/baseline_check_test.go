@@ -132,7 +132,7 @@ func TestBaselineCheckUnusableFile(t *testing.T) {
 	if code != 1 || !strings.Contains(stderr, file) || !strings.Contains(stderr, "regenerate it with: godebt baseline "+root+"\n") {
 		t.Errorf("invalid: exit %d, stderr %q", code, stderr)
 	}
-	schema := strings.Replace(string(committedBaseline(t, root)), `"schemaVersion": "1.0.0"`, `"schemaVersion": "9.0.0"`, 1)
+	schema := strings.Replace(string(committedBaseline(t, root)), `"schemaVersion": "1.1.0"`, `"schemaVersion": "9.0.0"`, 1)
 	if err := os.WriteFile(file, []byte(schema), 0o644); err != nil {
 		t.Fatal(err)
 	}

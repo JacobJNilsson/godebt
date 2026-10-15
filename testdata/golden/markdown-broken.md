@@ -4,6 +4,7 @@ example.com/broken, godebt 0.0.0-test.
 
 The index is 100/100, lower is better, scoring 0.3.0, partial.
 Contributions: complexity-erosion 60, duplication 40.
+The test index is 100/100, not part of the index, partial.
 
 | set | files | sloc | funcs | cc p50/p90/max | eroded | clones | dup lines |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |

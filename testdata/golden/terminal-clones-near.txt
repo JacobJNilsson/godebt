@@ -2,6 +2,7 @@ godebt 0.0.0-test  example.com/clones/near
 
 index  27/100  lower is better  scoring 0.3.0
        complexity-erosion 6  duplication 21
+test index  0/100  not part of the index
 
                    files    sloc   funcs   cc p50/p90/max     eroded  clones    dup lines
 production             2      80       2         11/11/11   2 (100%)       1     44 (55%)

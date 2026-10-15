@@ -3,6 +3,7 @@ godebt 0.0.0-test  example.com/broken
 index  100/100  lower is better  scoring 0.3.0 (partial)
 incomplete: bad.go, bad_test.go
        complexity-erosion 60  duplication 40
+test index  100/100  not part of the index (partial)
 
                    files    sloc   funcs   cc p50/p90/max     eroded  clones    dup lines
 production             2       2       -                -          -       -            -

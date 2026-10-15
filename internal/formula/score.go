@@ -3,6 +3,7 @@ package formula
 import (
 	"math"
 	"sort"
+	"strings"
 
 	"github.com/JacobJNilsson/godebt/internal/contract"
 )
@@ -15,9 +16,31 @@ const fullScore = 100
 
 // Score computes the index of spec 002 from the production metrics, and it reads no configuration.
 func Score(metrics map[string]contract.Metric) contract.Score {
-	out := contract.Score{Direction: DirectionLowerIsBetter, Contributions: make([]contract.Contribution, len(Dimensions))}
-	weighted := make([]float64, len(Dimensions))
+	return score(Dimensions, metrics)
+}
+
+// TestScore computes the test index of spec 002 with the table of Score over the test metrics.
+func TestScore(metrics map[string]contract.Metric) contract.Score {
+	return score(testDimensions, metrics)
+}
+
+// testDimensions is Dimensions with every production metric id replaced by its test id.
+var testDimensions = func() []Dimension {
+	out := make([]Dimension, len(Dimensions))
 	for i, d := range Dimensions {
+		out[i] = Dimension{ID: d.ID, Weight: d.Weight, Terms: make([]Term, len(d.Terms))}
+		for j, t := range d.Terms {
+			t.MetricID = strings.TrimSuffix(t.MetricID, "."+string(contract.Production)) + "." + string(contract.Test)
+			out[i].Terms[j] = t
+		}
+	}
+	return out
+}()
+
+func score(dimensions []Dimension, metrics map[string]contract.Metric) contract.Score {
+	out := contract.Score{Direction: DirectionLowerIsBetter, Contributions: make([]contract.Contribution, len(dimensions))}
+	weighted := make([]float64, len(dimensions))
+	for i, d := range dimensions {
 		terms, dimension, partial := scoreDimension(d, metrics)
 		out.Partial = out.Partial || partial
 		weighted[i] = float64(d.Weight * dimension)

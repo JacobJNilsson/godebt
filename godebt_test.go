@@ -132,7 +132,7 @@ func TestAuditVersionsAndDigest(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := []string{r.SchemaVersion, r.AnalyzerVersion, r.ScoringVersion, r.ConfigDigest}
-	want := []string{"1.0.0", Version, formula.ScoringVersion, contract.Digest(contract.Config{Exclude: cfg.Exclude, TestPatterns: cfg.Classify.Test})}
+	want := []string{"1.1.0", Version, formula.ScoringVersion, contract.Digest(contract.Config{Exclude: cfg.Exclude, TestPatterns: cfg.Classify.Test})}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("versions and digest = %v, want %v", got, want)
 	}

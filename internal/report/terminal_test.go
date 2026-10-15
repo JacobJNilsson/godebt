@@ -61,8 +61,28 @@ func TestTerminalHeaderAndIndex(t *testing.T) {
 	if got[3] != contributions {
 		t.Errorf("contributions line = %q, want %q", got[3], contributions)
 	}
-	if out := render(t, &Report{}); !strings.HasPrefix(out, "godebt   (no go.mod)\n\nindex  0/100  lower is better  scoring \n\n") {
+	if out := render(t, &Report{}); !strings.HasPrefix(out, "godebt   (no go.mod)\n\nindex  0/100  lower is better  scoring \ntest index  0/100  not part of the index\n\n") {
 		t.Errorf("empty report:\n%s", out)
+	}
+}
+
+func TestTerminalTestIndexLine(t *testing.T) {
+	r := newReport(t, "functions")
+	got := lines(render(t, r))
+	want := fmt.Sprintf("test index  %d/100  not part of the index", r.TestScore.Index)
+	if got[4] != want {
+		t.Errorf("line after the contributions line = %q, want %q", got[4], want)
+	}
+}
+
+func TestTerminalPartialTestIndex(t *testing.T) {
+	r := &Report{ScoringVersion: "0.3.0", TestScore: contract.Score{Index: 9, Partial: true}}
+	if got := lineWith(t, render(t, r), "test index"); got != "test index  9/100  not part of the index (partial)" {
+		t.Errorf("test index line = %q, want the partial mark", got)
+	}
+	r.TestScore.Partial = false
+	if got := lineWith(t, render(t, r), "test index"); strings.Contains(got, "partial") {
+		t.Errorf("complete test index line = %q, want no partial mark", got)
 	}
 }
 
@@ -117,7 +137,7 @@ func TestTerminalTable(t *testing.T) {
 	} {
 		out := render(t, newReport(t, tc.fixture))
 		for _, want := range [][]string{tc.production, tc.test} {
-			if got := strings.Fields(lineWith(t, out, want[0]+" ")); !reflect.DeepEqual(got, want) {
+			if got := strings.Fields(lineWith(t, out, fmt.Sprintf("%-10s", want[0]))); !reflect.DeepEqual(got, want) {
 				t.Errorf("%s: %s row = %q, want %q", tc.fixture, want[0], got, want)
 			}
 		}
@@ -129,7 +149,7 @@ func TestTerminalTableWidths(t *testing.T) {
 	for _, fixture := range []string{"functions", "broken", "empty", "clones/nested"} {
 		out := render(t, newReport(t, fixture))
 		header := lineWith(t, out, strings.Repeat(" ", 19)+"files")
-		for _, prefix := range []string{"production ", "test "} {
+		for _, prefix := range []string{"production", "test      "} {
 			if row := lineWith(t, out, prefix); len(row) != len(header) {
 				t.Errorf("%s: %q is %d wide, header %d", fixture, row, len(row), len(header))
 			}

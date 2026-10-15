@@ -19,7 +19,7 @@ const (
 func rep(index int, findings ...contract.Finding) *report.Report {
 	contract.SortFindings(findings)
 	return &report.Report{
-		SchemaVersion:   "1.0.0",
+		SchemaVersion:   "1.1.0",
 		AnalyzerVersion: "0.1.0",
 		ScoringVersion:  "0.1.0",
 		ConfigDigest:    "sha256:aa",

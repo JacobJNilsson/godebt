@@ -83,6 +83,13 @@ func TestMaxIndex(t *testing.T) {
 	}
 }
 
+func TestPolicyIgnoresTestIndex(t *testing.T) {
+	r := rep(10)
+	r.TestScore = contract.Score{Index: 90, Partial: true}
+	p := config.Policy{MaxIndex: intp(40)}
+	assertReasons(t, Evaluate(p, r, nil), false)
+}
+
 func TestPartialScoreFailsMaxIndex(t *testing.T) {
 	partial := rep(10)
 	partial.Score.Partial = true

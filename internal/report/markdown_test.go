@@ -37,6 +37,7 @@ func TestMarkdownSummary(t *testing.T) {
 		"",
 		"The index is 5/100, lower is better, scoring 0.3.0.",
 		"Contributions: complexity-erosion 5, duplication 0.",
+		"The test index is 7/100, not part of the index.",
 		"",
 		"| set | files | sloc | funcs | cc p50/p90/max | eroded | clones | dup lines |",
 		"| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
@@ -83,6 +84,26 @@ func TestMarkdownSummary(t *testing.T) {
 	}, "\n")
 	if out != want {
 		t.Errorf("markdown:\n%s\nwant:\n%s", out, want)
+	}
+}
+
+func TestMarkdownTestIndexLine(t *testing.T) {
+	r := newReport(t, "functions")
+	got := lines(markdown(t, r))
+	want := fmt.Sprintf("The test index is %d/100, not part of the index.", r.TestScore.Index)
+	if got[6] != want {
+		t.Errorf("line after the contributions line = %q, want %q", got[6], want)
+	}
+}
+
+func TestMarkdownPartialTestIndex(t *testing.T) {
+	r := &Report{TestScore: contract.Score{Index: 9, Partial: true}}
+	if want := "The test index is 9/100, not part of the index, partial.\n"; !strings.Contains(markdown(t, r), want) {
+		t.Errorf("markdown lacks %q:\n%s", want, markdown(t, r))
+	}
+	r.TestScore.Partial = false
+	if out := markdown(t, r); !strings.Contains(out, "not part of the index.\n") {
+		t.Errorf("complete test index line has a partial mark:\n%s", out)
 	}
 }
 

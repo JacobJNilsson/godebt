@@ -4,6 +4,7 @@ example.com/clones/exact, godebt 0.0.0-test.
 
 The index is 21/100, lower is better, scoring 0.3.0.
 Contributions: complexity-erosion 0, duplication 21.
+The test index is 21/100, not part of the index.
 
 | set | files | sloc | funcs | cc p50/p90/max | eroded | clones | dup lines |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |

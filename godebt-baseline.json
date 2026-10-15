@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
   "analyzerVersion": "0.5.0-dev",
   "scoringVersion": "0.3.0",
   "repo": {
@@ -10,11 +10,11 @@
   "coverage": {
     "production": {
       "files": 45,
-      "sloc": 5971
+      "sloc": 6009
     },
     "test": {
       "files": 39,
-      "sloc": 8166
+      "sloc": 8299
     },
     "generated": {
       "files": 0
@@ -61,7 +61,7 @@
     },
     "complexity.cc.p90.production": {
       "state": "complete",
-      "value": 8,
+      "value": 7,
       "unit": "count",
       "detail": {}
     },
@@ -73,30 +73,30 @@
     },
     "complexity.functions.production": {
       "state": "complete",
-      "value": 434,
+      "value": 438,
       "unit": "count",
       "detail": {}
     },
     "complexity.functions.test": {
       "state": "complete",
-      "value": 655,
+      "value": 672,
       "unit": "count",
       "detail": {}
     },
     "duplication.density.production": {
       "state": "complete",
-      "value": 0.0030145704237146205,
+      "value": 0.0029955067398901645,
       "unit": "ratio",
       "numerator": 18,
-      "denominator": 5971,
+      "denominator": 6009,
       "detail": {}
     },
     "duplication.density.test": {
       "state": "complete",
-      "value": 0.05400440852314475,
+      "value": 0.05313893240149416,
       "unit": "ratio",
       "numerator": 441,
-      "denominator": 8166,
+      "denominator": 8299,
       "detail": {}
     },
     "duplication.duplicated-lines.production": {
@@ -137,18 +137,18 @@
     },
     "erosion.eroded-share.production": {
       "state": "complete",
-      "value": 0.037026442815647785,
+      "value": 0.036816869312612584,
       "unit": "ratio",
       "numerator": 223.69256378506574,
-      "denominator": 6041.42733610183,
+      "denominator": 6075.817090412791,
       "detail": {}
     },
     "erosion.eroded-share.test": {
       "state": "complete",
-      "value": 0.06695325902563844,
+      "value": 0.06586713870400167,
       "unit": "ratio",
       "numerator": 545.4116695787089,
-      "denominator": 8146.1556541983155,
+      "denominator": 8280.482199624883,
       "detail": {}
     },
     "erosion.excess-mass.production": {
@@ -165,29 +165,29 @@
     },
     "erosion.excess-share.production": {
       "state": "complete",
-      "value": 0.007503711460829045,
+      "value": 0.007461239676422395,
       "unit": "ratio",
       "numerator": 45.33312754167319,
-      "denominator": 6041.42733610183,
+      "denominator": 6075.817090412791,
       "detail": {}
     },
     "erosion.excess-share.test": {
       "state": "complete",
-      "value": 0.015919429833117827,
+      "value": 0.01566118375962947,
       "unit": "ratio",
       "numerator": 129.68215334666613,
-      "denominator": 8146.1556541983155,
+      "denominator": 8280.482199624883,
       "detail": {}
     },
     "erosion.mass.production": {
       "state": "complete",
-      "value": 6041.42733610183,
+      "value": 6075.817090412791,
       "unit": "mass",
       "detail": {}
     },
     "erosion.mass.test": {
       "state": "complete",
-      "value": 8146.1556541983155,
+      "value": 8280.482199624883,
       "unit": "mass",
       "detail": {}
     }
@@ -205,9 +205,9 @@
           {
             "metricId": "erosion.excess-share.production",
             "state": "complete",
-            "value": 0.007503711460829045,
+            "value": 0.007461239676422395,
             "saturatesAt": 0.55,
-            "score": 1.3643111746961898
+            "score": 1.356589032076799
           },
           {
             "metricId": "erosion.excess-mass.production",
@@ -226,9 +226,9 @@
           {
             "metricId": "duplication.density.production",
             "state": "complete",
-            "value": 0.0030145704237146205,
+            "value": 0.0029955067398901645,
             "saturatesAt": 0.3,
-            "score": 1.0048568079048736
+            "score": 0.9985022466300548
           },
           {
             "metricId": "duplication.groups.production",
@@ -236,6 +236,55 @@
             "value": 1,
             "countScale": 15,
             "score": 6.062582034946465
+          }
+        ]
+      }
+    ]
+  },
+  "testScore": {
+    "index": 18,
+    "direction": "lower-is-better",
+    "partial": false,
+    "contributions": [
+      {
+        "dimension": "complexity-erosion",
+        "points": 5,
+        "weight": 0.6,
+        "terms": [
+          {
+            "metricId": "erosion.excess-share.test",
+            "state": "complete",
+            "value": 0.01566118375962947,
+            "saturatesAt": 0.55,
+            "score": 2.8474879562962667
+          },
+          {
+            "metricId": "erosion.excess-mass.test",
+            "state": "complete",
+            "value": 129.68215334666613,
+            "countScale": 700,
+            "score": 14.527163665495745
+          }
+        ]
+      },
+      {
+        "dimension": "duplication",
+        "points": 13,
+        "weight": 0.4,
+        "terms": [
+          {
+            "metricId": "duplication.density.test",
+            "state": "complete",
+            "value": 0.05313893240149416,
+            "saturatesAt": 0.3,
+            "score": 17.71297746716472
+          },
+          {
+            "metricId": "duplication.groups.test",
+            "state": "complete",
+            "value": 23,
+            "countScale": 15,
+            "score": 48.174067680343526
           }
         ]
       }
@@ -275,8 +324,8 @@
     {
       "kind": "complexity.hotspot",
       "path": "cmd/godebt/run.go",
-      "startLine": 88,
-      "endLine": 112,
+      "startLine": 89,
+      "endLine": 113,
       "identity": "cmd/godebt:run",
       "ambiguous": false,
       "sourceSet": "production",
@@ -365,8 +414,8 @@
     {
       "kind": "complexity.hotspot",
       "path": "internal/formula/score.go",
-      "startLine": 36,
-      "endLine": 67,
+      "startLine": 59,
+      "endLine": 90,
       "identity": "internal/formula:scoreDimension",
       "ambiguous": false,
       "sourceSet": "production",
@@ -380,8 +429,8 @@
     {
       "kind": "complexity.hotspot",
       "path": "internal/formula/score_test.go",
-      "startLine": 44,
-      "endLine": 75,
+      "startLine": 45,
+      "endLine": 76,
       "identity": "internal/formula:TestWorkedExample",
       "ambiguous": false,
       "sourceSet": "test",
@@ -740,8 +789,8 @@
     {
       "kind": "duplication.clone-group",
       "path": "internal/policy/policy_test.go",
-      "startLine": 121,
-      "endLine": 130,
+      "startLine": 128,
+      "endLine": 137,
       "identity": "c99d7bb358d3a5d0",
       "ambiguous": false,
       "sourceSet": "test",
@@ -751,13 +800,13 @@
         "members": [
           {
             "path": "internal/policy/policy_test.go",
-            "startLine": 121,
-            "endLine": 130
+            "startLine": 128,
+            "endLine": 137
           },
           {
             "path": "internal/policy/policy_test.go",
-            "startLine": 131,
-            "endLine": 140
+            "startLine": 138,
+            "endLine": 147
           }
         ]
       }

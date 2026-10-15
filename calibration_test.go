@@ -117,6 +117,18 @@ func TestTestsOnlyPairAddsTestDebt(t *testing.T) {
 	}
 }
 
+// TestTestsOnlyPairRaisesTestIndex asserts that the test debt of the tests-only pair moves the test index and leaves the index equal.
+func TestTestsOnlyPairRaisesTestIndex(t *testing.T) {
+	before := pairReport(t, "tests-only/before")
+	after := pairReport(t, "tests-only/after")
+	if after.TestScore.Index <= before.TestScore.Index {
+		t.Errorf("test index %d -> %d, want a higher test index", before.TestScore.Index, after.TestScore.Index)
+	}
+	if after.Score.Index != before.Score.Index {
+		t.Errorf("index %d -> %d, want an equal index", before.Score.Index, after.Score.Index)
+	}
+}
+
 // pairChange is the production metric that one pair must move, and the move that the fixtures name.
 type pairChange struct {
 	pair   string
