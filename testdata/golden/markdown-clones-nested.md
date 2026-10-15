@@ -2,8 +2,8 @@
 
 example.com/clones/nested, godebt 0.0.0-test.
 
-The index is 55/100, lower is better, scoring 0.2.0.
-Contributions: complexity-erosion 33, duplication 22.
+The index is 46/100, lower is better, scoring 0.3.0.
+Contributions: complexity-erosion 24, duplication 22.
 
 | set | files | sloc | funcs | cc p50/p90/max | eroded | clones | dup lines |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |

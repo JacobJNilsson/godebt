@@ -4,19 +4,19 @@
     "index": 0,
     "partial": false,
     "analyzerVersion": "0.0.0-test",
-    "scoringVersion": "0.2.0",
+    "scoringVersion": "0.3.0",
     "schemaVersion": "1.0.0",
     "configDigest": "sha256:4c50bb6e6bc006a5b9243824f1685a5379c85d70169e618006d2edfe7d505d66"
   },
   "after": {
-    "index": 23,
+    "index": 5,
     "partial": false,
     "analyzerVersion": "0.0.0-test",
-    "scoringVersion": "0.2.0",
+    "scoringVersion": "0.3.0",
     "schemaVersion": "1.0.0",
     "configDigest": "sha256:4c50bb6e6bc006a5b9243824f1685a5379c85d70169e618006d2edfe7d505d66"
   },
-  "indexDelta": 23,
+  "indexDelta": 5,
   "metrics": [
     {
       "id": "complexity.cc.max.production",

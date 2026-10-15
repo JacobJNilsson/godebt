@@ -1,6 +1,6 @@
 godebt 0.0.0-test  example.com/broken
 
-index  100/100  lower is better  scoring 0.2.0 (partial)
+index  100/100  lower is better  scoring 0.3.0 (partial)
 incomplete: bad.go, bad_test.go
        complexity-erosion 60  duplication 40
 

@@ -2,8 +2,8 @@
 
 example.com/clones/near, godebt 0.0.0-test.
 
-The index is 54/100, lower is better, scoring 0.2.0.
-Contributions: complexity-erosion 33, duplication 21.
+The index is 27/100, lower is better, scoring 0.3.0.
+Contributions: complexity-erosion 6, duplication 21.
 
 | set | files | sloc | funcs | cc p50/p90/max | eroded | clones | dup lines |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |

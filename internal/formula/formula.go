@@ -17,7 +17,7 @@ const (
 )
 
 // ScoringVersion changes whenever a weight, term, or constant of the score changes.
-const ScoringVersion = "0.2.0"
+const ScoringVersion = "0.3.0"
 
 // Dimension is one weighted part of the index.
 type Dimension struct {
@@ -39,8 +39,8 @@ var Dimensions = []Dimension{
 	{
 		ID: "complexity-erosion", Weight: 0.6,
 		Terms: []Term{
-			{MetricID: "erosion.eroded-share.production", Share: 0.5, SaturatesAt: 0.8},
-			{MetricID: "erosion.eroded-count.production", Share: 0.5, CountScale: 20},
+			{MetricID: "erosion.excess-share.production", Share: 0.5, SaturatesAt: 0.55},
+			{MetricID: "erosion.excess-mass.production", Share: 0.5, CountScale: 700},
 		},
 	},
 	{

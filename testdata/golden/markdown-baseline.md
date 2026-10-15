@@ -2,9 +2,9 @@
 
 example.com/functions, godebt 0.0.0-test.
 
-The index is 23/100, lower is better, scoring 0.2.0.
-Against the baseline index 0 the delta is +23, with 4 new and 0 resolved findings.
-Contributions: complexity-erosion 23, duplication 0.
+The index is 5/100, lower is better, scoring 0.3.0.
+Against the baseline index 0 the delta is +5, with 4 new and 0 resolved findings.
+Contributions: complexity-erosion 5, duplication 0.
 
 | set | files | sloc | funcs | cc p50/p90/max | eroded | clones | dup lines |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |

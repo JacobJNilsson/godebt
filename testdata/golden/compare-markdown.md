@@ -1,8 +1,8 @@
 # godebt comparison
 
-Before: index 0/100, scoring 0.2.0.
-After: index 23/100, scoring 0.2.0.
-The index delta is +23.
+Before: index 0/100, scoring 0.3.0.
+After: index 5/100, scoring 0.3.0.
+The index delta is +5.
 
 ## Metrics
 

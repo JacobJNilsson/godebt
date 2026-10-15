@@ -87,7 +87,7 @@ func TestLoadRejects(t *testing.T) {
 		{"trailing object", `"meta":{"durationMs":0}}`, `"meta":{"durationMs":0}}{}`, "(end)"},
 		{"trailing brace", `"meta":{"durationMs":0}}`, `"meta":{"durationMs":0}}}`, "(end)"},
 		{"trailing bracket", `"meta":{"durationMs":0}}`, `"meta":{"durationMs":0}}]`, "(end)"},
-		{"term value", `"metricId":"erosion.eroded-share.production","state":"complete"`, `"metricId":"erosion.eroded-share.production","state":"incomplete"`, "value"},
+		{"term value", `"metricId":"erosion.excess-share.production","state":"complete"`, `"metricId":"erosion.excess-share.production","state":"incomplete"`, "value"},
 		{"metric unit", `"unit":"count",`, ``, "unit"},
 		{"null locations", `"locations":[]`, `"locations":null`, "locations"},
 		{"missing notes", `,"notes":"No agent hook is declared."`, ``, "notes"},

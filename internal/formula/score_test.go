@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	erodedShare = "erosion.eroded-share.production"
-	erodedCount = "erosion.eroded-count.production"
+	excessShare = "erosion.excess-share.production"
+	excessMass  = "erosion.excess-mass.production"
 	density     = "duplication.density.production"
 	groups      = "duplication.groups.production"
 )
@@ -21,7 +21,7 @@ func complete(v float64) contract.Metric {
 
 func clean() map[string]contract.Metric {
 	return map[string]contract.Metric{
-		erodedShare: complete(0), erodedCount: complete(0), density: complete(0), groups: complete(0),
+		excessShare: complete(0), excessMass: complete(0), density: complete(0), groups: complete(0),
 	}
 }
 
@@ -40,45 +40,45 @@ func scoreOf(t *testing.T, s contract.Score, id string) float64 {
 	return 0
 }
 
-// The worked example: share term 22.5, count term 100 × ln(1.15)/(1+ln(1.15)) = 12.26, dimension 17.38, weighted 10.43, index 10.
+// The worked example of spec 003: share term 9.09, mass term 100 × b/(1+b) with b = ln(1 + 114.6/700), 13.17, dimension 11.13, weighted 6.68, index 7.
 func TestWorkedExample(t *testing.T) {
 	m := clean()
-	m[erodedShare] = complete(0.18)
-	m[erodedCount] = complete(3)
+	m[excessShare] = complete(0.05)
+	m[excessMass] = complete(114.6)
 	s := Score(m)
-	if got := scoreOf(t, s, erodedShare); !near(got, 22.5) {
-		t.Errorf("share term = %v, want 22.5", got)
+	if got := scoreOf(t, s, excessShare); !near(got, 9.09) {
+		t.Errorf("share term = %v, want 9.09", got)
 	}
-	if got := scoreOf(t, s, erodedCount); !near(got, 12.26) {
-		t.Errorf("count term = %v, want 12.26", got)
+	if got := scoreOf(t, s, excessMass); !near(got, 13.17) {
+		t.Errorf("count term = %v, want 13.17", got)
 	}
-	if s.Index != 10 || s.Partial || s.Direction != "lower-is-better" {
-		t.Errorf("score = %+v, want index 10, not partial, lower-is-better", s)
+	if s.Index != 7 || s.Partial || s.Direction != "lower-is-better" {
+		t.Errorf("score = %+v, want index 7, not partial, lower-is-better", s)
 	}
 	if len(s.Contributions) != 2 {
 		t.Fatalf("got %d contributions, want 2", len(s.Contributions))
 	}
 	erosion, dup := s.Contributions[0], s.Contributions[1]
-	if erosion.Dimension != "complexity-erosion" || erosion.Points != 10 || erosion.Weight != 0.6 {
+	if erosion.Dimension != "complexity-erosion" || erosion.Points != 7 || erosion.Weight != 0.6 {
 		t.Errorf("erosion contribution = %+v", erosion)
 	}
 	if dup.Dimension != "duplication" || dup.Points != 0 || dup.Weight != 0.4 {
 		t.Errorf("duplication contribution = %+v", dup)
 	}
 	term := erosion.Terms[0]
-	if term.MetricID != erodedShare || term.State != contract.Complete || term.Value != 0.18 || term.SaturatesAt != 0.8 {
+	if term.MetricID != excessShare || term.State != contract.Complete || term.Value != 0.05 || term.SaturatesAt != 0.55 {
 		t.Errorf("share term = %+v", term)
 	}
-	if count := erosion.Terms[1]; count.CountScale != 20 || count.SaturatesAt != 0 {
+	if count := erosion.Terms[1]; count.CountScale != 700 || count.SaturatesAt != 0 {
 		t.Errorf("count term = %+v", count)
 	}
 }
 
 func TestSaturatingTerm(t *testing.T) {
-	for _, tc := range []struct{ value, want float64 }{{0, 0}, {0.4, 50}, {0.8, 100}, {0.9, 100}} {
+	for _, tc := range []struct{ value, want float64 }{{0, 0}, {0.275, 50}, {0.55, 100}, {0.9, 100}} {
 		m := clean()
-		m[erodedShare] = complete(tc.value)
-		if got := scoreOf(t, Score(m), erodedShare); !near(got, tc.want) {
+		m[excessShare] = complete(tc.value)
+		if got := scoreOf(t, Score(m), excessShare); !near(got, tc.want) {
 			t.Errorf("value %v: term = %v, want %v", tc.value, got, tc.want)
 		}
 	}
@@ -116,7 +116,7 @@ func TestDimensionIsShareWeightedSum(t *testing.T) {
 func TestIndexRoundsHalfUp(t *testing.T) {
 	// The share term scores 12.5, the dimension 6.25, and the weighted sum 3.75, which rounds to 4.
 	m := clean()
-	m[erodedShare] = complete(0.1)
+	m[excessShare] = complete(0.55 / 8)
 	if s := Score(m); s.Index != 4 {
 		t.Errorf("index = %d, want 4", s.Index)
 	}
@@ -138,7 +138,7 @@ func TestContributionsSumToIndex(t *testing.T) {
 		for _, dens := range values {
 			for _, count := range counts {
 				s := Score(map[string]contract.Metric{
-					erodedShare: complete(share), erodedCount: complete(count),
+					excessShare: complete(share), excessMass: complete(count),
 					density: complete(dens), groups: complete(count),
 				})
 				total := 0
@@ -164,21 +164,21 @@ func TestApportionmentTiesByDimensionID(t *testing.T) {
 
 func TestNotApplicableRatioBesideZeroCount(t *testing.T) {
 	m := clean()
-	m[erodedShare] = contract.Metric{State: contract.NotApplicable}
+	m[excessShare] = contract.Metric{State: contract.NotApplicable}
 	m[density] = contract.Metric{State: contract.NotApplicable}
 	s := Score(m)
 	if s.Index != 0 || s.Partial {
 		t.Errorf("score = %+v, want 0 and not partial", s)
 	}
-	if got := scoreOf(t, s, erodedShare); got != 0 {
+	if got := scoreOf(t, s, excessShare); got != 0 {
 		t.Errorf("not-applicable term = %v, want 0", got)
 	}
 }
 
 func TestNotApplicableRatioBesideNonzeroCountIsPartial(t *testing.T) {
 	m := clean()
-	m[erodedShare] = contract.Metric{State: contract.NotApplicable}
-	m[erodedCount] = complete(2)
+	m[excessShare] = contract.Metric{State: contract.NotApplicable}
+	m[excessMass] = complete(2)
 	if s := Score(m); !s.Partial || s.Contributions[0].Points != 60 {
 		t.Errorf("score = %+v, want partial with erosion at 60 points", s)
 	}
@@ -188,7 +188,7 @@ func TestIncompleteOrAbsentMetricScoresFullWeight(t *testing.T) {
 	incomplete := clean()
 	incomplete[groups] = contract.Metric{State: contract.Incomplete, Value: 3}
 	absent := clean()
-	delete(absent, erodedCount)
+	delete(absent, excessMass)
 	for name, tc := range map[string]struct {
 		metrics map[string]contract.Metric
 		index   int
@@ -216,7 +216,7 @@ func TestIncompleteOrAbsentMetricScoresFullWeight(t *testing.T) {
 // TestIndexStaysInRange drives every term to its largest value and asserts an index within 0..100.
 func TestIndexStaysInRange(t *testing.T) {
 	m := clean()
-	for id, v := range map[string]float64{erodedShare: 1, erodedCount: 1e12, density: 1, groups: 1e12} {
+	for id, v := range map[string]float64{excessShare: 1, excessMass: 1e12, density: 1, groups: 1e12} {
 		m[id] = complete(v)
 	}
 	if s := Score(m); s.Index > 100 || s.Index < 95 {
@@ -226,7 +226,7 @@ func TestIndexStaysInRange(t *testing.T) {
 
 func TestScoreIgnoresTestMetrics(t *testing.T) {
 	m := clean()
-	m["erosion.eroded-share.test"] = complete(1)
+	m["erosion.excess-share.test"] = complete(1)
 	m["duplication.groups.test"] = contract.Metric{State: contract.Incomplete}
 	if s := Score(m); s.Index != 0 || s.Partial {
 		t.Errorf("score = %+v, want 0 and not partial", s)
@@ -240,5 +240,26 @@ func TestSumAddsInAscendingOrder(t *testing.T) {
 	// Adding each 1 to 1e16 alone loses it, and adding the two ones first keeps them.
 	if got := sum([]float64{1e16, 1, 1}); got != 1e16+2 {
 		t.Errorf("sum = %v, want %v", got, 1e16+2)
+	}
+}
+
+// TestErosionTermsAreTheExcessMetrics pins the scored metrics, so the unscored eroded metrics cannot return to the table.
+func TestErosionTermsAreTheExcessMetrics(t *testing.T) {
+	want := []Term{
+		{MetricID: excessShare, Share: 0.5, SaturatesAt: 0.55},
+		{MetricID: excessMass, Share: 0.5, CountScale: 700},
+	}
+	if got := Dimensions[0].Terms; !reflect.DeepEqual(got, want) {
+		t.Errorf("complexity-erosion terms = %+v, want %+v", got, want)
+	}
+}
+
+// TestNotApplicableExcessShareBesideZeroExcessMass scores an empty production set, where the mass is zero and the share is not applicable.
+func TestNotApplicableExcessShareBesideZeroExcessMass(t *testing.T) {
+	m := clean()
+	m[excessShare] = contract.Metric{State: contract.NotApplicable}
+	s := Score(m)
+	if s.Index != 0 || s.Partial || scoreOf(t, s, excessShare) != 0 {
+		t.Errorf("score = %+v, want 0, not partial, and a share term of 0", s)
 	}
 }

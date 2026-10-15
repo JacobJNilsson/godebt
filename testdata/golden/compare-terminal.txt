@@ -1,8 +1,8 @@
 godebt compare
 
-before  index 0/100, scoring 0.2.0
-after   index 23/100, scoring 0.2.0
-delta   +23
+before  index 0/100, scoring 0.3.0
+after   index 5/100, scoring 0.3.0
+delta   +5
 
 metric                                       before     after     delta
 complexity.cc.max.production                      1        15       +14

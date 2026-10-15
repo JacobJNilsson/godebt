@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "analyzerVersion": "0.0.0-test",
-  "scoringVersion": "0.2.0",
+  "scoringVersion": "0.3.0",
   "repo": {
     "root": "<root>",
     "module": "example.com/clones/idiom"
@@ -191,17 +191,17 @@
         "weight": 0.6,
         "terms": [
           {
-            "metricId": "erosion.eroded-share.production",
+            "metricId": "erosion.excess-share.production",
             "state": "complete",
             "value": 0,
-            "saturatesAt": 0.8,
+            "saturatesAt": 0.55,
             "score": 0
           },
           {
-            "metricId": "erosion.eroded-count.production",
+            "metricId": "erosion.excess-mass.production",
             "state": "complete",
             "value": 0,
-            "countScale": 20,
+            "countScale": 700,
             "score": 0
           }
         ]
