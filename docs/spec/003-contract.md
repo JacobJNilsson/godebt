@@ -168,7 +168,7 @@ not a policy failure. Integer knobs reject fractions.
 ## Command line
 
 ```
-godebt audit <path> [--config <file>] [--baseline <report.json>] [--json|--md] [--out <file>] [--quiet]
+godebt audit <path> [--config <file>] [--baseline <report.json>] [--path <dir>] [--json|--md] [--out <file>] [--quiet]
 godebt compare <before.json> <after.json> [--json|--md]
 godebt baseline [path] [--config <file>] [--out <file>] [--check] [--quiet]
 godebt version
@@ -183,6 +183,18 @@ godebt --version
   written by `--out` never carries it, so a saved report is always a valid
   baseline for a later run. Save reports with `--out`, not by redirecting
   stdout.
+- `audit --path <dir>` prints only the findings under `<dir>`, a slash
+  path relative to the audited root. A finding is under `<dir>` when its
+  path is `<dir>` or starts with `<dir>/`. A clone group is under `<dir>`
+  when any member is. With `--baseline`, the new and resolved lists of the
+  comparison hold only findings under `<dir>`. Metrics, safeguards, the
+  score, and the policy checks still cover the whole module, so the index
+  is the same with or without the flag. The text and Markdown headers name the directory. The
+  JSON report keeps its shape and holds the filtered findings. `--path`
+  with `--out` is a usage error, because a filtered report is not a valid
+  baseline. A `<dir>` that is empty, is absolute, holds `..`, passes
+  through a symbolic link, or is not a directory under the root is a usage
+  error.
 - `version` and `--version` print `godebt <version>` to stdout and exit
   `0`.
 - `compare` reads two saved JSON reports and prints the comparison. It runs
