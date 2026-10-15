@@ -21,7 +21,8 @@ import (
 // KindCloneGroup is the finding kind of a clone group.
 const KindCloneGroup = "duplication.clone-group"
 
-// sentinelBase lies above every token kind, and file i ends with the symbol sentinelBase + i.
+// sentinelBase lies above every token kind.
+// A file end or a dropped declaration ends a token run with the unique symbol sentinelBase + n.
 const sentinelBase = 1000
 
 const (
@@ -123,14 +124,17 @@ func measureSet(inv *inventory.Inventory, set contract.SourceSet, maxTokens, max
 // stream is the symbol sequence of one set, with the lines of each symbol.
 type stream struct {
 	symbols []int32
-	// lines and endLines hold the first and the last line of the symbol at each position, and 0 for a sentinel.
+	// lines and endLines hold the first and last line of each symbol.
+	// Both are 0 for a sentinel.
 	lines    []int32
 	endLines []int32
 	// inserted marks the semicolons that the scanner inserts at a line end.
 	inserted []bool
 	files    []streamFile
-	// tokens counts the symbols of every file, also the ones past the cap that the stream does not keep.
-	// The count and the token cap leave out the file sentinels.
+	// sentinels counts the sentinel symbols of file ends and dropped declarations.
+	sentinels int
+	// tokens counts the symbols of every file, including those past the cap that the stream drops.
+	// Sentinels count toward neither tokens nor the cap.
 	tokens int
 }
 
@@ -162,15 +166,65 @@ func newStream(inv *inventory.Inventory, set contract.SourceSet, maxTokens int) 
 // span is a half-open range of byte offsets.
 type span struct{ start, end int }
 
-// dropRanges returns the byte ranges of the package clause and of every import declaration, in source order.
+// dropRanges returns the byte ranges of the package clause, the imports, and the literal value declarations, in source order.
 func dropRanges(syntax *ast.File, file *token.File) []span {
 	ranges := []span{{file.Offset(syntax.Package), file.Offset(syntax.Name.End())}}
 	for _, decl := range syntax.Decls {
-		if gen, ok := decl.(*ast.GenDecl); ok && gen.Tok == token.IMPORT {
+		if gen, ok := decl.(*ast.GenDecl); ok && (gen.Tok == token.IMPORT || isLiteralDecl(gen)) {
 			ranges = append(ranges, span{file.Offset(gen.Pos()), file.Offset(gen.End())})
 		}
 	}
 	return ranges
+}
+
+// isLiteralDecl reports whether gen is a var or const declaration whose specs all have literal values.
+// A call of a named function with literal arguments counts as a literal value.
+func isLiteralDecl(gen *ast.GenDecl) bool {
+	if gen.Tok != token.VAR && gen.Tok != token.CONST {
+		return false
+	}
+	for _, spec := range gen.Specs {
+		value, ok := spec.(*ast.ValueSpec)
+		if !ok || len(value.Values) == 0 {
+			return false
+		}
+		for _, v := range value.Values {
+			if !isLiteralValue(v) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// isLiteralValue reports whether e is a literal or a call of a named function with literal arguments.
+func isLiteralValue(e ast.Expr) bool {
+	switch e := e.(type) {
+	case *ast.BasicLit:
+		return true
+	case *ast.CallExpr:
+		if !isNamed(e.Fun) {
+			return false
+		}
+		for _, arg := range e.Args {
+			if _, ok := arg.(*ast.BasicLit); !ok {
+				return false
+			}
+		}
+		return true
+	}
+	return false
+}
+
+// isNamed reports whether e is an identifier or a selector chain of identifiers.
+func isNamed(e ast.Expr) bool {
+	switch e := e.(type) {
+	case *ast.Ident:
+		return true
+	case *ast.SelectorExpr:
+		return isNamed(e.X)
+	}
+	return false
 }
 
 func (s *stream) addFile(f *discover.File, drops []span, code []bool, maxTokens int) {
@@ -179,25 +233,15 @@ func (s *stream) addFile(f *discover.File, drops []span, code []bool, maxTokens 
 	var sc scanner.Scanner
 	sc.Init(file, f.Src, nil, 0)
 	sf := streamFile{path: f.Path, start: len(s.symbols)}
-	next, afterDrop := 0, false
+	var scan dropScan
 	for {
 		pos, tok, lit := sc.Scan()
 		if tok == token.EOF {
 			break
 		}
-		offset := file.Offset(pos)
-		for next < len(drops) && offset >= drops[next].end {
-			next++
-		}
-		if next < len(drops) && offset >= drops[next].start {
-			afterDrop = true
+		if s.skipDropped(&scan, drops, file.Offset(pos), tok, maxTokens) {
 			continue
 		}
-		if afterDrop && tok == token.SEMICOLON {
-			afterDrop = false
-			continue
-		}
-		afterDrop = false
 		s.tokens++
 		if s.tokens > maxTokens {
 			continue
@@ -223,15 +267,54 @@ func (s *stream) addFile(f *discover.File, drops []span, code []bool, maxTokens 
 			sf.codeLines[l+1]++
 		}
 	}
-	s.symbols = append(s.symbols, int32(sentinelBase+len(s.files)))
-	s.lines = append(s.lines, 0)
-	s.endLines = append(s.endLines, 0)
-	s.inserted = append(s.inserted, false)
+	s.endRun()
 	s.files = append(s.files, sf)
 }
 
+// dropScan tracks where a token loop stands among the dropped ranges of one file.
+type dropScan struct {
+	next      int
+	afterDrop bool
+}
+
+// skipDropped reports whether the token at offset lies in a dropped range or is the semicolon right after one.
+// On the first token of a dropped range it also ends the open run, so a clone cannot span the dropped declaration.
+func (s *stream) skipDropped(scan *dropScan, drops []span, offset int, tok token.Token, maxTokens int) bool {
+	for scan.next < len(drops) && offset >= drops[scan.next].end {
+		scan.next++
+	}
+	if scan.next < len(drops) && offset >= drops[scan.next].start {
+		scan.afterDrop = true
+		if s.needsSeparator(maxTokens) {
+			s.endRun()
+		}
+		return true
+	}
+	if scan.afterDrop && tok == token.SEMICOLON {
+		scan.afterDrop = false
+		return true
+	}
+	scan.afterDrop = false
+	return false
+}
+
+// needsSeparator reports whether a dropped declaration must end the open run.
+// An empty stream, a run that a sentinel already ends, and a stream past the token cap need none.
+func (s *stream) needsSeparator(maxTokens int) bool {
+	return len(s.symbols) > 0 && s.symbols[len(s.symbols)-1] < sentinelBase && s.tokens <= maxTokens
+}
+
+// endRun appends the next unique sentinel symbol, which sits on no line.
+func (s *stream) endRun() {
+	s.symbols = append(s.symbols, int32(sentinelBase+s.sentinels))
+	s.lines = append(s.lines, 0)
+	s.endLines = append(s.endLines, 0)
+	s.inserted = append(s.inserted, false)
+	s.sentinels++
+}
+
 func (s *stream) alphabet() int {
-	return sentinelBase + len(s.files)
+	return sentinelBase + s.sentinels
 }
 
 // fileAt returns the index of the file that holds a position.

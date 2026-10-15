@@ -269,10 +269,7 @@ func streamOf(files ...[]int32) *stream {
 				line++
 			}
 		}
-		s.symbols = append(s.symbols, int32(sentinelBase+f))
-		s.lines = append(s.lines, 0)
-		s.endLines = append(s.endLines, 0)
-		s.inserted = append(s.inserted, false)
+		s.endRun()
 	}
 	return s
 }
@@ -363,10 +360,7 @@ func synthetic(files ...[]symbolAt) *stream {
 			s.endLines = append(s.endLines, t.line)
 			s.inserted = append(s.inserted, false)
 		}
-		s.symbols = append(s.symbols, int32(sentinelBase+f))
-		s.lines = append(s.lines, 0)
-		s.endLines = append(s.endLines, 0)
-		s.inserted = append(s.inserted, false)
+		s.endRun()
 	}
 	return s
 }

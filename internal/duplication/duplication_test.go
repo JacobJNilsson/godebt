@@ -146,6 +146,17 @@ func TestFourway(t *testing.T) {
 	checkMetrics(t, metrics, setMetrics("production", 1, 4*22, 4*23))
 }
 
+// TestSentinelBlocks shows that two var blocks of errors.New calls with literal arguments form no group.
+func TestSentinelBlocks(t *testing.T) {
+	metrics, findings, _ := Measure(build(t, filepath.Join(fixtures, "clones", "sentinels")))
+	if len(findings) != 0 {
+		t.Errorf("findings = %+v, want none", groups(findings, contract.Production))
+	}
+	if m := metrics["duplication.groups.production"]; m.Value != 0 {
+		t.Errorf("groups = %+v, want 0", m)
+	}
+}
+
 func TestIdiom(t *testing.T) {
 	metrics, findings, _ := Measure(build(t, filepath.Join(fixtures, "clones", "idiom")))
 	if len(findings) != 0 {
@@ -214,9 +225,10 @@ func TestLadder(t *testing.T) {
 
 // TestSubsumedGroup drops a block that repeats only inside two copies of a larger block.
 func TestSubsumedGroup(t *testing.T) {
+	// Identifiers instead of literals keep the declarations in the stream.
 	// The inner function occurs twice in each outer block with other symbols around each copy, so it forms a maximal repeat of four members.
 	inner := strings.Replace(checksum(t), "func ", "func Inner", 1)
-	outer := "package p\n\n" + inner + "\nconst c = 1\n\n" + strings.Replace(inner, "Inner", "Again", 1) + "\nvar v = 2\n"
+	outer := "package p\n\n" + inner + "\nconst c = d\n\n" + strings.Replace(inner, "Inner", "Again", 1) + "\nvar v = w\n"
 	metrics, findings, _ := Measure(buildSource(t, map[string]string{
 		"go.mod": "module example.com/m\n",
 		"a.go":   outer,
@@ -368,11 +380,12 @@ func TestDropsImportsAndPackage(t *testing.T) {
 		fmt.Fprintf(&imports, "\tx%d \"example.com/m/p%d\"\n", i, i)
 	}
 	imports.WriteString(")\n\nimport \"fmt\"\n")
+	// Identifiers instead of literals keep the declarations in the stream.
 	src := imports.String()
 	inv := buildSource(t, map[string]string{
 		"go.mod": "module example.com/m\n",
-		"a.go":   src + "\nvar a = fmt.Sprint(1)\n",
-		"b.go":   src + "\nconst b = 2\n",
+		"a.go":   src + "\nvar a = fmt.Sprint(x)\n",
+		"b.go":   src + "\nconst b = c\n",
 	})
 	metrics, findings, _ := Measure(inv)
 	if len(findings) != 0 {
@@ -387,9 +400,152 @@ func TestDropsImportsAndPackage(t *testing.T) {
 			kinds = append(kinds, token.Token(sym).String())
 		}
 	}
-	want := "var IDENT = IDENT . IDENT ( INT ) ; const IDENT = INT ;"
+	want := "var IDENT = IDENT . IDENT ( IDENT ) ; const IDENT = IDENT ;"
 	if got := strings.Join(kinds, " "); got != want {
 		t.Errorf("stream = %s, want %s", got, want)
+	}
+}
+
+// TestKeepsOtherDeclarations shows that a declaration with a non-literal value, or a spec without a value, still forms a group when copied.
+func TestKeepsOtherDeclarations(t *testing.T) {
+	block := func(open, line string) string {
+		var b strings.Builder
+		b.WriteString("package p\n\n" + open)
+		for i := range 60 {
+			fmt.Fprintf(&b, line, i)
+		}
+		b.WriteString(")\n")
+		return b.String()
+	}
+	for name, src := range map[string]string{
+		"call with identifier argument": block("var (\n", "\tx%d = f(y)\n"),
+		"iota block":                    block("const (\n\tfirst = iota\n", "\tc%d\n"),
+		"negative literal":              block("var (\n", "\tx%d = -1\n"),
+		"immediately invoked literal":   block("var (\n", "\tx%d = func() int { return 1 }()\n"),
+		"callee is a call":              block("var (\n", "\tx%d = f()(1)\n"),
+	} {
+		t.Run(name, func(t *testing.T) {
+			inv := buildSource(t, map[string]string{"go.mod": "module example.com/m\n", "a.go": src, "b.go": src})
+			_, findings, _ := Measure(inv)
+			if len(groups(findings, contract.Production)) == 0 {
+				t.Error("no group, want one")
+			}
+		})
+	}
+}
+
+// streamOfSource returns the stream of one file and its non-sentinel symbols as token names.
+func streamOfSource(t *testing.T, src string) (*stream, string) {
+	t.Helper()
+	inv := buildSource(t, map[string]string{"go.mod": "module example.com/m\n", "a.go": src})
+	s := newStream(inv, contract.Production, 1<<30)
+	var kinds []string
+	for _, sym := range s.symbols {
+		if int(sym) < sentinelBase {
+			kinds = append(kinds, token.Token(sym).String())
+		}
+	}
+	return s, strings.Join(kinds, " ")
+}
+
+// TestDropsLiteralShapes shows which declaration shapes leave the stream.
+func TestDropsLiteralShapes(t *testing.T) {
+	src := "package p\n\nvar a, b = 1, 2\nconst c = 3\nvar e int\n\nfunc f() {\n\tvar (\n\t\tx = 1\n\t)\n\t_ = x\n}\n"
+	_, got := streamOfSource(t, src)
+	want := "var IDENT IDENT ; func IDENT ( ) { var ( IDENT = INT ; ) ; IDENT = IDENT ; } ;"
+	if got != want {
+		t.Errorf("stream = %s, want %s", got, want)
+	}
+}
+
+// TestDropsNamedCalls shows that a call of a named function with no arguments, and a call of a selector, leave the stream.
+func TestDropsNamedCalls(t *testing.T) {
+	_, got := streamOfSource(t, "package p\n\nvar p = newPool()\n\nvar e = errors.New(\"x\")\n\nfunc f() {}\n")
+	if want := "func IDENT ( ) { } ;"; got != want {
+		t.Errorf("stream = %s, want %s", got, want)
+	}
+}
+
+// TestDropAfterTokenCap shows that a drop past the token cap adds no separator and leaves the token count right.
+func TestDropAfterTokenCap(t *testing.T) {
+	inv := buildSource(t, map[string]string{"go.mod": "module example.com/m\n", "a.go": "package p\n\nfunc f() { a() }\n\nvar x = 1\n\nfunc g() { b() }\n"})
+	s := newStream(inv, contract.Production, 5)
+	type counts struct{ Symbols, Sentinels, Tokens int }
+	// Both functions have 10 symbols, and the dropped declaration has none.
+	got, want := counts{len(s.symbols), s.sentinels, s.tokens}, counts{5, 0, 20}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("counts = %+v, want %+v", got, want)
+	}
+}
+
+// TestDroppedDeclarationSeparatesRuns shows that a dropped declaration ends a run with its own sentinel, and that the sentinels stay out of the token count.
+func TestDroppedDeclarationSeparatesRuns(t *testing.T) {
+	s, _ := streamOfSource(t, "package p\n\nvar a = 1\n\nfunc f() {}\n\nvar b = 2\nvar c = 3\n\nfunc g() {}\n")
+	seen := map[int32]bool{}
+	var sentinels int
+	for i, sym := range s.symbols {
+		if int(sym) < sentinelBase {
+			continue
+		}
+		sentinels++
+		if seen[sym] {
+			t.Errorf("sentinel %d repeats", sym)
+		}
+		seen[sym] = true
+		if s.lines[i] != 0 || s.endLines[i] != 0 {
+			t.Errorf("sentinel at %d has lines %d-%d, want 0", i, s.lines[i], s.endLines[i])
+		}
+	}
+	// The two adjacent drops after f share one separator, and the file sentinel ends the file.
+	if sentinels != 2 || s.alphabet() != sentinelBase+2 {
+		t.Errorf("sentinels = %d, alphabet = %d, want 2 and %d", sentinels, s.alphabet(), sentinelBase+2)
+	}
+	if want := len(s.symbols) - sentinels; s.tokens != want {
+		t.Errorf("tokens = %d, want %d", s.tokens, want)
+	}
+}
+
+// TestDroppedDeclarationAtFileEnd shows that a drop at the end of a file leaves two adjacent sentinels, which is harmless because no symbol sits between them.
+func TestDroppedDeclarationAtFileEnd(t *testing.T) {
+	s, _ := streamOfSource(t, "package p\n\nfunc f() {}\n\nvar a = 1\n")
+	n := len(s.symbols)
+	if n < 2 || int(s.symbols[n-1]) != sentinelBase+1 || int(s.symbols[n-2]) != sentinelBase {
+		t.Errorf("tail = %v, want sentinels %d and %d", s.symbols[max(n-2, 0):], sentinelBase, sentinelBase+1)
+	}
+	if s.sentinels != 2 {
+		t.Errorf("sentinels = %d, want 2", s.sentinels)
+	}
+}
+
+// TestDroppedDeclarationAfterImports shows that a drop while the run is still empty adds no separator, so only the file sentinel remains.
+func TestDroppedDeclarationAfterImports(t *testing.T) {
+	s, _ := streamOfSource(t, "package p\n\nimport \"fmt\"\n\nvar a = 1\n\nfunc f() { fmt.Println() }\n")
+	if s.sentinels != 1 {
+		t.Errorf("sentinels = %d, want 1", s.sentinels)
+	}
+	if int(s.symbols[0]) != int(token.FUNC) {
+		t.Errorf("first symbol = %d, want func", s.symbols[0])
+	}
+}
+
+// TestNoCloneSpansDroppedDeclaration puts a dropped declaration between two runs that are each below the thresholds and together above them.
+func TestNoCloneSpansDroppedDeclaration(t *testing.T) {
+	nums := make([]string, 25)
+	for i := range nums {
+		nums[i] = fmt.Sprint(i)
+	}
+	// The two functions differ in their element kind, so the run is not periodic.
+	fn := func(name, typ, quote string) string {
+		return "func " + name + "() []" + typ + " {\n\treturn []" + typ + "{" + quote + strings.Join(nums, quote+", "+quote) + quote + "}\n}\n"
+	}
+	src := "package p\n\n" + fn("A", "int", "") + "\nvar x = 1\n\n" + fn("B", "string", `"`)
+	inv := buildSource(t, map[string]string{"go.mod": "module example.com/m\n", "a.go": src, "b.go": src})
+	metrics, findings, _ := Measure(inv)
+	if got := groups(findings, contract.Production); len(got) != 0 {
+		t.Errorf("groups = %+v, want none", got)
+	}
+	if m := metrics["duplication.groups.production"]; m.Value != 0 {
+		t.Errorf("groups metric = %v, want 0", m.Value)
 	}
 }
 
