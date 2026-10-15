@@ -252,3 +252,11 @@ func TestRefusedBaselineFailsAnEmptyPolicy(t *testing.T) {
 		t.Errorf("comparable baseline = %+v, want a pass", ok)
 	}
 }
+
+func TestFailOnNewIgnoresChanged(t *testing.T) {
+	grown := contract.Finding{Kind: "duplication.clone-group", Path: "c.go", StartLine: 1, EndLine: 9, Identity: "g2"}
+	c := cmp(0, 0)
+	c.Changed = []compare.Changed{{After: grown, BeforeGroupID: "g1", BeforeTokens: 40}}
+	p := config.Policy{FailOnNew: []string{"duplication.clone-group"}}
+	assertReasons(t, Evaluate(p, rep(0), c), false)
+}

@@ -6,9 +6,9 @@ import (
 	"github.com/JacobJNilsson/godebt/internal/contract"
 )
 
-// matchFindings splits the findings of two reports into new, resolved, and persistent, each sorted.
+// matchFindings splits the findings of two reports into new, resolved, persistent, and changed, each sorted.
 // A persistent finding is the one from after, so that it shows the current location.
-func matchFindings(before, after []contract.Finding) (newFindings, resolved, persistent []contract.Finding) {
+func matchFindings(before, after []contract.Finding) (newFindings, resolved, persistent []contract.Finding, changed []Changed) {
 	beforeMatched, afterMatched := make([]bool, len(before)), make([]bool, len(after))
 	// The exact rule runs first, so a finding that it matches is no candidate for the sole-finding rule.
 	for _, key := range []func([]contract.Finding) []string{exactKeys, soleKeys} {
@@ -30,7 +30,8 @@ func matchFindings(before, after []contract.Finding) (newFindings, resolved, per
 	contract.SortFindings(newFindings)
 	contract.SortFindings(resolved)
 	contract.SortFindings(persistent)
-	return newFindings, resolved, persistent
+	newFindings, resolved, changed = pairChanged(newFindings, resolved)
+	return newFindings, resolved, persistent, changed
 }
 
 // pair marks as matched each unmatched finding whose key is not "" and occurs once on each side.

@@ -31,7 +31,7 @@ func RenderMarkdownCompared(w io.Writer, r *Report, base *Baseline) error {
 	}
 	b.WriteString(".\n")
 	if base != nil {
-		fmt.Fprintf(&b, "Against the baseline index %d the delta is %s, with %d new and %d resolved findings.\n", base.Index, Signed(base.Delta), base.New, base.Resolved)
+		fmt.Fprintf(&b, "Against the baseline index %d the delta is %s, with %d new, %d resolved, and %d changed findings.\n", base.Index, Signed(base.Delta), base.New, base.Resolved, base.Changed)
 	}
 	if len(r.Score.Contributions) > 0 {
 		parts := make([]string, 0, len(r.Score.Contributions))

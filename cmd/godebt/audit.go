@@ -194,7 +194,7 @@ func baselineOf(cmp *godebt.Comparison) *report.Baseline {
 	if cmp == nil || !cmp.Comparable {
 		return nil
 	}
-	return &report.Baseline{Index: cmp.Before.Index, Delta: cmp.IndexDelta, New: len(cmp.New), Resolved: len(cmp.Resolved)}
+	return &report.Baseline{Index: cmp.Before.Index, Delta: cmp.IndexDelta, New: len(cmp.New), Resolved: len(cmp.Resolved), Changed: len(cmp.Changed)}
 }
 
 // jsonFor leaves the comparison out of a report written to a file, so every saved report loads as a later baseline.

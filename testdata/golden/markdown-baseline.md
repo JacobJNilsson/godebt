@@ -3,7 +3,7 @@
 example.com/functions, godebt 0.0.0-test.
 
 The index is 5/100, lower is better, scoring 0.3.0.
-Against the baseline index 0 the delta is +5, with 4 new and 0 resolved findings.
+Against the baseline index 0 the delta is +5, with 4 new, 0 resolved, and 0 changed findings.
 Contributions: complexity-erosion 5, duplication 0.
 The test index is 7/100, not part of the index.
 

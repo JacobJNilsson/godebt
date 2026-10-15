@@ -22,6 +22,7 @@ type Comparison struct {
 	New        []contract.Finding `json:"new"`
 	Resolved   []contract.Finding `json:"resolved"`
 	Persistent []contract.Finding `json:"persistent"`
+	Changed    []Changed          `json:"changed"`
 }
 
 // MarshalJSON omits the index delta of a refused comparison, because a refused comparison computes no delta.
@@ -36,7 +37,8 @@ func (c Comparison) MarshalJSON() ([]byte, error) {
 		New        []contract.Finding `json:"new"`
 		Resolved   []contract.Finding `json:"resolved"`
 		Persistent []contract.Finding `json:"persistent"`
-	}{c.Comparable, c.Refusal, c.Before, c.After, nil, c.Metrics, c.New, c.Resolved, c.Persistent}
+		Changed    []Changed          `json:"changed"`
+	}{c.Comparable, c.Refusal, c.Before, c.After, nil, c.Metrics, c.New, c.Resolved, c.Persistent, c.Changed}
 	if c.Comparable {
 		out.IndexDelta = &c.IndexDelta
 	}
@@ -73,7 +75,7 @@ func Compare(before, after *report.Report) *Comparison {
 	c.Comparable = true
 	c.IndexDelta = c.After.Index - c.Before.Index
 	c.Metrics = metricDeltas(before.Metrics, after.Metrics)
-	c.New, c.Resolved, c.Persistent = matchFindings(before.Findings, after.Findings)
+	c.New, c.Resolved, c.Persistent, c.Changed = matchFindings(before.Findings, after.Findings)
 	return c
 }
 

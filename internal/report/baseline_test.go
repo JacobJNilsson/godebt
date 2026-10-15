@@ -10,9 +10,10 @@ func TestTerminalBaselineLine(t *testing.T) {
 	r := newReport(t, "functions")
 	plain := render(t, r)
 	cases := map[Baseline]string{
-		{Index: 27, Delta: -2, Resolved: 2}: "       baseline 27  delta -2  new 0  resolved 2",
-		{Index: 20, Delta: 3, New: 1}:       "       baseline 20  delta +3  new 1  resolved 0",
-		{Index: 20}:                         "       baseline 20  delta 0  new 0  resolved 0",
+		{Index: 27, Delta: -2, Resolved: 2}:          "       baseline 27  delta -2  new 0  resolved 2  changed 0",
+		{Index: 20, Delta: 3, New: 1}:                "       baseline 20  delta +3  new 1  resolved 0  changed 0",
+		{Index: 20}:                                  "       baseline 20  delta 0  new 0  resolved 0  changed 0",
+		{Index: 20, New: 1, Resolved: 1, Changed: 3}: "       baseline 20  delta 0  new 1  resolved 1  changed 3",
 	}
 	for b, want := range cases {
 		var out bytes.Buffer
@@ -40,7 +41,7 @@ func TestMarkdownBaselineSentence(t *testing.T) {
 	if err := RenderMarkdownCompared(&out, r, &Baseline{Index: 27, Delta: -2, Resolved: 2}); err != nil {
 		t.Fatal(err)
 	}
-	sentence := "Against the baseline index 27 the delta is -2, with 0 new and 2 resolved findings.\n"
+	sentence := "Against the baseline index 27 the delta is -2, with 0 new, 2 resolved, and 0 changed findings.\n"
 	if !strings.Contains(out.String(), ".\n"+sentence) {
 		t.Errorf("Markdown lacks %q:\n%s", sentence, out.String())
 	}

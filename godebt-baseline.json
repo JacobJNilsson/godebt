@@ -9,12 +9,12 @@
   "configDigest": "sha256:4c50bb6e6bc006a5b9243824f1685a5379c85d70169e618006d2edfe7d505d66",
   "coverage": {
     "production": {
-      "files": 45,
-      "sloc": 6009
+      "files": 46,
+      "sloc": 6147
     },
     "test": {
-      "files": 39,
-      "sloc": 8299
+      "files": 40,
+      "sloc": 8556
     },
     "generated": {
       "files": 0
@@ -61,7 +61,7 @@
     },
     "complexity.cc.p90.production": {
       "state": "complete",
-      "value": 7,
+      "value": 8,
       "unit": "count",
       "detail": {}
     },
@@ -73,30 +73,30 @@
     },
     "complexity.functions.production": {
       "state": "complete",
-      "value": 438,
+      "value": 445,
       "unit": "count",
       "detail": {}
     },
     "complexity.functions.test": {
       "state": "complete",
-      "value": 672,
+      "value": 700,
       "unit": "count",
       "detail": {}
     },
     "duplication.density.production": {
       "state": "complete",
-      "value": 0.0029955067398901645,
+      "value": 0.0029282576866764276,
       "unit": "ratio",
       "numerator": 18,
-      "denominator": 6009,
+      "denominator": 6147,
       "detail": {}
     },
     "duplication.density.test": {
       "state": "complete",
-      "value": 0.05313893240149416,
+      "value": 0.06112669471715755,
       "unit": "ratio",
-      "numerator": 441,
-      "denominator": 8299,
+      "numerator": 523,
+      "denominator": 8556,
       "detail": {}
     },
     "duplication.duplicated-lines.production": {
@@ -107,7 +107,7 @@
     },
     "duplication.duplicated-lines.test": {
       "state": "complete",
-      "value": 441,
+      "value": 523,
       "unit": "count",
       "detail": {}
     },
@@ -119,13 +119,13 @@
     },
     "duplication.groups.test": {
       "state": "complete",
-      "value": 23,
+      "value": 29,
       "unit": "count",
       "detail": {}
     },
     "erosion.eroded-count.production": {
       "state": "complete",
-      "value": 3,
+      "value": 4,
       "unit": "count",
       "detail": {}
     },
@@ -137,23 +137,23 @@
     },
     "erosion.eroded-share.production": {
       "state": "complete",
-      "value": 0.036816869312612584,
+      "value": 0.04987988154299972,
       "unit": "ratio",
-      "numerator": 223.69256378506574,
-      "denominator": 6075.817090412791,
+      "numerator": 312.6869456302137,
+      "denominator": 6268.798881582288,
       "detail": {}
     },
     "erosion.eroded-share.test": {
       "state": "complete",
-      "value": 0.06586713870400167,
+      "value": 0.06421008955755868,
       "unit": "ratio",
       "numerator": 545.4116695787089,
-      "denominator": 8280.482199624883,
+      "denominator": 8494.173942707173,
       "detail": {}
     },
     "erosion.excess-mass.production": {
       "state": "complete",
-      "value": 45.33312754167319,
+      "value": 60.16552451586452,
       "unit": "mass",
       "detail": {}
     },
@@ -165,29 +165,29 @@
     },
     "erosion.excess-share.production": {
       "state": "complete",
-      "value": 0.007461239676422395,
+      "value": 0.009597616011040113,
       "unit": "ratio",
-      "numerator": 45.33312754167319,
-      "denominator": 6075.817090412791,
+      "numerator": 60.16552451586452,
+      "denominator": 6268.798881582288,
       "detail": {}
     },
     "erosion.excess-share.test": {
       "state": "complete",
-      "value": 0.01566118375962947,
+      "value": 0.015267188336542965,
       "unit": "ratio",
       "numerator": 129.68215334666613,
-      "denominator": 8280.482199624883,
+      "denominator": 8494.173942707173,
       "detail": {}
     },
     "erosion.mass.production": {
       "state": "complete",
-      "value": 6075.817090412791,
+      "value": 6268.798881582288,
       "unit": "mass",
       "detail": {}
     },
     "erosion.mass.test": {
       "state": "complete",
-      "value": 8280.482199624883,
+      "value": 8494.173942707173,
       "unit": "mass",
       "detail": {}
     }
@@ -199,36 +199,36 @@
     "contributions": [
       {
         "dimension": "complexity-erosion",
-        "points": 2,
+        "points": 3,
         "weight": 0.6,
         "terms": [
           {
             "metricId": "erosion.excess-share.production",
             "state": "complete",
-            "value": 0.007461239676422395,
+            "value": 0.009597616011040113,
             "saturatesAt": 0.55,
-            "score": 1.356589032076799
+            "score": 1.745021092916384
           },
           {
             "metricId": "erosion.excess-mass.production",
             "state": "complete",
-            "value": 45.33312754167319,
+            "value": 60.16552451586452,
             "countScale": 700,
-            "score": 5.904575796834911
+            "score": 7.617480973453611
           }
         ]
       },
       {
         "dimension": "duplication",
-        "points": 2,
+        "points": 1,
         "weight": 0.4,
         "terms": [
           {
             "metricId": "duplication.density.production",
             "state": "complete",
-            "value": 0.0029955067398901645,
+            "value": 0.0029282576866764276,
             "saturatesAt": 0.3,
-            "score": 0.9985022466300548
+            "score": 0.9760858955588092
           },
           {
             "metricId": "duplication.groups.production",
@@ -242,7 +242,7 @@
     ]
   },
   "testScore": {
-    "index": 18,
+    "index": 20,
     "direction": "lower-is-better",
     "partial": false,
     "contributions": [
@@ -254,9 +254,9 @@
           {
             "metricId": "erosion.excess-share.test",
             "state": "complete",
-            "value": 0.01566118375962947,
+            "value": 0.015267188336542965,
             "saturatesAt": 0.55,
-            "score": 2.8474879562962667
+            "score": 2.7758524248259935
           },
           {
             "metricId": "erosion.excess-mass.test",
@@ -269,22 +269,22 @@
       },
       {
         "dimension": "duplication",
-        "points": 13,
+        "points": 15,
         "weight": 0.4,
         "terms": [
           {
             "metricId": "duplication.density.test",
             "state": "complete",
-            "value": 0.05313893240149416,
+            "value": 0.06112669471715755,
             "saturatesAt": 0.3,
-            "score": 17.71297746716472
+            "score": 20.375564905719184
           },
           {
             "metricId": "duplication.groups.test",
             "state": "complete",
-            "value": 23,
+            "value": 29,
             "countScale": 15,
-            "score": 48.174067680343526
+            "score": 51.833678210927694
           }
         ]
       }
@@ -334,6 +334,21 @@
         "nesting": 1,
         "sloc": 24,
         "mass": 53.88877434122991
+      }
+    },
+    {
+      "kind": "complexity.hotspot",
+      "path": "internal/compare/changed.go",
+      "startLine": 27,
+      "endLine": 81,
+      "identity": "internal/compare:pairChanged",
+      "ambiguous": false,
+      "sourceSet": "production",
+      "facts": {
+        "cc": 12,
+        "nesting": 3,
+        "sloc": 55,
+        "mass": 88.99438184514796
       }
     },
     {
@@ -458,6 +473,156 @@
     },
     {
       "kind": "duplication.clone-group",
+      "path": "internal/compare/changed_test.go",
+      "startLine": 51,
+      "endLine": 59,
+      "identity": "4de2dde9b07e12a6",
+      "ambiguous": false,
+      "sourceSet": "test",
+      "facts": {
+        "groupId": "4de2dde9b07e12a6",
+        "tokens": 116,
+        "members": [
+          {
+            "path": "internal/compare/changed_test.go",
+            "startLine": 51,
+            "endLine": 59
+          },
+          {
+            "path": "internal/compare/changed_test.go",
+            "startLine": 61,
+            "endLine": 69
+          }
+        ]
+      }
+    },
+    {
+      "kind": "duplication.clone-group",
+      "path": "internal/compare/changed_test.go",
+      "startLine": 81,
+      "endLine": 88,
+      "identity": "d0415a45b05fb618",
+      "ambiguous": false,
+      "sourceSet": "test",
+      "facts": {
+        "groupId": "d0415a45b05fb618",
+        "tokens": 107,
+        "members": [
+          {
+            "path": "internal/compare/changed_test.go",
+            "startLine": 81,
+            "endLine": 88
+          },
+          {
+            "path": "internal/compare/changed_test.go",
+            "startLine": 116,
+            "endLine": 123
+          }
+        ]
+      }
+    },
+    {
+      "kind": "duplication.clone-group",
+      "path": "internal/compare/changed_test.go",
+      "startLine": 90,
+      "endLine": 99,
+      "identity": "17151ce725561b61",
+      "ambiguous": false,
+      "sourceSet": "test",
+      "facts": {
+        "groupId": "17151ce725561b61",
+        "tokens": 105,
+        "members": [
+          {
+            "path": "internal/compare/changed_test.go",
+            "startLine": 90,
+            "endLine": 99
+          },
+          {
+            "path": "internal/compare/changed_test.go",
+            "startLine": 155,
+            "endLine": 164
+          }
+        ]
+      }
+    },
+    {
+      "kind": "duplication.clone-group",
+      "path": "internal/compare/changed_test.go",
+      "startLine": 105,
+      "endLine": 112,
+      "identity": "2c8d5b8a0149a0da",
+      "ambiguous": false,
+      "sourceSet": "test",
+      "facts": {
+        "groupId": "2c8d5b8a0149a0da",
+        "tokens": 112,
+        "members": [
+          {
+            "path": "internal/compare/changed_test.go",
+            "startLine": 105,
+            "endLine": 112
+          },
+          {
+            "path": "internal/compare/changed_test.go",
+            "startLine": 117,
+            "endLine": 124
+          }
+        ]
+      }
+    },
+    {
+      "kind": "duplication.clone-group",
+      "path": "internal/compare/changed_test.go",
+      "startLine": 123,
+      "endLine": 132,
+      "identity": "510404400b0d399f",
+      "ambiguous": false,
+      "sourceSet": "test",
+      "facts": {
+        "groupId": "510404400b0d399f",
+        "tokens": 115,
+        "members": [
+          {
+            "path": "internal/compare/changed_test.go",
+            "startLine": 123,
+            "endLine": 132
+          },
+          {
+            "path": "internal/compare/changed_test.go",
+            "startLine": 164,
+            "endLine": 173
+          }
+        ]
+      }
+    },
+    {
+      "kind": "duplication.clone-group",
+      "path": "internal/compare/changed_test.go",
+      "startLine": 200,
+      "endLine": 206,
+      "identity": "ac73ad900196a220",
+      "ambiguous": false,
+      "sourceSet": "test",
+      "facts": {
+        "groupId": "ac73ad900196a220",
+        "tokens": 140,
+        "members": [
+          {
+            "path": "internal/compare/changed_test.go",
+            "startLine": 200,
+            "endLine": 206
+          },
+          {
+            "path": "internal/compare/compare_test.go",
+            "startLine": 183,
+            "endLine": 189
+          }
+        ]
+      }
+    },
+    {
+      "kind": "duplication.clone-group",
       "path": "internal/compare/compare_test.go",
       "startLine": 128,
       "endLine": 139,
@@ -500,8 +665,8 @@
           },
           {
             "path": "internal/compare/render.go",
-            "startLine": 43,
-            "endLine": 51
+            "startLine": 44,
+            "endLine": 52
           }
         ]
       }

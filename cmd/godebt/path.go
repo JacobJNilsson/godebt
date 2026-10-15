@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/JacobJNilsson/godebt"
+	"github.com/JacobJNilsson/godebt/internal/compare"
 	"github.com/JacobJNilsson/godebt/internal/contract"
 )
 
@@ -104,7 +105,18 @@ func filterReport(r *godebt.Report, dir string) *godebt.Report {
 	return &c
 }
 
-// filterComparison returns a copy of cmp whose new and resolved lists lie under dir.
+// changedUnder keeps the changed entries whose new group has a member under dir.
+func changedUnder(dir string, changed []compare.Changed) []compare.Changed {
+	var kept []compare.Changed
+	for _, ch := range changed {
+		if findingUnder(dir, ch.After) {
+			kept = append(kept, ch)
+		}
+	}
+	return kept
+}
+
+// filterComparison returns a copy of cmp whose new, resolved, and changed lists lie under dir.
 func filterComparison(cmp *godebt.Comparison, dir string) *godebt.Comparison {
 	if cmp == nil {
 		return nil
@@ -112,5 +124,6 @@ func filterComparison(cmp *godebt.Comparison, dir string) *godebt.Comparison {
 	c := *cmp
 	c.New = findingsUnder(dir, cmp.New)
 	c.Resolved = findingsUnder(dir, cmp.Resolved)
+	c.Changed = changedUnder(dir, cmp.Changed)
 	return &c
 }
