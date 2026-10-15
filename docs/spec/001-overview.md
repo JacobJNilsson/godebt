@@ -37,12 +37,14 @@ up to 0.3.0 used the name `scree`.
 ## Goals
 
 - Deterministic. The same files and the same configuration produce a
-  byte-equal report payload, on any machine.
+  byte-equal report payload, on any machine. Git's ignore rules decide the
+  files, as [002](002-metrics.md) states.
 - Offline. No network, no model, no credentials, no database. An audit reads
   files and does arithmetic.
 - Zero footprint. A default audit writes nothing. It needs no `go.mod`, no
   Git, no built dependencies, and never runs the target's code, tests, or
-  tools.
+  tools. It runs one command, `git ls-files`, when the root is inside a Git
+  work tree.
 - Honest about gaps. A measurement that could not finish says so. Unsupported
   files count as coverage, never as clean code. A partial analysis never
   publishes a complete-looking score.
