@@ -142,7 +142,7 @@ policy:
 `Compare(before, after)` takes two loaded reports and returns:
 
 - the index delta and each metric's delta
-- new, resolved, and persistent findings
+- new, resolved, persistent, and changed findings
 
 Finding matching is conservative. A named hotspot matches on identity;
 line numbers do not matter. An ambiguous identity matches in two cases:
@@ -151,6 +151,22 @@ when both reports hold a finding with the same identity string on the same
 path and the same facts. Otherwise it is reported as one resolved and one
 new finding, so an unchanged tree compared with itself always reports every
 finding as persistent. A clone group matches on its group id.
+
+The group id hashes the repeated symbols, so an edit next to a copy can
+lengthen or shorten the run and change the id. The same code then shows as
+one resolved and one new group. Pairing joins such groups as one changed
+finding. It runs after id matching and only between new and resolved clone
+groups of the same source set. A new and a resolved group are a candidate
+pair when at least two of the new group's members overlap a member of the
+resolved group on the same path. Two members overlap when their line ranges
+share a line. The shared lines of a pair are the sum, over every new member
+and resolved member on the same path, of the lines their ranges share. The
+pair with the most shared lines is joined first, ties by the resolved
+group id and then the new group id, and each group joins at most once. A
+changed finding holds the new group and the resolved group id and token
+count. Pairing reads only the two reports, so a member whose file moved by
+more lines than the copy spans does not overlap, and its groups stay new
+and resolved.
 
 ## Policy
 
@@ -165,7 +181,7 @@ failure.
 - `regression`: requires a baseline. Fails when the index rose by more than
   `maxIncrease` points or more than `maxIncreasePercent` of the baseline.
 - `failOnNew`: requires a baseline. Fails when the comparison lists a new
-  finding of a named kind.
+  finding of a named kind. A changed finding is not new.
 
 Without a baseline, the baseline-dependent checks are skipped and the
 command names them on stderr. The report itself carries no policy state.
@@ -193,8 +209,9 @@ godebt --version
 - `audit --path <dir>` prints only the findings under `<dir>`, a slash
   path relative to the audited root. A finding is under `<dir>` when its
   path is `<dir>` or starts with `<dir>/`. A clone group is under `<dir>`
-  when any member is. With `--baseline`, the new and resolved lists of the
-  comparison hold only findings under `<dir>`. Metrics, safeguards, the
+  when any member is. With `--baseline`, the new, resolved, and changed
+  lists of the comparison hold only findings under `<dir>`. A changed
+  finding is under `<dir>` when its new group is. Metrics, safeguards, the
   score, and the policy checks still cover the whole module, so the index
   is the same with or without the flag. The text and Markdown headers name the directory. The
   JSON report keeps its shape and holds the filtered findings. `--path`
@@ -217,8 +234,8 @@ godebt --version
   command exits `0` and prints one line to stderr unless `--quiet`. When
   they differ, the command exits `2`. It prints that the baseline has not
   been updated and the command that regenerates it. For comparable reports
-  it prints the index before and after and the counts of new and resolved
-  findings, otherwise `refused:` and the reason. It then prints one
+  it prints the index before and after and the counts of new, resolved,
+  and changed findings, otherwise `refused:` and the reason. It then prints one
   `changed:` line per differing leaf of the report, without `meta`, as a
   dotted path with the old and new value. An array prints only its path.
   It adds the item counts when they differ. The lines for `score` come
