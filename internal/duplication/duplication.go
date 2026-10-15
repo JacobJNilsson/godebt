@@ -478,6 +478,14 @@ func (s *stream) units(nodes []node, sa, lcp []int32, work *budget) []int32 {
 	if work.exceeded() {
 		return nil
 	}
+	needs := make([]bool, len(nodes))
+	for k, n := range nodes {
+		needs[k] = halves[k] == 0 && inheritedUnit(children[k], halves, n.length) == 0
+	}
+	gaps := closestPairs(nodes, children, needs, sa, work)
+	if work.exceeded() {
+		return nil
+	}
 	// A deferred node has a period above half its length, so no parent can inherit it.
 	deferred := make([]bool, len(nodes))
 	for _, k := range longestFirst(nodes) {
@@ -486,17 +494,13 @@ func (s *stream) units(nodes []node, sa, lcp []int32, work *budget) []int32 {
 			out[k] = d
 			continue
 		}
-		if !work.spend(int(n.rb-n.lb) + 1) {
-			return nil
-		}
-		gap := closestPair(sa[n.lb:n.rb+1], n.length)
-		if gap == 0 {
+		// Two occurrences gap symbols apart show a period of at most gap, so a half period decides the unit whatever the gap is.
+		if halves[k] > 0 {
 			out[k] = halves[k]
 			continue
 		}
-		// A run with two occurrences gap symbols apart has a period of at most gap, which its first 2*gap symbols show.
-		if halves[k] > 0 {
-			out[k] = halves[k]
+		gap := gaps[k]
+		if gap == 0 || gap >= n.length {
 			continue
 		}
 		prefix := min(n.length, 2*gap)
@@ -599,6 +603,8 @@ func (s *stream) halfPeriods(nodes []node, sa, lcp []int32, work *budget) []int3
 	}
 	work.spend(len(sa))
 	out := make([]int32, len(nodes))
+	// exact marks a node whose entry in out is its true smallest half period, or its true absence.
+	exact := make([]bool, len(nodes))
 	children := childLists(nodes)
 	level := make([]int, len(nodes))
 	var stack []int32
@@ -615,11 +621,20 @@ func (s *stream) halfPeriods(nodes []node, sa, lcp []int32, work *budget) []int3
 			level[k] = level[n.parent] + 1
 		}
 		f.path = append(f.path[:level[k]], k)
-		switch z := parentUnit(out, n); {
+		z, floor, parentExact := parentUnit(out, n), int32(1), n.parent >= 0 && exact[n.parent]
+		switch {
 		case z > 0 && f.holds(n, level[k], z):
 			out[k] = z
-		case n.length <= 2*parentDepth(n, lcp):
-			out[k] = f.search(n, level[k])
+			exact[k] = parentExact
+			continue
+		case parentExact && z > 0:
+			floor = z + 1
+		case parentExact:
+			floor = nodes[n.parent].length/2 + 1
+		}
+		if n.length <= 2*parentDepth(n, lcp) {
+			out[k] = f.search(n, level[k], floor)
+			exact[k] = n.length >= 2*nodeMinLength
 		}
 	}
 	return out
@@ -656,23 +671,27 @@ func (f *halfFinder) holds(n node, level int, p int32) bool {
 	return a.lb <= r && r <= a.rb
 }
 
-// search returns the smallest period of at most half the run length, from the shorter of two lists of candidate offsets.
-func (f *halfFinder) search(n node, level int) int32 {
+// search returns the smallest period from floor to half the run length, from the shorter of two lists of candidate offsets.
+// The caller sets the floor above every offset that the parent rules out.
+func (f *halfFinder) search(n node, level int, floor int32) int32 {
 	half := n.length / 2
+	if floor > half {
+		return 0
+	}
 	start := f.sa[n.lb]
 	a := f.ancestor(level, (n.length+1)/2)
 	var offsets []int32
-	if size := int(a.rb-a.lb) + 1; size < int(half) {
+	if size, span := int(a.rb-a.lb)+1, int(half-floor)+1; size < span {
 		f.work.spend(size)
 		for _, p := range f.sa[a.lb : a.rb+1] {
-			if p > start && p <= start+half {
+			if p >= start+floor && p <= start+half {
 				offsets = append(offsets, p-start)
 			}
 		}
 		slices.Sort(offsets)
 	} else {
-		f.work.spend(int(half))
-		for p := int32(1); p <= half; p++ {
+		f.work.spend(span)
+		for p := floor; p <= half; p++ {
 			if r := f.rank[start+p]; a.lb <= r && r <= a.rb {
 				offsets = append(offsets, p)
 			}
@@ -696,16 +715,95 @@ func inheritedUnit(children, units []int32, length int32) int32 {
 	return 0
 }
 
-// closestPair returns the smallest distance between two positions below length, or 0.
-func closestPair(positions []int32, length int32) int32 {
-	sorted := slices.Sorted(slices.Values(positions))
-	gap := int32(0)
-	for i := 1; i < len(sorted); i++ {
-		if d := sorted[i] - sorted[i-1]; d < length && (gap == 0 || d < gap) {
-			gap = d
+// closestPairs returns, for each node that needs one, the smallest distance between two of its positions, or 0 for the others.
+// It returns nil once the budget runs out.
+// Along each chain of largest children one set of positions grows from the lowest needed node upward, so a position joins a set once per smaller child above it.
+func closestPairs(nodes []node, children [][]int32, needs []bool, sa []int32, work *budget) []int32 {
+	gaps := make([]int32, len(nodes))
+	heavy := heavyChildren(nodes, children)
+	isHeavy := make([]bool, len(nodes))
+	for _, h := range heavy {
+		if h >= 0 {
+			isHeavy[h] = true
 		}
 	}
-	return gap
+	set := newPosSet(len(sa))
+	var chain []int32
+	for top := range nodes {
+		if isHeavy[top] {
+			continue
+		}
+		chain = neededChain(chain[:0], heavy, needs, int32(top))
+		if len(chain) == 0 {
+			continue
+		}
+		highest := nodes[chain[0]]
+		if !work.spend(int(highest.rb-highest.lb) + 1) {
+			return nil
+		}
+		growChain(set, nodes, chain, sa, gaps)
+		for _, p := range sa[highest.lb : highest.rb+1] {
+			set.remove(p)
+		}
+	}
+	return gaps
+}
+
+// heavyChildren returns the child with the most suffixes of each node, or -1.
+func heavyChildren(nodes []node, children [][]int32) []int32 {
+	heavy := make([]int32, len(nodes))
+	for k := range nodes {
+		heavy[k] = -1
+		for _, c := range children[k] {
+			if h := heavy[k]; h < 0 || nodes[c].rb-nodes[c].lb > nodes[h].rb-nodes[h].lb {
+				heavy[k] = c
+			}
+		}
+	}
+	return heavy
+}
+
+// neededChain appends the nodes from the highest to the lowest needed node on the chain of largest children that starts at top.
+func neededChain(chain, heavy []int32, needs []bool, top int32) []int32 {
+	first, last := -1, -1
+	for k := top; k >= 0; k = heavy[k] {
+		chain = append(chain, k)
+		if needs[k] {
+			if first < 0 {
+				first = len(chain) - 1
+			}
+			last = len(chain) - 1
+		}
+	}
+	if first < 0 {
+		return chain[:0]
+	}
+	return chain[first : last+1]
+}
+
+// growChain fills the set with the positions of the chain from its lowest node up, and records the closest pair at each needed node.
+func growChain(set *posSet, nodes []node, chain, sa []int32, gaps []int32) {
+	best := int32(0)
+	add := func(from, to int32) {
+		for _, p := range sa[from : to+1] {
+			if q := set.prev(p); q >= 0 && (best == 0 || p-q < best) {
+				best = p - q
+			}
+			if q := set.next(p); q >= 0 && (best == 0 || q-p < best) {
+				best = q - p
+			}
+			set.insert(p)
+		}
+	}
+	bottom := len(chain) - 1
+	add(nodes[chain[bottom]].lb, nodes[chain[bottom]].rb)
+	gaps[chain[bottom]] = best
+	for i := bottom - 1; i >= 0; i-- {
+		n, h := nodes[chain[i]], nodes[chain[i+1]]
+		add(n.lb, h.lb-1)
+		add(h.rb+1, n.rb)
+		gaps[chain[i]] = best
+	}
 }
 
 // smallestPeriod returns the smallest p for which the symbols equal themselves shifted by p.
@@ -731,6 +829,7 @@ type target struct{ node, length int32 }
 func unitNodes(nodes []node, units []int32, work *budget) []int32 {
 	out := make([]int32, len(nodes))
 	order := longestFirst(nodes)
+	var jump []int32
 	for i := len(order) - 1; i >= 0; i-- {
 		k, d := order[i], units[order[i]]
 		if d < formula.DuplicationMinTokens {
@@ -743,15 +842,49 @@ func unitNodes(nodes []node, units []int32, work *budget) []int32 {
 		case units[parent] == d:
 			out[k] = out[parent]
 		default:
-			u := parent
-			for nodes[u].parent >= 0 && nodes[nodes[u].parent].length >= d {
-				u = nodes[u].parent
-				work.spend(1)
+			if jump == nil {
+				jump = jumpPointers(nodes, order, work)
 			}
-			out[k] = u
+			out[k] = shallowest(nodes, jump, parent, d, work)
 		}
 	}
 	return out
+}
+
+// jumpPointers returns for each node an ancestor so that a climb of any distance takes a logarithmic number of steps.
+// The pointer of a node skips as many levels as the pointers of the two nodes above it together, and a root points to itself.
+func jumpPointers(nodes []node, order []int32, work *budget) []int32 {
+	jump := make([]int32, len(nodes))
+	depth := make([]int32, len(nodes))
+	work.spend(len(nodes))
+	for i := len(order) - 1; i >= 0; i-- {
+		k := order[i]
+		p := nodes[k].parent
+		if p < 0 {
+			jump[k] = k
+			continue
+		}
+		depth[k] = depth[p] + 1
+		if j := jump[p]; depth[p]-depth[j] == depth[j]-depth[jump[j]] {
+			jump[k] = jump[j]
+		} else {
+			jump[k] = p
+		}
+	}
+	return jump
+}
+
+// shallowest returns the shallowest ancestor of node v, or v itself, that is at least length symbols long.
+func shallowest(nodes []node, jump []int32, v int32, length int32, work *budget) int32 {
+	for p := nodes[v].parent; p >= 0 && nodes[p].length >= length; p = nodes[v].parent {
+		work.spend(1)
+		if j := jump[v]; nodes[j].length >= length {
+			v = j
+		} else {
+			v = p
+		}
+	}
+	return v
 }
 
 // candidates returns each maximal repeat's group after the unit and line rules.

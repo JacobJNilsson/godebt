@@ -267,9 +267,8 @@ Budgets. Before running, the detector checks the set against fixed caps:
 `DuplicationMaxWork` (100,000,000) work units for indexing and extraction.
 A set that exceeds a cap reports every duplication metric as `incomplete`
 with the cap named in the detail. No partial value is reported as a
-measurement. Input with many nested repeats, such as a long Fibonacci word
-or rows A B, A A B, A A A B, can reach the work cap and leave the metric
-incomplete.
+measurement. Input with many nested repeats, such as a long Fibonacci word,
+can reach the work cap and leave the metric incomplete.
 
 Engine. A suffix array built with SA-IS over the symbol sequence, an LCP
 array by Kasai's algorithm, and maximal repeat extraction over LCP
