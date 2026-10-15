@@ -7,7 +7,7 @@ godebt/
 ├─ godebt.go               # public package: Audit, Compare, Evaluate, LoadReport, LoadConfig
 ├─ cmd/godebt/             # flag parsing and dispatch only
 ├─ internal/
-│  ├─ discover/           # walk, .gitignore, source-set classification
+│  ├─ discover/           # walk, git ls-files, .gitignore, source-set classification
 │  ├─ inventory/          # one parse per file; functions with identity, CC, nesting, SLOC
 │  ├─ complexity/         # distributions, erosion, hotspot findings
 │  ├─ duplication/        # token stream, suffix array, LCP, groups, line accounting
@@ -35,9 +35,19 @@ package.
 - Standard library for parsing (`go/parser`, `go/ast`, `go/scanner`,
   `go/token`) and for the CLI (`flag`).
 - `gopkg.in/yaml.v3` with `KnownFields(true)` for configuration.
-- `github.com/boyter/gocodewalker/go-gitignore` for `.gitignore` matching.
-  It matched `git check-ignore` on every case of a 26-file conformance
-  fixture with nested ignore files, negation, anchors, `**`, directory-only
+- The `git` command for the file list inside a Git work tree. The walk runs
+  `git -C <root> ls-files -z --cached --others --exclude-standard` with
+  `LC_ALL=C`. It runs `git -C <root> rev-parse --is-inside-work-tree
+  --show-prefix` first and falls back to the `.gitignore` matcher when `git`
+  is missing or the root is not inside a work tree. The prefix is the path
+  of the root below the top level, which Git warnings start with. Both
+  commands run without `GIT_DIR`,
+  `GIT_WORK_TREE`, and `GIT_INDEX_FILE`, so a Git hook that runs the audit
+  lists the files of the root, not of the repository that runs the hook.
+- `github.com/boyter/gocodewalker/go-gitignore` for `.gitignore` matching
+  outside a Git work tree. It matched `git check-ignore` on every case of
+  a 26-file conformance fixture with nested ignore files, negation,
+  anchors, `**`, directory-only
   patterns, and escaped trailing spaces, with two transitive modules. Call
   `repo.Absolute(path, isDir).Ignore()` on a repository opened with the
   file name `./.gitignore`. The promoted `repo.Ignore` and

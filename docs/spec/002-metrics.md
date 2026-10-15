@@ -15,11 +15,29 @@ The walk skips it and counts it once under coverage as `nested-module`. A
 directory that the source-set rules below place in `vendored`, `testdata`,
 or `excluded` is never a nested module, whatever it holds.
 
-The walk skips files and directories that `.gitignore` files under the root
-exclude, with the same pattern semantics as Git. Only `.gitignore` files
-are read. Git's `.git/info/exclude` and the global excludes file are state
-of one machine and never apply. A `.git` entry, file or directory, is
-skipped. Nothing else is skipped by name.
+The walk sees the files that Git sees. When the root is inside a Git work
+tree, the walk visits only the files that
+`git ls-files --cached --others --exclude-standard` lists for the root.
+That list holds every tracked file and every untracked file that no ignore
+rule matches. Git applies its own rules: `.gitignore` files, the global
+excludes file, and `.git/info/exclude`. A tracked file counts even when a
+`.gitignore` pattern matches it. A tracked file that is missing from disk
+does not count. Git does not list the files of a submodule or of a nested
+repository, so the walk skips them. On a clean checkout with no untracked
+files, every machine sees the same files. An untracked file that only one
+machine ignores can make two machines see different files. A root that Git
+ignores, for example a folder that the `.gitignore` of the enclosing
+repository names, holds no file that Git lists, so the audit finds no files.
+
+When `git` is not installed, or the root is not inside a Git work tree, the
+walk skips the files and directories that `.gitignore` files under the
+root exclude, with the same pattern semantics as Git. In that case only
+`.gitignore` files are read. Any other `git` failure, for example a
+repository that Git refuses for its owner, stops the audit with exit code
+`1` and the message from Git.
+
+A `.git` entry, file or directory, is always skipped. Nothing else is
+skipped by name.
 
 Build constraints do not matter. A file named `foo_windows.go` or one that
 starts with `//go:build linux` is parsed like any other file. The code exists
@@ -252,10 +270,13 @@ Every metric carries one state:
   `incomplete` and lists the file. A file or directory that cannot be read
   is listed the same way. Its contents are unknown, so it makes both
   measured sets `incomplete`, unless the path rules already place it in
-  `testdata`, `vendored`, or `excluded`. An unreadable `.gitignore`, or one
-  that is not a regular file, is a read error too, because the files it
-  names are then measured. A read
-  error never stops the audit.
+  `testdata`, `vendored`, or `excluded`. Outside a Git work tree, an
+  unreadable `.gitignore`, or one that is not a regular file, is a read
+  error too, because the files it names are then measured. Inside a Git
+  work tree, Git reads the ignore files. A directory that Git reports it
+  cannot open is a read error too, with the reason from Git, because Git
+  then lists none of its untracked files. A read error never stops the
+  audit.
 - `not-applicable`: the scope is genuinely empty, for example a set with no
   functions.
 - `unsupported` is a coverage category, not a metric state.
