@@ -327,9 +327,9 @@ func spearman(xs, ys []float64) (float64, bool) {
 	mx, my := mean(rx), mean(ry)
 	var sxy, sxx, syy float64
 	for i := range rx {
-		sxy += (rx[i] - mx) * (ry[i] - my)
-		sxx += (rx[i] - mx) * (rx[i] - mx)
-		syy += (ry[i] - my) * (ry[i] - my)
+		sxy += float64((rx[i] - mx) * (ry[i] - my))
+		sxx += float64((rx[i] - mx) * (rx[i] - mx))
+		syy += float64((ry[i] - my) * (ry[i] - my))
 	}
 	if sxx == 0 || syy == 0 {
 		return 0, false

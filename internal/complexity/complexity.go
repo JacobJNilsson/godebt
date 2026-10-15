@@ -93,7 +93,7 @@ func sum(values []float64) float64 {
 }
 
 func functionMass(f inventory.Function) float64 {
-	return float64(f.CC) * math.Sqrt(float64(f.SLOC))
+	return float64(float64(f.CC) * math.Sqrt(float64(f.SLOC)))
 }
 
 func measured(value float64, unit string) contract.Metric {
