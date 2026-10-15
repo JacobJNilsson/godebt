@@ -57,17 +57,20 @@ failure. Without a baseline, the checks that need one are skipped and named.
 ## What it measures
 
 Two dimensions weigh the index: complexity erosion at 0.6 and duplication at
-0.4. A function is eroded when its cyclomatic complexity is above 10. A clone
+0.4. A function is eroded when its cyclomatic complexity is above 10. Its
+excess is the complexity above 10 times the square root of its code lines, so
+every branch above 10 adds the same amount to it. A clone
 group holds at least 100 tokens over at least 3 lines. The match runs over
 normalized tokens. Renamed identifiers and changed literals still match.
 
 Each dimension scores two terms with equal weight. A count term turns the
-number of eroded functions or clone groups into a score that keeps rising with
-the count. The count is not divided by repository size, so at the same debt
-density a larger repository scores higher on it. A saturating term scores the
-eroded share or the duplication density, which divide debt by the size of the
-code. Compare a repository with its own baseline, not with a repository of
-another size.
+excess of eroded functions or the number of clone groups into a score that
+keeps rising with the debt. The debt is not divided by repository size, so at
+the same debt density a larger repository scores higher on it. A saturating
+term scores the excess share or the duplication density, which divide debt by
+the size of the code. Compare a repository with its own baseline, not with a
+repository of another size. The report also lists the eroded count and the
+eroded share, which never enter the index.
 
 Test code is measured apart and never enters the index. Safeguards, such as a
 tracked pre-commit hook, are reported with their evidence and never scored. A
@@ -75,7 +78,7 @@ default run writes nothing, and audits run offline.
 
 ## Calibration
 
-Nine paired refactors under `testdata/fixtures/pairs/` decide whether the
+Eleven paired refactors under `testdata/fixtures/pairs/` decide whether the
 constants hold. Each pair holds a `before` and an `after` module, and the only
 difference between them is one stated refactor. A test asserts the direction of
 the index: removing a clone or splitting a function with too many branches
