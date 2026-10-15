@@ -10,11 +10,11 @@
   "coverage": {
     "production": {
       "files": 43,
-      "sloc": 5767
+      "sloc": 5768
     },
     "test": {
       "files": 37,
-      "sloc": 7717
+      "sloc": 7718
     },
     "generated": {
       "files": 0
@@ -85,18 +85,18 @@
     },
     "duplication.density.production": {
       "state": "complete",
-      "value": 0.0031212068666551067,
+      "value": 0.0031206657420249652,
       "unit": "ratio",
       "numerator": 18,
-      "denominator": 5767,
+      "denominator": 5768,
       "detail": {}
     },
     "duplication.density.test": {
       "state": "complete",
-      "value": 0.057146559543864196,
+      "value": 0.05713915522155999,
       "unit": "ratio",
       "numerator": 441,
-      "denominator": 7717,
+      "denominator": 7718,
       "detail": {}
     },
     "duplication.duplicated-lines.production": {
@@ -137,29 +137,29 @@
     },
     "erosion.eroded-share.production": {
       "state": "complete",
-      "value": 0.05694569031505433,
+      "value": 0.05712875428731653,
       "unit": "ratio",
-      "numerator": 332.78497462551877,
-      "denominator": 5843.90096571615,
+      "numerator": 333.91960221030877,
+      "denominator": 5845.03559330094,
       "detail": {}
     },
     "erosion.eroded-share.test": {
       "state": "complete",
-      "value": 0.07127051125860613,
+      "value": 0.07126936053552577,
       "unit": "ratio",
       "numerator": 545.4116695787089,
-      "denominator": 7652.6975876414635,
+      "denominator": 7652.821148954137,
       "detail": {}
     },
     "erosion.mass.production": {
       "state": "complete",
-      "value": 5843.90096571615,
+      "value": 5845.03559330094,
       "unit": "mass",
       "detail": {}
     },
     "erosion.mass.test": {
       "state": "complete",
-      "value": 7652.6975876414635,
+      "value": 7652.821148954137,
       "unit": "mass",
       "detail": {}
     }
@@ -177,9 +177,9 @@
           {
             "metricId": "erosion.eroded-share.production",
             "state": "complete",
-            "value": 0.05694569031505433,
+            "value": 0.05712875428731653,
             "saturatesAt": 0.8,
-            "score": 7.118211289381791
+            "score": 7.1410942859145665
           },
           {
             "metricId": "erosion.eroded-count.production",
@@ -198,9 +198,9 @@
           {
             "metricId": "duplication.density.production",
             "state": "complete",
-            "value": 0.0031212068666551067,
+            "value": 0.0031206657420249652,
             "saturatesAt": 0.3,
-            "score": 1.0404022888850357
+            "score": 1.0402219140083218
           },
           {
             "metricId": "duplication.groups.production",
@@ -248,15 +248,15 @@
       "kind": "complexity.hotspot",
       "path": "cmd/godebt/run.go",
       "startLine": 86,
-      "endLine": 109,
+      "endLine": 110,
       "identity": "cmd/godebt:run",
       "ambiguous": false,
       "sourceSet": "production",
       "facts": {
         "cc": 11,
         "nesting": 1,
-        "sloc": 23,
-        "mass": 52.75414675643991
+        "sloc": 24,
+        "mass": 53.88877434122991
       }
     },
     {

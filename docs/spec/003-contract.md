@@ -172,6 +172,7 @@ godebt audit <path> [--config <file>] [--baseline <report.json>] [--json|--md] [
 godebt compare <before.json> <after.json> [--json|--md]
 godebt baseline [path] [--config <file>] [--out <file>] [--check] [--quiet]
 godebt version
+godebt --version
 ```
 
 - `audit` measures, scores, evaluates the policy, and prints the report. The
@@ -182,6 +183,8 @@ godebt version
   written by `--out` never carries it, so a saved report is always a valid
   baseline for a later run. Save reports with `--out`, not by redirecting
   stdout.
+- `version` and `--version` print `godebt <version>` to stdout and exit
+  `0`.
 - `compare` reads two saved JSON reports and prints the comparison. It runs
   no audit.
 - `baseline` audits like `audit` and writes the reproducible form of the
