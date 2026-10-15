@@ -166,6 +166,13 @@ Every floating-point sum in a report adds its terms in ascending numeric
 order, with ties in any order. The result then depends only on the values,
 so a file rename never moves a metric.
 
+Every floating-point value in a report comes from IEEE-754 addition,
+subtraction, multiplication, division, and square root, each rounded on its
+own. No computation fuses a multiplication with an addition, and no
+computation calls a library function whose result differs between
+platforms. The natural logarithm in the count term is computed from these
+operations alone. A report therefore holds the same bits on every platform.
+
 Aggregation from files to the set sums masses. It never averages ratios, so
 one large package cannot be diluted by many small clean ones.
 
